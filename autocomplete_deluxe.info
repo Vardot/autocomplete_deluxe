@@ -5,3 +5,5 @@ package = Other
 version = VERSION
 core = 7.x
 files[] = autocomplete_deluxe.module
+dependencies[] = options
+dependencies[] = taxonomy

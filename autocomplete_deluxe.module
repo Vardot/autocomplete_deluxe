@@ -98,8 +98,9 @@ function autocomplete_deluxe_field_widget_form(&$form, &$form_state, $field, $in
 function autocomplete_deluxe_process($element) {
   drupal_add_library('system', 'ui.autocomplete');
   drupal_add_library('system', 'ui.button');
-  drupal_add_js(drupal_get_path('module', 'autocomplete_deluxe') . '/autocomplete_deluxe.js');
   drupal_add_css(drupal_get_path('module', 'autocomplete_deluxe') . '/autocomplete_deluxe.css');
+  drupal_add_js(drupal_get_path('module', 'autocomplete_deluxe') . '/js/autocomplete_deluxe.js');
+  drupal_add_js(drupal_get_path('module', 'autocomplete_deluxe') . '/js/autocomplete_deluxe.sources.js');
 
   $html_id = drupal_html_id('autocomplete-deluxe-input');
 
@@ -123,6 +124,7 @@ function autocomplete_deluxe_process($element) {
       'type' => 'ajax',
       'uri' => $element['#autocomplete_path'],
     );
+
   }
   elseif (isset($element['#autocomplete_data'])) {
     $js_settings['autocomplete_deluxe'][$html_id] += array(
