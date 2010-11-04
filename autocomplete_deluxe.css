@@ -1,0 +1,7 @@
+@CHARSET "UTF-8";
+
+/* Theme the button */
+span.autocomplete-deluxe-button {
+  top: 3px;
+  height: 23px;
+}
