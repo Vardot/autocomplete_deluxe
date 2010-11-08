@@ -81,6 +81,8 @@ function autocomplete_deluxe_field_widget_form(&$form, &$form_state, $field, $in
       $element += array(
         '#autocomplete_data' => $options,
         '#autocomplete_min_length' => 0,
+        '#autocomplete_multiple_quantity' => $field['cardinality'],
+        '#autocomplete_multiple_type' => 'array',
         '#value_key' => $value_key,
         '#element_validate' => array('options_field_widget_validate'),
         '#properties' => $properties,
@@ -106,6 +108,11 @@ function autocomplete_deluxe_process($element) {
 
   $element['#after_build'][] = 'autocomplete_deluxe_after_build';
 
+  // Set default options for multiple values.
+  $element['#autocomplete_multiple_quantity'] = isset($element['#autocomplete_multiple_quantity']) ? $element['#autocomplete_multiple_quantity'] : 1;
+  $element['#autocomplete_multiple_type'] = isset($element['#autocomplete_multiple_type']) ? $element['#autocomplete_multiple_type'] : 'string';
+
+
 
   $element['value'] = array(
     '#type' => 'textfield',
@@ -117,6 +124,8 @@ function autocomplete_deluxe_process($element) {
   $js_settings['autocomplete_deluxe'][$html_id] = array(
     'input_id' => $html_id,
     'min_length' => isset($element['#autocomplete_min_length']) ? $element['#autocomplete_min_length'] : 0,
+    'multiple' => $element['#autocomplete_multiple_quantity'],
+    'multiple_delimeter' => $element['#autocomplete_multiple_delimiter'] = isset($element['#autocomplete_multiple_delimiter']) ? $element['#autocomplete_multiple_delimiter'] : ', ',
   );
 
   if (isset($element['#autocomplete_path'])) {
@@ -131,6 +140,11 @@ function autocomplete_deluxe_process($element) {
       'type' => 'list',
       'data' => $element['#autocomplete_data'],
     );
+  }
+  else {
+    // If there is no source(path or data), we don't want to add the js
+    // settings and so the functions will be abborted.
+    return $element;
   }
 
   drupal_add_js($js_settings, 'setting');
@@ -152,18 +166,37 @@ function autocomplete_deluxe_value(&$element, $input = FALSE, $form_state = NULL
   return array();
 }
 
+function autocomplete_deluxe_value_filter($var) {
+  $string = trim($var);
+  if (empty($string))
+    return FALSE;
+  else
+    return TRUE;
+}
+
 /**
  * FAPI after build callback for the duration parameter type form.
  * Fixes up the form value by applying the multiplier.
  */
 function autocomplete_deluxe_after_build($element, &$form_state) {
   $element['#value'] = $element['value']['#value'];
+
+  if ($element['#autocomplete_multiple_quantity'] > 1) {
+    if ($element['#autocomplete_multiple_type'] == 'array') {
+      // Filter the extra space after the comma and explode it split the string to
+      // an array. drupal_explode_tags will not work in certain situations, since
+      // it trims spaces.
+      $element['#value'] = explode(trim($element['#autocomplete_multiple_delimiter']), str_replace($element['#autocomplete_multiple_delimiter'], trim($element['#autocomplete_multiple_delimiter']), $element['#value']));
+      $element['#value'] = array_filter($element['#value'], 'autocomplete_deluxe_value_filter');
+    }
+  }
+
   form_set_value($element, $element['#value'], $form_state);
   return $element;
 }
 
 /**
- * Implements hook_element_info
+ * Implements hook_element_info().
  */
 function autocomplete_deluxe_element_info() {
   $types['autocomplete_deluxe'] = array(

@@ -2,11 +2,16 @@
 
 (function ($) {
   Drupal.autocomplete_deluxe = Drupal.autocomplete_deluxe || {};
-  
+
   /**
    * Main abstract source object
    */
-  Drupal.autocomplete_deluxe.source = function() {};
+  Drupal.autocomplete_deluxe.source = function() {
+  };
+
+  Drupal.autocomplete_deluxe.source.prototype.multipleValues = 1;
+  Drupal.autocomplete_deluxe.source.prototype.delimiter = ', ';
+  
   /**
    * Sets the source element from the autocomplete deluxe object.
    */
@@ -14,14 +19,34 @@
     response(null);
   };
 
-  Drupal.autocomplete_deluxe.source.prototype.search = function(autocomplete, ui) {
-    return true;
+  Drupal.autocomplete_deluxe.source.prototype.search = function(autocomplete, ui, ac_deluxe) {
+    if (this.multipleValues > 1) {
+      var term = Drupal.autocomplete_deluxe.extractLast(autocomplete.value, this.delimiter);
+      if ( term.length < ac_deluxe.minLength ) {
+        return false;
+      }
+    }
   };
 
   Drupal.autocomplete_deluxe.source.prototype.select = function(autocomplete, ui) {
-    return true;
+    if (this.multipleValues > 1 || this.multipleValues == -1) {
+      var terms = Drupal.autocomplete_deluxe.split(autocomplete.value, this.delimiter);
+      if (terms.length > this.multipleValues && this.multipleValues != -1) {
+        // if there are to many inputs, replace the the last and the second 
+        // last inputs.
+        terms.pop();
+      }
+      // remove the current input
+      terms.pop();
+      // add the selected item
+      terms.push(ui.item.value);
+      // add placeholder to get the comma-and-space at the end
+      terms.push("");
+      autocomplete.value = terms.join(this.delimiter);
+      return false;
+    }
   };
-  
+
   /**
    * List Source Object
    * @param data The data for the autocomplete object.
@@ -36,7 +61,7 @@
       });
     });
   };
-  
+
   // Set base class
   Drupal.autocomplete_deluxe.listSingleSource.prototype = new Drupal.autocomplete_deluxe.source();
 
@@ -45,10 +70,10 @@
    * the data.
    */
   Drupal.autocomplete_deluxe.listSingleSource.prototype.setResponse = function (request, response) {
-    var filtered = Drupal.autocomplete_deluxe.filter(this.list, request.term);
+    var filtered = Drupal.autocomplete_deluxe.filter(this.list, Drupal.autocomplete_deluxe.extractLast(request.term, this.delimiter));
     response(filtered);
   };
-  
+
   /**
    * Ajax Source Object for single selection
    * @param uri URI to server with the data.
@@ -64,10 +89,10 @@
       this.dataType = dataType;
     }
   };
-  
+
   // Set base class
   Drupal.autocomplete_deluxe.ajaxSingleSource.prototype = new Drupal.autocomplete_deluxe.source();
-  
+
   /**
    * Will be called by the JQuery autocomplete source function to retrieve 
    * the data.
@@ -79,14 +104,14 @@
       return;
     }
     $.ajax({
-      url: this.uri + '/' + Drupal.autocomplete_deluxe.extractLast(request.term),
+      url: this.uri + '/' + Drupal.autocomplete_deluxe.extractLast(request.term, this.delimiter),
       dataType: this.dataType,
       success: function(data) {
         response(instance.success(data, request));
       }
     });
   };
-  
+
   /**
    * Success function for the autocomplete object.
    */
@@ -101,30 +126,4 @@
     this.cache[request.term] = list;
     return list;
   };
-
-  /**
-   * Event listener for search.
-   * Prevents the autocomplete window from opening the autocomplete window for 
-   * multiple terms.
-   */
-  Drupal.autocomplete_deluxe.ajaxSingleSource.prototype.search = function(autocomplete, ui, ac_deluxe) {
-    var term = Drupal.autocomplete_deluxe.extractLast(autocomplete.value);
-    if ( term.length < ac_deluxe.minLength ) {
-      return false;
-    }
-  };
-  
-  Drupal.autocomplete_deluxe.ajaxSingleSource.prototype.select = function(autocomplete, ui) {
-    var terms = Drupal.autocomplete_deluxe.split(autocomplete.value);
-    // remove the current input
-    terms.pop();
-    // add the selected item
-    terms.push(ui.item.value);
-    // add placeholder to get the comma-and-space at the end
-    terms.push("");
-    autocomplete.value = terms.join(", ");
-    
-    return false;
-  };
-
 })(jQuery);
