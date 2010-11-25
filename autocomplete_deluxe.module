@@ -27,7 +27,7 @@ function autocomplete_deluxe_field_widget_info() {
       'field types' => array('list', 'list_text', 'list_number'),
       'settings' => array(
         'size' => 60,
-      ),
+    ),
       'behaviors' => array(
         'multiple values' => FIELD_BEHAVIOR_CUSTOM,
       ),
@@ -62,6 +62,7 @@ function autocomplete_deluxe_field_widget_form(&$form, &$form_state, $field, $in
         '#autocomplete_path' => $instance['widget']['settings']['autocomplete_path'] . '/' . $field['field_name'],
         '#autocomplete_min_length' => 1,
         '#element_validate' => array('taxonomy_autocomplete_validate'),
+        '#autocomplete_multiple_quantity' => $field['cardinality'],
       );
 
 
@@ -88,8 +89,7 @@ function autocomplete_deluxe_field_widget_form(&$form, &$form_state, $field, $in
         '#properties' => $properties,
       );
       break;
-  }
-;
+  };
 
   return $element;
 }
@@ -98,11 +98,11 @@ function autocomplete_deluxe_field_widget_form(&$form, &$form_state, $field, $in
  * Generates the basic form elements and javascript settings.
  */
 function autocomplete_deluxe_process($element) {
-  drupal_add_library('system', 'ui.autocomplete');
-  drupal_add_library('system', 'ui.button');
-  drupal_add_css(drupal_get_path('module', 'autocomplete_deluxe') . '/autocomplete_deluxe.css');
-  drupal_add_js(drupal_get_path('module', 'autocomplete_deluxe') . '/js/autocomplete_deluxe.js');
-  drupal_add_js(drupal_get_path('module', 'autocomplete_deluxe') . '/js/autocomplete_deluxe.sources.js');
+  $element['#attached'] = array(
+    'library' => array(array('system', 'ui.autocomplete'), array('system', 'ui.button')),
+    'js' => array(drupal_get_path('module', 'autocomplete_deluxe') . '/autocomplete_deluxe.js'),
+    'css' => array(drupal_get_path('module', 'autocomplete_deluxe') . '/autocomplete_deluxe.css'),
+  );
 
   $html_id = drupal_html_id('autocomplete-deluxe-input');
 
@@ -118,7 +118,7 @@ function autocomplete_deluxe_process($element) {
     '#type' => 'textfield',
     '#size' => isset($element['#size']) ? $element['#size'] : '',
     '#required' => isset($element['#required']) ? $element['#required'] : '',
-    '#attributes' => array('class' => array('autocomplete-deluxe-form'), 'id' => array($html_id)),
+    '#attributes' => array('class' => array('autocomplete-deluxe-form', 'form-autocomplete'), 'id' => array($html_id)),
   );
 
   $js_settings['autocomplete_deluxe'][$html_id] = array(
@@ -146,8 +146,7 @@ function autocomplete_deluxe_process($element) {
     // settings and so the functions will be abborted.
     return $element;
   }
-
-  drupal_add_js($js_settings, 'setting');
+  $element['#attached']['js'][] = array('data' => $js_settings, 'type' => 'setting');
 
   return $element;
 }
@@ -168,10 +167,12 @@ function autocomplete_deluxe_value(&$element, $input = FALSE, $form_state = NULL
 
 function autocomplete_deluxe_value_filter($var) {
   $string = trim($var);
-  if (empty($string))
+  if (empty($string)) {
     return FALSE;
-  else
+  }
+  else {
     return TRUE;
+  }
 }
 
 /**
@@ -183,9 +184,9 @@ function autocomplete_deluxe_after_build($element, &$form_state) {
 
   if ($element['#autocomplete_multiple_quantity'] > 1) {
     if ($element['#autocomplete_multiple_type'] == 'array') {
-      // Filter the extra space after the comma and explode it split the string to
-      // an array. drupal_explode_tags will not work in certain situations, since
-      // it trims spaces.
+      // Filter the extra space after the comma and explode it split the string
+      // to an array. drupal_explode_tags will not work in certain situations,
+      // since it trims spaces.
       $element['#value'] = explode(trim($element['#autocomplete_multiple_delimiter']), str_replace($element['#autocomplete_multiple_delimiter'], trim($element['#autocomplete_multiple_delimiter']), $element['#value']));
       $element['#value'] = array_filter($element['#value'], 'autocomplete_deluxe_value_filter');
     }
