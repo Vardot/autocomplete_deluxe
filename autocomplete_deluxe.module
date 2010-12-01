@@ -133,7 +133,6 @@ function autocomplete_deluxe_process($element) {
       'type' => 'ajax',
       'uri' => $element['#autocomplete_path'],
     );
-
   }
   elseif (isset($element['#autocomplete_data'])) {
     $js_settings['autocomplete_deluxe'][$html_id] += array(
@@ -142,7 +141,7 @@ function autocomplete_deluxe_process($element) {
     );
   }
   else {
-    // If there is no source(path or data), we don't want to add the js
+    // If there is no source (path or data), we don't want to add the js
     // settings and so the functions will be abborted.
     return $element;
   }
@@ -165,6 +164,9 @@ function autocomplete_deluxe_value(&$element, $input = FALSE, $form_state = NULL
   return array();
 }
 
+/**
+ * Helper function for array_filter.
+ */
 function autocomplete_deluxe_value_filter($var) {
   $string = trim($var);
   if (empty($string)) {

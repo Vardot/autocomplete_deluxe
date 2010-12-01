@@ -58,7 +58,7 @@
     // handlers.
     var instance = this;
 
-    // Event handlers
+    // Event handlers.
     this.jqObject.focus(function() {
       // If the something was selected, the window should not open again.
       if (!instance.selected || instance.groupSelected) {
@@ -99,13 +99,11 @@
 
     this.jqObject.bind("autocompletesearch", function(event, ui) {
       instance.jqObject.addClass('throbbing');
-      // prevent value inserted on focus
       return instance.source.search(ui);
     });
 
     this.jqObject.bind("autocompletefocus", function(event, ui) {
       if (instance.multiple > 1 || instance.multiple < 0) {
-        // prevent value inserted on focus
         return false;
       }
     });
@@ -207,7 +205,7 @@
   };
 
   /**
-   * Main abstract source object
+   * Main abstract source object.
    */
   Drupal.autocomplete_deluxe.source = function() {
   };
@@ -263,11 +261,11 @@
   Drupal.autocomplete_deluxe.source.prototype.select = function(input, ui) {
     if (this.multiple > 1 || this.multiple == -1) {
       var terms = Drupal.autocomplete_deluxe.split(input.value, this.delimiter);
-      // remove the current input
+      // Remove the current input.
       terms.pop();
-      // add the selected item
+      // Add the selected item
       terms.push(ui.item.value);
-      // add placeholder to get the comma-and-space at the end
+      // Add placeholder to get the comma-and-space at the end.
       terms.push("");
       input.value = terms.join(this.delimiter);
       return false;
@@ -291,7 +289,7 @@
     });
   };
 
-  // Set base class
+  // Set base class.
   Drupal.autocomplete_deluxe.listSource.prototype = new Drupal.autocomplete_deluxe.source();
 
   /**
@@ -321,7 +319,7 @@
     }
   };
 
-  // Set base class
+  // Set base class.
   Drupal.autocomplete_deluxe.ajaxSource.prototype = new Drupal.autocomplete_deluxe.source();
 
   /**
