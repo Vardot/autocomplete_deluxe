@@ -84,7 +84,6 @@
 
     switch (this.type) {
       case 'ajax':
-        console.log(settings.uri);
         var uri = settings.uri;
         this.source = new Drupal.autocomplete_deluxe.ajaxSource(uri);
         break;
