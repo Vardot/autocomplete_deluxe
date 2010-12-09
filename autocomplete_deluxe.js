@@ -7,10 +7,12 @@
     attach: function(context) {
       var autocomplete_settings = Drupal.settings.autocomplete_deluxe;
 
-      $('input.autocomplete-deluxe-form').once(function() {
+      $('input.autocomplete-deluxe-form').once( function() {
         new Drupal.autocomplete_deluxe(this, autocomplete_settings[$(this).attr('id')]);
       });
+
     }
+
   };
 
   /**
@@ -27,7 +29,6 @@
     this.delimiter = settings.autocomplete_multiple_delimiter;
 
     this.selected = false;
-    this.groupSelected = false;
     this.opendByFocus = false;
 
     this.button = $('<span>&nbsp;</span>');
@@ -59,34 +60,37 @@
     var instance = this;
 
     // Event handlers.
-    this.jqObject.focus(function() {
+    this.jqObject.focus( function() {
       // If the something was selected, the window should not open again.
-      if (!instance.selected || instance.groupSelected) {
+      if (!instance.selected) {
         instance.open();
         instance.opendByFocus = true;
-      } else {
+      }
+      else {
         // If the something was selected, the window should not open again.
         instance.selected = false;
       }
     });
 
     // Needed when the window is closed but the textfield has the focus.
-    this.jqObject.click(function() {
+    this.jqObject.click( function() {
       if (!instance.opendByFocus) {
         instance.toggle();
-      } else {
-        instance.close();
+      }
+      else {
+        instance.opendByFocus = false;
       }
     });
 
     switch (this.type) {
-    case 'ajax':
-      var uri = location.protocol + '//' + location.host + Drupal.settings.basePath + '?q=' + settings.uri;
-      this.source = new Drupal.autocomplete_deluxe.ajaxSource(uri);
-      break;
-    case 'list':
-      this.source = new Drupal.autocomplete_deluxe.listSource(settings.data);
-      break;
+      case 'ajax':
+        console.log(settings.uri);
+        var uri = settings.uri;
+        this.source = new Drupal.autocomplete_deluxe.ajaxSource(uri);
+        break;
+      case 'list':
+        this.source = new Drupal.autocomplete_deluxe.listSource(settings.data);
+        break;
     }
 
     this.source.autocomplete = this;
@@ -111,6 +115,7 @@
     this.jqObject.bind("autocompleteselect", function(event, ui) {
       instance.close();
       instance.selected = true;
+      instance.opendByFocus = false;
       return instance.source.select(this, ui);
     });
 
@@ -127,15 +132,17 @@
         content = this._normalize(content);
         this._suggest(content);
         this._trigger("open");
-      } else {
+      }
+      else {
         this.close();
       }
       this.element.removeClass('throbbing');
     };
 
-    this.button.click(function() {
+    this.button.click( function() {
       instance.toggle();
     });
+
   };
 
   /**
@@ -153,6 +160,7 @@
     return $.grep(array, function(value) {
       return matcher.test(value.label || value.value || value);
     });
+
   };
 
   /**
@@ -161,31 +169,25 @@
   Drupal.autocomplete_deluxe.prototype.open = function() {
     this.jqObject.autocomplete("search", this.jqObject.val());
     this.button.addClass("ui-state-focus");
-    this.groupSelected = false;
   };
 
   /**
    * Close the autocomplete window.
    */
   Drupal.autocomplete_deluxe.prototype.close = function() {
-    var value = this.jqObject.val();
-    // If the Selector is group, then keep the selection list open.
-    if (value.substring(value.length - 1, value.length) != ':') {
-      this.jqObject.autocomplete("close");
-      this.button.removeClass("ui-state-focus");
-      this.opendByFocus = false;
-    } else {
-      this.groupSelected = true;
-    }
+    this.jqObject.autocomplete("close");
+    this.button.removeClass("ui-state-focus");
+    this.opendByFocus = false;
   };
 
   /**
-   * Toogle the autcomplete window.
+   * Toggle the autcomplete window.
    */
   Drupal.autocomplete_deluxe.prototype.toggle = function() {
     if (this.jqObject.autocomplete("widget").is(":visible")) {
       this.close();
-    } else {
+    }
+    else {
       this.open();
     }
   };
@@ -220,7 +222,8 @@
     // If no term is entered, we want to return the data as it is.
     if (lterm == '') {
       return data;
-    } else {
+    }
+    else {
       // Create a new data array, so we can keep our original data clean
       // (without <strong> tags).
       var newData = new Array();
@@ -274,7 +277,7 @@
 
   /**
    * List Source Object
-   * 
+   *
    * @param data
    *          The data for the autocomplete object.
    */
@@ -287,6 +290,7 @@
         value: index
       });
     });
+
   };
 
   // Set base class.
@@ -303,7 +307,7 @@
 
   /**
    * Ajax Source Object for selection
-   * 
+   *
    * @param uri
    *          URI to server with the data.
    * @param dataType
@@ -314,7 +318,8 @@
     this.uri = uri;
     if (dataType === undefined) {
       this.dataType = 'json';
-    } else {
+    }
+    else {
       this.dataType = dataType;
     }
   };
@@ -338,6 +343,7 @@
       success: function(data) {
         instance.response(request, response, instance.success(data, request));
       }
+
     });
   };
 
@@ -352,7 +358,9 @@
         value: index
       });
     });
+
     this.cache[request.term] = list;
     return list;
   };
+
 })(jQuery);

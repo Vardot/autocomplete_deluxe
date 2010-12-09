@@ -59,7 +59,7 @@ function autocomplete_deluxe_field_widget_form(&$form, &$form_state, $field, $in
       }
       $element += array(
         '#default_value' => taxonomy_implode_tags($tags),
-        '#autocomplete_path' => $instance['widget']['settings']['autocomplete_path'] . '/' . $field['field_name'],
+        '#autocomplete_path' => url($instance['widget']['settings']['autocomplete_path'] . '/' . $field['field_name'], array('absolute'=>TRUE)),
         '#autocomplete_min_length' => 1,
         '#element_validate' => array('taxonomy_autocomplete_validate'),
         '#autocomplete_multiple_quantity' => $field['cardinality'],
