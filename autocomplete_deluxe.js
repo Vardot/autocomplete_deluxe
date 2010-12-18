@@ -26,10 +26,14 @@
     this.minLength = settings.min_length;
 
     this.multiple = settings.multiple;
-    this.delimiter = settings.autocomplete_multiple_delimiter;
+    this.delimiter = (settings.autocomplete_multiple_delimiter === undefined) ? ', ' : settings.autocomplete_multiple_delimiter;
 
     this.selected = false;
     this.opendByFocus = false;
+
+    if (settings.select_input !== undefined) {
+      this.selectInput = $('#' + settings.select_input);
+    }
 
     this.button = $('<span>&nbsp;</span>');
     this.button.attr( {
@@ -39,6 +43,7 @@
     this.button.insertAfter(this.jqObject);
 
     this.button.button( {
+
       icons: {
         primary: 'ui-icon-triangle-1-s'
       },
@@ -88,7 +93,7 @@
         this.source = new Drupal.autocomplete_deluxe.ajaxSource(uri);
         break;
       case 'list':
-        this.source = new Drupal.autocomplete_deluxe.listSource(settings.data);
+        this.source = new Drupal.autocomplete_deluxe.listSource(settings.data, this.selectInput);
         break;
     }
 
@@ -105,17 +110,20 @@
       return instance.source.search(ui);
     });
 
+    // Don't set the value input when autocomplete window has focus.
     this.jqObject.bind("autocompletefocus", function(event, ui) {
-      if (instance.multiple > 1 || instance.multiple < 0) {
-        return false;
-      }
+      return false;
+    });
+
+    this.jqObject.bind("autocompletechange", function(event, ui) {
+      instance.source.change(event, ui);
     });
 
     this.jqObject.bind("autocompleteselect", function(event, ui) {
       instance.close();
       instance.selected = true;
       instance.opendByFocus = false;
-      return instance.source.select(this, ui);
+      return instance.source._select(this, ui);
     });
 
     // Since jquery autocomplete by default strips html text by using .text()
@@ -139,7 +147,7 @@
     };
 
     this.button.click( function() {
-      instance.toggle();
+      instance.toggle(true);
     });
 
   };
@@ -164,9 +172,17 @@
 
   /**
    * Open the autocomplete window.
+   * @param emptySearch If true it will perform an empty search.
    */
-  Drupal.autocomplete_deluxe.prototype.open = function() {
-    this.jqObject.autocomplete("search", this.jqObject.val());
+  Drupal.autocomplete_deluxe.prototype.open = function(emptySearch) {
+    if ( emptySearch !== undefined) {
+      var item = Drupal.autocomplete_deluxe.extractLast(this.jqObject.val(), this.delimiter);
+      var searchFor = item.substring(0, this.minLength);
+    }
+    else {
+      var searchFor = this.jqObject.val();
+    }
+    this.jqObject.autocomplete("search", searchFor);
     this.button.addClass("ui-state-focus");
   };
 
@@ -181,13 +197,15 @@
 
   /**
    * Toggle the autcomplete window.
+   * @param emptySearch If true and autocomplete is opening, it will perform an
+   *                    empty search.
    */
-  Drupal.autocomplete_deluxe.prototype.toggle = function() {
+  Drupal.autocomplete_deluxe.prototype.toggle = function(emptySearch) {
     if (this.jqObject.autocomplete("widget").is(":visible")) {
       this.close();
     }
     else {
-      this.open();
+      this.open(emptySearch);
     }
   };
 
@@ -195,7 +213,12 @@
    * Split a string with delimiter.
    */
   Drupal.autocomplete_deluxe.split = function(val, delimiter) {
-    return val.split(delimiter);
+    if (val !== undefined) {
+      return val.split(delimiter);
+    }
+    else {
+      return "";
+    }
   };
 
   /**
@@ -258,20 +281,41 @@
   };
 
   /**
-   * Select function for multiple values.
+   * Select super function. Super because, in contrary to the .select()
+   * function this function will be always called, not depending on the source
+   * objects type.
    */
-  Drupal.autocomplete_deluxe.source.prototype.select = function(input, ui) {
+  Drupal.autocomplete_deluxe.source.prototype._select = function(input, ui) {
+    // Strip the strong tags from the label.
+    ui.item.label = $("<span>" + ui.item.label + "</span>").text();
     if (this.multiple > 1 || this.multiple == -1) {
       var terms = Drupal.autocomplete_deluxe.split(input.value, this.delimiter);
       // Remove the current input.
       terms.pop();
       // Add the selected item
-      terms.push(ui.item.value);
+      terms.push(ui.item.label);
       // Add placeholder to get the comma-and-space at the end.
       terms.push("");
       input.value = terms.join(this.delimiter);
-      return false;
+      this.select(input, ui);
     }
+    else {
+      input.value = ui.item.label;
+    }
+    this.select(input, ui);
+    return false;
+  };
+
+  /**
+   * Select event function.
+   */
+  Drupal.autocomplete_deluxe.source.prototype.select = function(input, ui) {
+  };
+
+  /**
+   * Change event function.
+   */
+  Drupal.autocomplete_deluxe.source.prototype.change = function(input, ui) {
   };
 
   /**
@@ -280,8 +324,9 @@
    * @param data
    *          The data for the autocomplete object.
    */
-  Drupal.autocomplete_deluxe.listSource = function(data) {
+  Drupal.autocomplete_deluxe.listSource = function(data, select) {
     this.list = new Array();
+    this.selected = new Array();
     var instance = this;
     jQuery.each(data, function(index, value) {
       instance.list.push( {
@@ -289,7 +334,11 @@
         value: index
       });
     });
-
+    // Add all selected(probably by #default_value) to the selected list. 
+    var selected = this.selected;
+    select.children("option:selected").each( function() {
+      selected.push(this.value);
+    });
   };
 
   // Set base class.
@@ -302,6 +351,55 @@
   Drupal.autocomplete_deluxe.listSource.prototype.setResponse = function(request, response) {
     var filtered = Drupal.autocomplete_deluxe.filter(this.list, Drupal.autocomplete_deluxe.extractLast(request.term, this.delimiter));
     this.response(request, response, filtered);
+  };
+
+  /**
+   * Select and deselect all values from the hidden select from.
+   */
+  Drupal.autocomplete_deluxe.listSource.prototype.selectInputOptions = function(ui) {
+    if (!jQuery.isEmptyObject(ui.item)) {
+      if (jQuery.inArray(ui.item.value, this.selected) == -1) {
+        this.selected.push(ui.item.value);
+        $('#autocomplete-deluxe-input-select > option:contains("' + ui.item.label + '")').attr("selected", true);
+      }
+    }
+    else {
+      var terms = Drupal.autocomplete_deluxe.split(this.autocomplete.jqObject.val(), this.delimiter);
+      var selected = this.selected;
+
+      // Find the item wich was deleted and remove it from the list and deselect
+      // the corresponding option.
+      this.autocomplete.selectInput.children("option").each( function() {
+        if (jQuery.inArray(this.text, terms) == -1) {
+          var pos = jQuery.inArray(this.value, selected);
+          if (pos >= 0) {
+            this.selected = false;
+            selected.splice(pos, 1);
+          }
+        }
+        else {
+          if (jQuery.inArray(this.value, selected) == -1) {
+            selected.push(this.value);
+            $('#autocomplete-deluxe-input-select > option:contains("' + this.text + '")').attr("selected", true);
+          }
+        }
+      });
+
+    }
+  };
+
+  /**
+   * Override select event function.
+   */
+  Drupal.autocomplete_deluxe.listSource.prototype.select = function(input, ui) {
+    this.selectInputOptions(ui);
+  };
+
+  /**
+   * Override change event function.
+   */
+  Drupal.autocomplete_deluxe.listSource.prototype.change = function(input, ui) {
+    this.selectInputOptions(ui);
   };
 
   /**

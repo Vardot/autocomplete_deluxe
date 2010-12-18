@@ -59,7 +59,7 @@ function autocomplete_deluxe_field_widget_form(&$form, &$form_state, $field, $in
       }
       $element += array(
         '#default_value' => taxonomy_implode_tags($tags),
-        '#autocomplete_path' => url($instance['widget']['settings']['autocomplete_path'] . '/' . $field['field_name'], array('absolute'=>TRUE)),
+        '#autocomplete_path' => url($instance['widget']['settings']['autocomplete_path'] . '/' . $field['field_name'], array('absolute' => TRUE)),
         '#autocomplete_min_length' => 1,
         '#element_validate' => array('taxonomy_autocomplete_validate'),
         '#autocomplete_multiple_quantity' => $field['cardinality'],
@@ -78,6 +78,7 @@ function autocomplete_deluxe_field_widget_form(&$form, &$form_state, $field, $in
 
       // Prepare the list of options.
       $options = _options_get_options($field, $instance, $properties);
+      $default_value = _options_storage_to_form($items, $options, $value_key, $properties);
 
       $element += array(
         '#autocomplete_data' => $options,
@@ -87,6 +88,7 @@ function autocomplete_deluxe_field_widget_form(&$form, &$form_state, $field, $in
         '#value_key' => $value_key,
         '#element_validate' => array('options_field_widget_validate'),
         '#properties' => $properties,
+        '#default_value' => $default_value,
       );
       break;
   };
@@ -119,6 +121,7 @@ function autocomplete_deluxe_process($element) {
     '#size' => isset($element['#size']) ? $element['#size'] : '',
     '#required' => isset($element['#required']) ? $element['#required'] : '',
     '#attributes' => array('class' => array('autocomplete-deluxe-form', 'form-autocomplete'), 'id' => array($html_id)),
+    '#default_value' => '',
   );
 
   $js_settings['autocomplete_deluxe'][$html_id] = array(
@@ -129,6 +132,7 @@ function autocomplete_deluxe_process($element) {
   );
 
   if (isset($element['#autocomplete_path'])) {
+    $element['value']['#default_value'] = isset($element['#default_value']) ? $element['#default_value'] : '';
     $js_settings['autocomplete_deluxe'][$html_id] += array(
       'type' => 'ajax',
       'uri' => $element['#autocomplete_path'],
@@ -139,6 +143,21 @@ function autocomplete_deluxe_process($element) {
       'type' => 'list',
       'data' => $element['#autocomplete_data'],
     );
+
+    $html_id_select = drupal_html_id('autocomplete-deluxe-input-select');
+    $element['list_value'] = array(
+      '#type' => 'select',
+      '#options' => $element['#autocomplete_data'],
+      '#multiple' => ($element['#autocomplete_multiple_quantity'] > 1) ? TRUE : FAlSE,
+      '#attributes' => array('class' => array('autocomplete-deluxe-form', 'form-autocomplete'), 'id' => array($html_id_select)),
+      '#default_value' => isset($element['#default_value']) ? $element['#default_value'] : '',
+    );
+
+    $addon = $element['#autocomplete_multiple_quantity'] > 1 ? $element['#autocomplete_multiple_delimiter'] : '';
+    foreach ($element['#default_value'] as $key) {
+      $element['value']['#default_value'] .= $element['#autocomplete_data'][$key] . $addon;
+    }
+    $js_settings['autocomplete_deluxe'][$html_id]['select_input'] = $html_id_select;
   }
   else {
     // If there is no source (path or data), we don't want to add the js
@@ -182,16 +201,18 @@ function autocomplete_deluxe_value_filter($var) {
  * Fixes up the form value by applying the multiplier.
  */
 function autocomplete_deluxe_after_build($element, &$form_state) {
-  $element['#value'] = $element['value']['#value'];
-
-  if ($element['#autocomplete_multiple_quantity'] > 1) {
-    if ($element['#autocomplete_multiple_type'] == 'array') {
+  if (!isset($element['list_value'])) {
+    $element['#value'] = $element['value']['#value'];
+    if ($element['#autocomplete_multiple_quantity'] > 1 && $element['#autocomplete_multiple_type'] == 'array') {
       // Filter the extra space after the comma and explode it split the string
       // to an array. drupal_explode_tags will not work in certain situations,
       // since it trims spaces.
       $element['#value'] = explode(trim($element['#autocomplete_multiple_delimiter']), str_replace($element['#autocomplete_multiple_delimiter'], trim($element['#autocomplete_multiple_delimiter']), $element['#value']));
       $element['#value'] = array_filter($element['#value'], 'autocomplete_deluxe_value_filter');
     }
+  }
+  else {
+    $element['#value'] = $element['list_value']['#value'];
   }
 
   form_set_value($element, $element['#value'], $form_state);
