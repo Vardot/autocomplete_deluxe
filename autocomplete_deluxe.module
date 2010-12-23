@@ -157,6 +157,8 @@ function autocomplete_deluxe_process($element) {
     foreach ($element['#default_value'] as $key) {
       $element['value']['#default_value'] .= $element['#autocomplete_data'][$key] . $addon;
     }
+    
+    $element['value']['#attributes']['style'] = 'display: none;';
     $js_settings['autocomplete_deluxe'][$html_id]['select_input'] = $html_id_select;
   }
   else {

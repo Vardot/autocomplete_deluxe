@@ -33,6 +33,8 @@
 
     if (settings.select_input !== undefined) {
       this.selectInput = $('#' + settings.select_input);
+      this.selectInput.hide();
+      this.jqObject.show();
     }
 
     this.button = $('<span>&nbsp;</span>');

@@ -10,7 +10,3 @@ ul.ui-autocomplete {
   overflow: scroll;
   max-height: 250px;
 }
-
-select.autocomplete-deluxe-form {
-  display: none;
-}
