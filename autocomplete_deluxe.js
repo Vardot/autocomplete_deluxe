@@ -92,6 +92,7 @@
     switch (this.type) {
       case 'ajax':
         var uri = settings.uri;
+        console.log(uri);
         this.source = new Drupal.autocomplete_deluxe.ajaxSource(uri);
         break;
       case 'list':

@@ -16,7 +16,7 @@ function autocomplete_deluxe_field_widget_info() {
       'field types' => array('taxonomy_term_reference'),
       'settings' => array(
         'size' => 60,
-        'autocomplete_path' => 'taxonomy/autocomplete',
+        'autocomplete_path' => 'autocomplete_deluxe/taxonomy',
       ),
       'behaviors' => array(
         'multiple values' => FIELD_BEHAVIOR_CUSTOM,
@@ -33,6 +33,66 @@ function autocomplete_deluxe_field_widget_info() {
       ),
     ),
   );
+}
+
+/**
+ * Costume taxonomy callback, which also accepts an empty string search.
+ */
+function taxonomy_autocomplete_deluxe($field_name, $tags_typed = '') {
+  $field = field_info_field($field_name);
+
+  // The user enters a comma-separated list of tags. We only autocomplete the last tag.
+  $tags_typed = drupal_explode_tags($tags_typed);
+  $tag_last = drupal_strtolower(array_pop($tags_typed));
+
+  $matches = array();
+
+  // Part of the criteria for the query come from the field's own settings.
+  $vids = array();
+  $vocabularies = taxonomy_vocabulary_get_names();
+  foreach ($field['settings']['allowed_values'] as $tree) {
+    $vids[] = $vocabularies[$tree['vocabulary']]->vid;
+  }
+
+  $query = db_select('taxonomy_term_data', 't');
+  $query->addTag('translatable');
+  $query->addTag('term_access');
+
+  if ($tag_last != '') {
+    // Do not select already entered terms.
+    if (!empty($tags_typed)) {
+      $query->condition('t.name', $tags_typed, 'NOT IN');
+    }
+    // Select rows that match by term name.
+    $tags_return = $query
+      ->fields('t', array('tid', 'name'))
+      ->condition('t.vid', $vids)
+      ->condition('t.name', '%' . db_like($tag_last) . '%', 'LIKE')
+      ->execute()
+      ->fetchAllKeyed();
+  }
+  else {
+    $tags_return = $query
+      ->fields('t', array('tid', 'name'))
+      ->execute()
+      ->fetchAllKeyed();
+  }
+
+  $prefix = count($tags_typed) ? implode(', ', $tags_typed) . ', ' : '';
+
+  $term_matches = array();
+  foreach ($tags_return as $tid => $name) {
+    $n = $name;
+    // Term names containing commas or quotes must be wrapped in quotes.
+    if (strpos($name, ',') !== FALSE || strpos($name, '"') !== FALSE) {
+      $n = '"' . str_replace('"', '""', $name) . '"';
+    }
+    else {
+      $term_matches[$prefix . $n] = check_plain($name);
+    }
+  }
+
+  drupal_json_output($term_matches);
 }
 
 /**
@@ -60,11 +120,10 @@ function autocomplete_deluxe_field_widget_form(&$form, &$form_state, $field, $in
       $element += array(
         '#default_value' => taxonomy_implode_tags($tags),
         '#autocomplete_path' => url($instance['widget']['settings']['autocomplete_path'] . '/' . $field['field_name'], array('absolute' => TRUE)),
-        '#autocomplete_min_length' => 1,
+        '#autocomplete_min_length' => 0,
         '#element_validate' => array('taxonomy_autocomplete_validate'),
         '#autocomplete_multiple_quantity' => $field['cardinality'],
       );
-
 
       break;
     case 'list':
@@ -157,7 +216,7 @@ function autocomplete_deluxe_process($element) {
     foreach ($element['#default_value'] as $key) {
       $element['value']['#default_value'] .= $element['#autocomplete_data'][$key] . $addon;
     }
-    
+
     $element['value']['#attributes']['style'] = 'display: none;';
     $js_settings['autocomplete_deluxe'][$html_id]['select_input'] = $html_id_select;
   }
@@ -234,3 +293,15 @@ function autocomplete_deluxe_element_info() {
   return $types;
 }
 
+/**
+ * Implements hook_menu().
+ */
+function autocomplete_deluxe_menu() {
+  $items['autocomplete_deluxe/taxonomy'] = array(
+    'title' => 'Autocomplete deluxe taxonomy',
+    'page callback' => 'taxonomy_autocomplete_deluxe',
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+  );
+  return $items;
+}
