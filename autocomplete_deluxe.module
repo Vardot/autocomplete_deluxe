@@ -140,7 +140,7 @@ function autocomplete_deluxe_field_widget_form(&$form, &$form_state, $field, $in
       $default_value = _options_storage_to_form($items, $options, $value_key, $properties);
 
       $element += array(
-        '#autocomplete_data' => $options,
+        '#options' => $options,
         '#autocomplete_min_length' => 0,
         '#autocomplete_multiple_quantity' => $field['cardinality'],
         '#autocomplete_multiple_type' => 'array',
@@ -164,6 +164,10 @@ function autocomplete_deluxe_process($element) {
     'js' => array(drupal_get_path('module', 'autocomplete_deluxe') . '/autocomplete_deluxe.js'),
     'css' => array(drupal_get_path('module', 'autocomplete_deluxe') . '/autocomplete_deluxe.css'),
   );
+  // Workaround for problems with jquery css in seven theme.
+  if ($GLOBALS['theme'] == 'seven') {
+    $element['#attached']['css'][] = drupal_get_path('module', 'autocomplete_deluxe') . '/autocomplete_deluxe.seven.css';
+  }
 
   $html_id = drupal_html_id('autocomplete-deluxe-input');
 
@@ -172,8 +176,6 @@ function autocomplete_deluxe_process($element) {
   // Set default options for multiple values.
   $element['#autocomplete_multiple_quantity'] = isset($element['#autocomplete_multiple_quantity']) ? $element['#autocomplete_multiple_quantity'] : 1;
   $element['#autocomplete_multiple_type'] = isset($element['#autocomplete_multiple_type']) ? $element['#autocomplete_multiple_type'] : 'string';
-
-
 
   $element['value'] = array(
     '#type' => 'textfield',
@@ -192,21 +194,22 @@ function autocomplete_deluxe_process($element) {
 
   if (isset($element['#autocomplete_path'])) {
     $element['value']['#default_value'] = isset($element['#default_value']) ? $element['#default_value'] : '';
+    
     $js_settings['autocomplete_deluxe'][$html_id] += array(
       'type' => 'ajax',
       'uri' => $element['#autocomplete_path'],
     );
   }
-  elseif (isset($element['#autocomplete_data'])) {
+  elseif (isset($element['#options'])) {
     $js_settings['autocomplete_deluxe'][$html_id] += array(
       'type' => 'list',
-      'data' => $element['#autocomplete_data'],
+      'data' => $element['#options'],
     );
 
     $html_id_select = drupal_html_id('autocomplete-deluxe-input-select');
     $element['list_value'] = array(
       '#type' => 'select',
-      '#options' => $element['#autocomplete_data'],
+      '#options' => $element['#options'],
       '#multiple' => ($element['#autocomplete_multiple_quantity'] > 1) ? TRUE : FAlSE,
       '#attributes' => array('class' => array('autocomplete-deluxe-form', 'form-autocomplete'), 'id' => array($html_id_select)),
       '#default_value' => isset($element['#default_value']) ? $element['#default_value'] : '',
@@ -214,7 +217,7 @@ function autocomplete_deluxe_process($element) {
 
     $addon = $element['#autocomplete_multiple_quantity'] > 1 ? $element['#autocomplete_multiple_delimiter'] : '';
     foreach ($element['#default_value'] as $key) {
-      $element['value']['#default_value'] .= $element['#autocomplete_data'][$key] . $addon;
+      $element['value']['#default_value'] .= $element['#options'][$key] . $addon;
     }
 
     $element['value']['#attributes']['style'] = 'display: none;';

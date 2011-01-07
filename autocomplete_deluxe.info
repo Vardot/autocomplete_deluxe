@@ -1,7 +1,7 @@
 ; $Id$
 name = Autocomplete Deluxe
 description = Enhanced autocomplete using Jquery UI autocomplete. 
-package = Other
+package = CCK
 version = VERSION
 core = 7.x
 files[] = autocomplete_deluxe.module

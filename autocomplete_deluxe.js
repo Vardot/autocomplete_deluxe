@@ -1,4 +1,4 @@
-// $Id
+// $Id$
 
 (function($) {
   Drupal.autocomplete_deluxe = Drupal.autocomplete_deluxe || {};
@@ -460,6 +460,13 @@
 
     this.cache[request.term] = list;
     return list;
+  };
+
+  /**
+   * Override select event function.
+   */
+  Drupal.autocomplete_deluxe.ajaxSource.prototype.select = function(input, ui) {
+    input.value = ui.item.value;
   };
 
 })(jQuery);
