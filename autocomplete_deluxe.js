@@ -38,14 +38,13 @@
     }
 
     this.button = $('<span>&nbsp;</span>');
-    this.button.attr( {
+    this.button.attr({
       'tabIndex': -1,
       'title': 'Show all items'
     });
     this.button.insertAfter(this.jqObject);
 
-    this.button.button( {
-
+    this.button.button({
       icons: {
         primary: 'ui-icon-triangle-1-s'
       },
@@ -238,7 +237,7 @@
 
   // Some base settings for all source objects.
   Drupal.autocomplete_deluxe.source.prototype.autocomplete = null;
-  Drupal.autocomplete_deluxe.source.prototype.multiple = 1;
+  Drupal.autocomplete_deluxe.source.prototype.multiple = false;
   Drupal.autocomplete_deluxe.source.prototype.delimiter = ', ';
 
   Drupal.autocomplete_deluxe.source.prototype.highlight = function(term, data) {
@@ -254,7 +253,7 @@
       var regex = new RegExp("(?![^&;]+;)(?!<[^<>]*)(" + lterm + ")(?![^<>]*>)(?![^&;]+;)", "gi");
       for ( var i in data) {
         var nterm = data[i].label.replace(regex, "<strong>$1</strong>");
-        newData.push( {
+        newData.push({
           label: nterm,
           value: data[i].value
         });
@@ -274,7 +273,7 @@
    * Costume search for multiple values.
    */
   Drupal.autocomplete_deluxe.source.prototype.search = function(ui) {
-    if (this.multiple > 1 && this.autocomplete.jqObject.value !== undefined) {
+    if (this.multiple == false && this.autocomplete.jqObject.value !== undefined) {
       var term = Drupal.autocomplete_deluxe.extractLast(this.autocomplete.jqObject.value, this.delimiter);
       if (term.length < this.autocomplete.minLength) {
         return false;
@@ -290,20 +289,6 @@
   Drupal.autocomplete_deluxe.source.prototype._select = function(input, ui) {
     // Strip the strong tags from the label.
     ui.item.label = $("<span>" + ui.item.label + "</span>").text();
-    if (this.multiple > 1 || this.multiple == -1) {
-      var terms = Drupal.autocomplete_deluxe.split(input.value, this.delimiter);
-      // Remove the current input.
-      terms.pop();
-      // Add the selected item
-      terms.push(ui.item.label);
-      // Add placeholder to get the comma-and-space at the end.
-      terms.push("");
-      input.value = terms.join(this.delimiter);
-      this.select(input, ui);
-    }
-    else {
-      input.value = ui.item.label;
-    }
     this.select(input, ui);
     return false;
   };
@@ -331,16 +316,18 @@
     this.selected = new Array();
     var instance = this;
     jQuery.each(data, function(index, value) {
-      instance.list.push( {
+      instance.list.push({
         label: $.trim(value),
         value: index
       });
     });
-    // Add all selected(probably by #default_value) to the selected list. 
+
+    // Add all selected(probably by #default_value) to the selected list.
     var selected = this.selected;
     select.children("option:selected").each( function() {
       selected.push(this.value);
     });
+
   };
 
   // Set base class.
@@ -394,6 +381,19 @@
    * Override select event function.
    */
   Drupal.autocomplete_deluxe.listSource.prototype.select = function(input, ui) {
+    if (this.multiple == true) {
+      var terms = Drupal.autocomplete_deluxe.split(input.value, this.delimiter);
+      // Remove the current input.
+      terms.pop();
+      // Add the selected item
+      terms.push(ui.item.label);
+      // Add placeholder to get the comma-and-space at the end.
+      terms.push("");
+      input.value = terms.join(this.delimiter);
+    }
+    else {
+      input.value = ui.item.label;
+    }
     this.selectInputOptions(ui);
   };
 
@@ -436,7 +436,7 @@
       instance.response(request, response, (this.cache[request.term]));
       return;
     }
-    $.ajax( {
+    $.ajax({
       url: this.uri + '/' + Drupal.autocomplete_deluxe.extractLast(request.term, this.delimiter),
       dataType: this.dataType,
       success: function(data) {
@@ -452,7 +452,7 @@
   Drupal.autocomplete_deluxe.ajaxSource.prototype.success = function(data, request) {
     var list = new Array();
     jQuery.each(data, function(index, value) {
-      list.push( {
+      list.push({
         label: value,
         value: index
       });
@@ -466,7 +466,18 @@
    * Override select event function.
    */
   Drupal.autocomplete_deluxe.ajaxSource.prototype.select = function(input, ui) {
-    input.value = ui.item.value;
+    if (this.multiple == true) {
+      var terms = Drupal.autocomplete_deluxe.split(input.value, this.delimiter);
+      // Remove the current input.
+      terms.pop();
+      // Add the selected item
+      terms.push(ui.item.value);
+      // Add placeholder to get the comma-and-space at the end.
+      terms.push("");
+      input.value = terms.join(this.delimiter);
+    }
+    else {
+      input.value = ui.item.value;
+    }
   };
-
 })(jQuery);
