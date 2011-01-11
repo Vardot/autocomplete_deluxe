@@ -216,7 +216,7 @@ function autocomplete_deluxe_process($element) {
     );
 
     // Add delimiters to the default values.
-    $addon = isset($element['#multiple']) ? $element['#autocomplete_multiple_delimiter'] : '';
+    $addon = (! empty($element['#multiple'])) ? $element['#autocomplete_multiple_delimiter'] : '';
     foreach ($element['#default_value'] as $key) {
       $element['value']['#default_value'] .= $element['#options'][$key] . $addon;
     }
