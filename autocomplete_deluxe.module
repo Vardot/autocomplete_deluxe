@@ -74,6 +74,7 @@ function taxonomy_autocomplete_deluxe($field_name, $tags_typed = '') {
   else {
     $tags_return = $query
       ->fields('t', array('tid', 'name'))
+      ->condition('t.vid', $vids)
       ->execute()
       ->fetchAllKeyed();
   }
