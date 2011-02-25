@@ -1,4 +1,3 @@
-// $Id$
 
 (function($) {
   Drupal.autocomplete_deluxe = Drupal.autocomplete_deluxe || {};
