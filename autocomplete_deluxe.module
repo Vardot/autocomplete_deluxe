@@ -159,7 +159,7 @@ function autocomplete_deluxe_field_widget_form(&$form, &$form_state, $field, $in
 /**
  * Generates the basic form elements and javascript settings.
  */
-function autocomplete_deluxe_process($element) {
+function autocomplete_deluxe_element_process($element) {
   $element['#attached'] = array(
     'library' => array(array('system', 'ui.autocomplete'), array('system', 'ui.button')),
     'js' => array(drupal_get_path('module', 'autocomplete_deluxe') . '/autocomplete_deluxe.js'),
@@ -286,7 +286,7 @@ function autocomplete_deluxe_element_info() {
     '#input' => TRUE,
     '#value_callback' => 'autocomplete_deluxe_value',
     '#pre_render' => array('form_pre_render_conditional_form_element'),
-    '#process' => array('autocomplete_deluxe_process'),
+    '#process' => array('autocomplete_deluxe_element_process'),
   );
   return $types;
 }
