@@ -2,23 +2,14 @@
 
 /* Theme the button */
 span.autocomplete-deluxe-button {
-  display: block;
-  float: left;
-  height: 1.6em;
+  /*top: 8px;*/
+  top: 0.6em;
+  height: 1.75em;
   overflow: hidden;
   outline: none;
-  top: 0.15em;
-}
-
-input.form-autocomplete {
-  float: left;
 }
 
 ul.ui-autocomplete {
   overflow: scroll;
   max-height: 250px;
-}
-
-.autocomplete-container {
-  vertical-align: baseline;
 }
