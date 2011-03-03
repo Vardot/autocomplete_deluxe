@@ -66,6 +66,13 @@
 
     // Event handlers.
     this.jqObject.focus( function() {
+      if (!instance.jqObject.autocomplete("widget").is(":visible")) {
+        var val = instance.jqObject.val();
+        if (val.substring(val.length, val.length - 2) !== ', ' && val.length > 0) {
+          instance.jqObject.val(instance.jqObject.val() + ', ');
+        }
+      }
+      console.log(instance.selected);
       // If the something was selected, the window should not open again.
       if (!instance.selected) {
         instance.open();
@@ -120,10 +127,23 @@
     });
 
     this.jqObject.bind("autocompleteselect", function(event, ui) {
-      instance.close();
       instance.selected = true;
+      instance.close();
       instance.opendByFocus = false;
-      return instance.source._select(this, ui);
+      var ret = instance.source._select(this, ui);
+      this.blur();
+      return ret;
+    });
+    
+    this.jqObject.blur(function() {
+      if (!instance.jqObject.autocomplete("widget").is(":visible")) {
+        var val = instance.jqObject.val();
+        if (val.substring(val.length, val.length - 2) == ', ') {
+          instance.jqObject.val(val.substring(0, val.length - 2));
+        }
+        console.log("blur: " + instance.selected);
+        instance.selected = false;
+      }
     });
 
     // Since jquery autocomplete by default strips html text by using .text()
@@ -147,6 +167,7 @@
     };
 
     this.button.click( function() {
+      this.blur();
       instance.toggle(true);
     });
 
