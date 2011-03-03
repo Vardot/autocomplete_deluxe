@@ -4,16 +4,21 @@
 span.autocomplete-deluxe-button {
   display: block;
   float: left;
-  height: 1.75em;
+  height: 1.6em;
   overflow: hidden;
   outline: none;
+  top: 0.15em;
 }
 
-.form-autocomplete {
+input.form-autocomplete {
   float: left;
 }
 
 ul.ui-autocomplete {
   overflow: scroll;
   max-height: 250px;
+}
+
+.autocomplete-container {
+  vertical-align: baseline;
 }

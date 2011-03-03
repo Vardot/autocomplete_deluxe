@@ -1,5 +1,9 @@
 @CHARSET "UTF-8";
 
+span.autocomplete-deluxe-button {
+  height: 1.75em;
+  top:.0em;
+}
 /**
  * JQuery UI style sheet fix for seven.
  */
