@@ -2,8 +2,15 @@
 
 /* Theme the button */
 span.autocomplete-deluxe-button {
-  top: 3px;
-  height: 23px;
+  display: block;
+  float: left;
+  height: 1.75em;
+  overflow: hidden;
+  outline: none;
+}
+
+.form-autocomplete {
+  float: left;
 }
 
 ul.ui-autocomplete {
