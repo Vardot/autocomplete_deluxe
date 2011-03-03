@@ -72,7 +72,6 @@
           instance.jqObject.val(instance.jqObject.val() + ', ');
         }
       }
-      console.log(instance.selected);
       // If the something was selected, the window should not open again.
       if (!instance.selected) {
         instance.open();
@@ -141,7 +140,6 @@
         if (val.substring(val.length, val.length - 2) == ', ') {
           instance.jqObject.val(val.substring(0, val.length - 2));
         }
-        console.log("blur: " + instance.selected);
         instance.selected = false;
       }
     });
