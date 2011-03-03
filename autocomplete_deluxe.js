@@ -29,6 +29,7 @@
 
     this.selected = false;
     this.opendByFocus = false;
+    this.keyPress = false;
 
     if (settings.select_input !== undefined) {
       this.selectInput = $('#' + settings.select_input);
@@ -130,7 +131,11 @@
       instance.close();
       instance.opendByFocus = false;
       var ret = instance.source._select(this, ui);
-      this.blur();
+      if (instance.keyPress === false) {
+        this.blur();
+      } else {
+        instance.keyPress = false;
+      }
       return ret;
     });
     
@@ -140,8 +145,11 @@
         if (val.substring(val.length, val.length - 2) == ', ') {
           instance.jqObject.val(val.substring(0, val.length - 2));
         }
-        instance.selected = false;
       }
+    });
+    
+    this.jqObject.keypress(function() {
+      instance.keyPress = true;
     });
 
     // Since jquery autocomplete by default strips html text by using .text()
