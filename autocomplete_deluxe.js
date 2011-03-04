@@ -138,7 +138,7 @@
       }
       return ret;
     });
-    console.log(instance.multiple)
+
     this.jqObject.blur(function() {
       if (instance.multiple === true && !instance.jqObject.autocomplete("widget").is(":visible")) {
         var val = instance.jqObject.val();
