@@ -57,7 +57,7 @@ function taxonomy_autocomplete_deluxe($field_name, $tags_typed = '') {
   $query->addTag('translatable');
   $query->addTag('term_access');
   $query->addTag('autocomplete_deluxe_taxonomy_autocomplete');
-  $query->addMetadata('field_name', $field_name); 
+  $query->addMetadata('field_name', $field_name);
 
   if ($tag_last != '') {
     // Do not select already entered terms.

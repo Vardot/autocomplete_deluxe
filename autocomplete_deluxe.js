@@ -67,10 +67,10 @@
 
     // Event handlers.
     this.jqObject.focus( function() {
-      if (!instance.jqObject.autocomplete("widget").is(":visible")) {
+      if (instance.multiple === true && !instance.jqObject.autocomplete("widget").is(":visible")) {
         var val = instance.jqObject.val();
-        if (val.substring(val.length, val.length - 2) !== ', ' && val.length > 0) {
-          instance.jqObject.val(instance.jqObject.val() + ', ');
+        if (val.substring(val.length, val.length - 2) !== instance.delimiter && val.length > 0) {
+          instance.jqObject.val(instance.jqObject.val() + instance.delimiter);
         }
       }
       // If the something was selected, the window should not open again.
@@ -138,9 +138,9 @@
       }
       return ret;
     });
-    
+    console.log(instance.multiple)
     this.jqObject.blur(function() {
-      if (!instance.jqObject.autocomplete("widget").is(":visible")) {
+      if (instance.multiple === true && !instance.jqObject.autocomplete("widget").is(":visible")) {
         var val = instance.jqObject.val();
         if (val.substring(val.length, val.length - 2) == ', ') {
           instance.jqObject.val(val.substring(0, val.length - 2));

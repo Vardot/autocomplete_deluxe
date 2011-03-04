@@ -8,7 +8,7 @@
 
 /**
  * Using the Autocomplete Deluxe element.
- * 
+ *
  * When you want to use the Autocomplete Deluxe element, you have to choose
  * between two types sources for the suggestion data: Ajax Callbacks or Lists.
  * You can set the source type by using the appropriate options:
@@ -18,8 +18,8 @@
  * - #options needs an array in the form of an array(similar to #options in core
  *   for selects or checkboxes): array('a', 'b', 'c') or array(1 => 'a', 2 =>
  *   'b', 3 => 'c').
- * 
- * Besides this two, there are three other options, wich autocomplete deluxe 
+ *
+ * Besides this two, there are three other options, wich autocomplete deluxe
  * accepts:
  * - #multiple Indicates whether the user may select more than one item. Expects
  *   TRUE or FALSE, by default it is set to FALSE.
