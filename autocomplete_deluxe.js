@@ -9,9 +9,7 @@
       $('input.autocomplete-deluxe-form').once( function() {
         new Drupal.autocomplete_deluxe(this, autocomplete_settings[$(this).attr('id')]);
       });
-
     }
-
   };
 
   /**
@@ -27,7 +25,6 @@
     this.multiple = settings.multiple;
     this.delimiter = (settings.autocomplete_multiple_delimiter === undefined) ? ', ' : settings.autocomplete_multiple_delimiter;
 
-    this.selected = false;
     this.opendByFocus = false;
     this.keyPress = false;
 
@@ -66,22 +63,20 @@
     var instance = this;
 
     // Event handlers.
-    this.jqObject.focus( function() {
+    this.jqObject.focus( function(eventObject) {
+      // Overlay causes a second focus, wich has to be catched.
+      if (eventObject.originalEvent === undefined) {
+        return false;
+      }
       if (instance.multiple === true && !instance.jqObject.autocomplete("widget").is(":visible")) {
         var val = instance.jqObject.val();
         if (val.substring(val.length, val.length - 2) !== instance.delimiter && val.length > 0) {
           instance.jqObject.val(instance.jqObject.val() + instance.delimiter);
         }
       }
-      // If the something was selected, the window should not open again.
-      if (!instance.selected) {
-        instance.open();
-        instance.opendByFocus = true;
-      }
-      else {
-        // If the something was selected, the window should not open again.
-        instance.selected = false;
-      }
+
+      instance.open();
+      instance.opendByFocus = true;
     });
 
     // Needed when the window is closed but the textfield has the focus.
@@ -127,7 +122,6 @@
     });
 
     this.jqObject.bind("autocompleteselect", function(event, ui) {
-      instance.selected = true;
       instance.close();
       instance.opendByFocus = false;
       var ret = instance.source._select(this, ui);
@@ -140,14 +134,14 @@
     });
 
     this.jqObject.blur(function() {
-      if (instance.multiple === true && !instance.jqObject.autocomplete("widget").is(":visible")) {
+      if (!instance.jqObject.autocomplete("widget").is(":visible")) {
         var val = instance.jqObject.val();
         if (val.substring(val.length, val.length - 2) == ', ') {
           instance.jqObject.val(val.substring(0, val.length - 2));
         }
       }
     });
-    
+
     this.jqObject.keypress(function() {
       instance.keyPress = true;
     });
@@ -173,10 +167,9 @@
     };
 
     this.button.click( function() {
-      this.blur();
+      instance.jqObject.blur();
       instance.toggle(true);
     });
-
   };
 
   /**
@@ -194,7 +187,6 @@
     return $.grep(array, function(value) {
       return matcher.test(value.label || value.value || value);
     });
-
   };
 
   /**
@@ -353,7 +345,6 @@
     select.children("option:selected").each( function() {
       selected.push(this.value);
     });
-
   };
 
   // Set base class.
@@ -399,7 +390,6 @@
           }
         }
       });
-
     }
   };
 
@@ -468,7 +458,6 @@
       success: function(data) {
         instance.response(request, response, instance.success(data, request));
       }
-
     });
   };
 
