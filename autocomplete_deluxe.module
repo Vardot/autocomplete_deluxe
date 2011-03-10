@@ -179,7 +179,7 @@ function autocomplete_deluxe_element_process($element) {
   // Set default options for multiple values.
   $element['#multiple'] = isset($element['#multiple']) ? $element['#multiple'] : FALSE;
   $element['#prefix'] = '<div class="clearfix autocomplete-container">';
-  $element['#postfix'] = '</div>';
+  $element['#suffix'] = '</div>';
 
   $element['value'] = array(
     '#type' => 'textfield',
