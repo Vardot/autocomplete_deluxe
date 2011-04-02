@@ -98,6 +98,52 @@ function taxonomy_autocomplete_deluxe($field_name, $tags_typed = '') {
 }
 
 /**
+ * Returns all allowed terms for a field without any prefix.
+ */
+function autocomplete_deluxe_allowed_terms($field) {
+  $options = array();
+  foreach ($field['settings']['allowed_values'] as $tree) {
+    if ($vocabulary = taxonomy_vocabulary_machine_name_load($tree['vocabulary'])) {
+      if ($terms = taxonomy_get_tree($vocabulary->vid, $tree['parent'])) {
+        foreach ($terms as $term) {
+          $options[$term->tid] = $term->name;
+        }
+      }
+    }
+  }
+  return $options;
+}
+
+/**
+ * Implements hook_field_widget_settings_form().
+ */
+function autocomplete_deluxe_field_widget_settings_form($field, $instance) {
+  $widget = $instance['widget'];
+  $settings = $widget['settings'];
+  $type = str_replace('autocomplete_deluxe_', '', $widget['type']);
+
+  $form['size'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Size of textfield'),
+    '#default_value' => isset($settings['size']) ? $settings['size'] : 6,
+    '#element_validate' => array('_element_validate_integer_positive'),
+    '#required' => TRUE,
+  );
+
+  switch ($type) {
+    case 'taxonomy':
+    $form['new_terms'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Allow new terms'),
+      '#description' => t('Should it be allowed, that user enter new terms?'),
+      '#default_value' => isset($settings['new_terms']) ? $settings['new_terms'] : TRUE,
+    );
+    break;
+  }
+  return $form;
+}
+
+/**
  * Implements hook_field_widget_error().
  */
 function autocomplete_deluxe_field_widget_error($element, $error, $form, &$form_state) {
@@ -118,17 +164,46 @@ function autocomplete_deluxe_field_widget_form(&$form, &$form_state, $field, $in
 
   switch ($type) {
     case 'taxonomy':
-      $tags = array();
-      foreach ($items as $item) {
-        $tags[$item['tid']] = isset($item['taxonomy_term']) ? $item['taxonomy_term'] : taxonomy_term_load($item['tid']);
+      if (! empty($instance['widget']['settings']['new_terms'])) {
+        $tags = array();
+        foreach ($items as $item) {
+          $tags[$item['tid']] = isset($item['taxonomy_term']) ? $item['taxonomy_term'] : taxonomy_term_load($item['tid']);
+        }
+        $element += array(
+          '#multiple' => $multiple,
+          '#element_validate' => array('taxonomy_autocomplete_validate'),
+          '#autocomplete_path' => url($instance['widget']['settings']['autocomplete_path'] . '/' . $field['field_name'], array('absolute' => TRUE)),
+          '#default_value' => taxonomy_implode_tags($tags),
+        );
       }
-      $element += array(
-        '#default_value' => taxonomy_implode_tags($tags),
-        '#autocomplete_path' => url($instance['widget']['settings']['autocomplete_path'] . '/' . $field['field_name'], array('absolute' => TRUE)),
-        '#autocomplete_min_length' => 0,
-        '#element_validate' => array('taxonomy_autocomplete_validate'),
-        '#multiple' => $multiple,
-      );
+      else{
+        $value_key = key($field['columns']);
+
+        $type = str_replace('options_', '', $instance['widget']['type']);
+        $required = $element['#required'];
+        $has_value = isset($items[0][$value_key]);
+        $properties = _options_properties($type, $multiple, $required, $has_value);
+        $default_value = array();
+
+        // Generate default value array.
+        foreach ($items as $item) {
+          $default_value[] = $item['tid'];
+        }
+
+        // Retrieve all allowed values
+        $data = autocomplete_deluxe_allowed_terms($field);
+        $element += array(
+          '#multiple' => $multiple && count($data) > 1,
+          '#element_validate' => array('options_field_widget_validate'),
+          '#options' => $data,
+          '#default_value' => $default_value,
+          '#value_key' => $value_key,
+          '#properties' => $properties,
+        );
+        $field += array(
+          'default_formatter' => 'taxonomy_term_reference_link',
+        );
+      }
 
       break;
     case 'list':
@@ -154,7 +229,6 @@ function autocomplete_deluxe_field_widget_form(&$form, &$form_state, $field, $in
       );
       break;
   };
-
   return $element;
 }
 
