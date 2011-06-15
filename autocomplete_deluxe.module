@@ -130,16 +130,6 @@ function autocomplete_deluxe_field_widget_settings_form($field, $instance) {
     '#required' => TRUE,
   );
 
-  switch ($type) {
-    case 'taxonomy':
-    $form['new_terms'] = array(
-      '#type' => 'checkbox',
-      '#title' => t('Allow new terms'),
-      '#description' => t('Should it be allowed, that user enter new terms?'),
-      '#default_value' => isset($settings['new_terms']) ? $settings['new_terms'] : TRUE,
-    );
-    break;
-  }
   return $form;
 }
 
@@ -164,47 +154,16 @@ function autocomplete_deluxe_field_widget_form(&$form, &$form_state, $field, $in
 
   switch ($type) {
     case 'taxonomy':
-      if (! empty($instance['widget']['settings']['new_terms'])) {
-        $tags = array();
-        foreach ($items as $item) {
-          $tags[$item['tid']] = isset($item['taxonomy_term']) ? $item['taxonomy_term'] : taxonomy_term_load($item['tid']);
-        }
-        $element += array(
-          '#multiple' => $multiple,
-          '#element_validate' => array('taxonomy_autocomplete_validate'),
-          '#autocomplete_path' => url($instance['widget']['settings']['autocomplete_path'] . '/' . $field['field_name'], array('absolute' => TRUE)),
-          '#default_value' => taxonomy_implode_tags($tags),
-        );
+      $tags = array();
+      foreach ($items as $item) {
+        $tags[$item['tid']] = isset($item['taxonomy_term']) ? $item['taxonomy_term'] : taxonomy_term_load($item['tid']);
       }
-      else{
-        $value_key = key($field['columns']);
-
-        $type = str_replace('options_', '', $instance['widget']['type']);
-        $required = $element['#required'];
-        $has_value = isset($items[0][$value_key]);
-        $properties = _options_properties($type, $multiple, $required, $has_value);
-        $default_value = array();
-
-        // Generate default value array.
-        foreach ($items as $item) {
-          $default_value[] = $item['tid'];
-        }
-
-        // Retrieve all allowed values
-        $data = autocomplete_deluxe_allowed_terms($field);
-        $element += array(
-          '#multiple' => $multiple && count($data) > 1,
-          '#element_validate' => array('options_field_widget_validate'),
-          '#options' => $data,
-          '#default_value' => $default_value,
-          '#value_key' => $value_key,
-          '#properties' => $properties,
-        );
-        $field += array(
-          'default_formatter' => 'taxonomy_term_reference_link',
-        );
-      }
-
+      $element += array(
+        '#multiple' => $multiple,
+        '#element_validate' => array('taxonomy_autocomplete_validate'),
+        '#autocomplete_path' => url($instance['widget']['settings']['autocomplete_path'] . '/' . $field['field_name'], array('absolute' => TRUE)),
+        '#default_value' => taxonomy_implode_tags($tags),
+      );
       break;
     case 'list':
       $value_key = key($field['columns']);
