@@ -23,7 +23,6 @@
     this.minLength = settings.min_length;
 
     this.multiple = settings.multiple;
-    this.delimiter = (settings.autocomplete_multiple_delimiter === undefined) ? ', ' : settings.autocomplete_multiple_delimiter;
 
     this.opendByFocus = false;
     this.keyPress = false;
@@ -68,12 +67,6 @@
       if (eventObject.originalEvent === undefined) {
         return false;
       }
-      if (instance.multiple === true && !instance.jqObject.autocomplete("widget").is(":visible")) {
-        var val = instance.jqObject.val();
-        if (val.substring(val.length, val.length - 2) !== instance.delimiter && val.length > 0) {
-          instance.jqObject.val(instance.jqObject.val() + instance.delimiter);
-        }
-      }
 
       instance.open();
       instance.opendByFocus = true;
@@ -101,7 +94,6 @@
 
     this.source.autocomplete = this;
     this.source.multiple = settings.multiple;
-    this.source.delimiter = settings.multiple_delimeter;
 
     this.jqObject.autocomplete("option", "source", function(request, response) {
       instance.source.setResponse(request, response);
@@ -109,7 +101,7 @@
 
     this.jqObject.bind("autocompletesearch", function(event, ui) {
       instance.jqObject.addClass('throbbing');
-      return instance.source.search(ui);
+      return ui;
     });
 
     // Don't set the value input when autocomplete window has focus.
@@ -195,7 +187,7 @@
    */
   Drupal.autocomplete_deluxe.prototype.open = function(emptySearch) {
     if ( emptySearch !== undefined) {
-      var item = Drupal.autocomplete_deluxe.extractLast(this.jqObject.val(), this.delimiter);
+      var item = this.jqObject.val();
       var searchFor = item.substring(0, this.minLength);
     }
     else {
@@ -229,25 +221,6 @@
   };
 
   /**
-   * Split a string with delimiter.
-   */
-  Drupal.autocomplete_deluxe.split = function(val, delimiter) {
-    if (val !== undefined) {
-      return val.split(delimiter);
-    }
-    else {
-      return "";
-    }
-  };
-
-  /**
-   * Returns the last term of an string.
-   */
-  Drupal.autocomplete_deluxe.extractLast = function(term, delimiter) {
-    return Drupal.autocomplete_deluxe.split(term, delimiter).pop();
-  };
-
-  /**
    * Main abstract source object.
    */
   Drupal.autocomplete_deluxe.source = function() {
@@ -256,19 +229,17 @@
   // Some base settings for all source objects.
   Drupal.autocomplete_deluxe.source.prototype.autocomplete = null;
   Drupal.autocomplete_deluxe.source.prototype.multiple = false;
-  Drupal.autocomplete_deluxe.source.prototype.delimiter = ', ';
 
   Drupal.autocomplete_deluxe.source.prototype.highlight = function(term, data) {
-    var lterm = $.ui.autocomplete.escapeRegex(Drupal.autocomplete_deluxe.extractLast(term, this.delimiter));
     // If no term is entered, we want to return the data as it is.
-    if (lterm == '') {
+    if (term == '') {
       return data;
     }
     else {
       // Create a new data array, so we can keep our original data clean
       // (without <strong> tags).
       var newData = new Array();
-      var regex = new RegExp("(?![^&;]+;)(?!<[^<>]*)(" + lterm + ")(?![^<>]*>)(?![^&;]+;)", "gi");
+      var regex = new RegExp("(?![^&;]+;)(?!<[^<>]*)(" + term + ")(?![^<>]*>)(?![^&;]+;)", "gi");
       for ( var i in data) {
         var nterm = data[i].label.replace(regex, "<strong>$1</strong>");
         newData.push({
@@ -285,18 +256,6 @@
    */
   Drupal.autocomplete_deluxe.source.prototype.response = function(request, response, data) {
     response(this.highlight(request.term, data));
-  };
-
-  /**
-   * Costume search for multiple values.
-   */
-  Drupal.autocomplete_deluxe.source.prototype.search = function(ui) {
-    if (this.multiple == false && this.autocomplete.jqObject.value !== undefined) {
-      var term = Drupal.autocomplete_deluxe.extractLast(this.autocomplete.jqObject.value, this.delimiter);
-      if (term.length < this.autocomplete.minLength) {
-        return false;
-      }
-    }
   };
 
   /**
@@ -355,7 +314,7 @@
    * data.
    */
   Drupal.autocomplete_deluxe.listSource.prototype.setResponse = function(request, response) {
-    var filtered = Drupal.autocomplete_deluxe.filter(this.list, Drupal.autocomplete_deluxe.extractLast(request.term, this.delimiter));
+    var filtered = Drupal.autocomplete_deluxe.filter(this.list, request.term);
     this.response(request, response, filtered);
   };
 
@@ -370,7 +329,7 @@
       }
     }
     else {
-      var terms = Drupal.autocomplete_deluxe.split(this.autocomplete.jqObject.val(), this.delimiter);
+      var terms = this.autocomplete.jqObject.val();
       var selected = this.selected;
 
       // Find the item wich was deleted and remove it from the list and deselect
@@ -397,19 +356,7 @@
    * Override select event function.
    */
   Drupal.autocomplete_deluxe.listSource.prototype.select = function(input, ui) {
-    if (this.multiple == true) {
-      var terms = Drupal.autocomplete_deluxe.split(input.value, this.delimiter);
-      // Remove the current input.
-      terms.pop();
-      // Add the selected item
-      terms.push(ui.item.label);
-      // Add placeholder to get the comma-and-space at the end.
-      terms.push("");
-      input.value = terms.join(this.delimiter);
-    }
-    else {
-      input.value = ui.item.label;
-    }
+    input.value = ui.item.label;
     this.selectInputOptions(ui);
   };
 
@@ -453,7 +400,7 @@
       return;
     }
     $.ajax({
-      url: this.uri + '/' + Drupal.autocomplete_deluxe.extractLast(request.term, this.delimiter),
+      url: this.uri + '/' + request.term,
       dataType: this.dataType,
       success: function(data) {
         instance.response(request, response, instance.success(data, request));
@@ -481,18 +428,6 @@
    * Override select event function.
    */
   Drupal.autocomplete_deluxe.ajaxSource.prototype.select = function(input, ui) {
-    if (this.multiple == true) {
-      var terms = Drupal.autocomplete_deluxe.split(input.value, this.delimiter);
-      // Remove the current input.
-      terms.pop();
-      // Add the selected item
-      terms.push(ui.item.value);
-      // Add placeholder to get the comma-and-space at the end.
-      terms.push("");
-      input.value = terms.join(this.delimiter);
-    }
-    else {
-      input.value = ui.item.value;
-    }
+    input.value = ui.item.value;
   };
 })(jQuery);
