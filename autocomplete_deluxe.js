@@ -406,6 +406,9 @@
    */
   Drupal.autocomplete_deluxe.listSource.prototype.select = function(input, ui) {
     input.value = ui.item.label;
+    if (!this.multiple) {
+      this.selectbox.children('option:contains("' + input.value + '")').attr("selected", true);
+    }
   };
   
   /**
@@ -426,15 +429,10 @@
    */
   Drupal.autocomplete_deluxe.source.prototype.removeValue = function(value) {
     this.selectbox.children('option:contains("' + value + '")').attr("selected", false);
-    
     this.list.push({
       label: $.trim(value),
       value: this.selectbox.children('option:contains("' + value + '")').val()
     });
-    
-    this.list.sort(function(a, b) {
-     return (a.value < a.value) ? -1 : (a.value > a.value) ? 1 : 0;
-    })
     this.list.sort(Drupal.autocomplete_deluxe.listSource. sortList);
   };
 
