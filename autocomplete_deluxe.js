@@ -29,7 +29,7 @@
 
     if (settings.select_input !== undefined) {
       this.selectInput = $('#' + settings.select_input);
-      this.selectInput.hide();
+      //this.selectInput.hide();
       this.jqObject.show();
     }
 
@@ -94,6 +94,9 @@
 
     this.source.autocomplete = this;
     this.source.multiple = settings.multiple;
+    if (this.multiple) {
+      this.source.container = this.jqObject.parent().parent().children('.autocomplete-deluxe-values');
+    }
 
     this.jqObject.autocomplete("option", "source", function(request, response) {
       instance.source.setResponse(request, response);
@@ -134,8 +137,15 @@
       }
     });
 
-    this.jqObject.keypress(function() {
+    this.jqObject.keypress(function(event) {
       instance.keyPress = true;
+      instance.source.keypress(event);
+    });
+
+    this.jqObject.keyup(function(event) {
+      if (instance.multiple && event.which == 188) {
+        instance.jqObject.val('');
+      }
     });
 
     // Since jquery autocomplete by default strips html text by using .text()
@@ -219,6 +229,29 @@
       this.open(emptySearch);
     }
   };
+  
+  /**
+   * Handles value elements for multiple entries.
+   */
+  Drupal.autocomplete_deluxe.value = function(value, source) {
+    this.removeLink = $('<span class="autocomplete-deluxe-value-delete">&nbsp;</span>')
+    this.span = $('<span class="autocomplete-deluxe-value ui-corner-all ui-button ui-state-default">' + value + '</span>');
+    this.value = value;
+    this.source = source;
+    source.container.append(this.span);
+    this.span.append(this.removeLink);
+    
+    var object = this;
+    
+    this.removeLink.click(function(){
+      object.span.remove();
+      object.source.removeValue(object.value)
+    });
+  };
+  
+  Drupal.autocomplete_deluxe.value.prototype.value = null;
+  Drupal.autocomplete_deluxe.value.prototype.span = null;
+  Drupal.autocomplete_deluxe.value.prototype.source = null;
 
   /**
    * Main abstract source object.
@@ -229,6 +262,7 @@
   // Some base settings for all source objects.
   Drupal.autocomplete_deluxe.source.prototype.autocomplete = null;
   Drupal.autocomplete_deluxe.source.prototype.multiple = false;
+  Drupal.autocomplete_deluxe.source.prototype.container = undefined;
 
   Drupal.autocomplete_deluxe.source.prototype.highlight = function(term, data) {
     // If no term is entered, we want to return the data as it is.
@@ -267,6 +301,10 @@
     // Strip the strong tags from the label.
     ui.item.label = $("<span>" + ui.item.label + "</span>").text();
     this.select(input, ui);
+    if (this.multiple) {
+      this.addValue(this.autocomplete.jqObject.val());
+      input.value = '';
+    }
     return false;
   };
 
@@ -281,6 +319,28 @@
    */
   Drupal.autocomplete_deluxe.source.prototype.change = function(input, ui) {
   };
+  
+  /**
+   * Keypress event function.
+   */
+  Drupal.autocomplete_deluxe.source.prototype.keypress = function(event) {
+    if (this.multiple && event.which == 44) {
+      this.addValue(this.autocomplete.jqObject.val());
+    }
+  };
+  
+  /**
+   * Adds a new value.
+   */
+  Drupal.autocomplete_deluxe.source.prototype.addValue = function(value) {
+    new Drupal.autocomplete_deluxe.value(value, this);
+  }
+  
+  /**
+   * Removes a value.
+   */
+  Drupal.autocomplete_deluxe.source.prototype.removeValue = function(value) {
+  }
 
   /**
    * List Source Object
@@ -292,6 +352,7 @@
     this.list = new Array();
     this.selected = new Array();
     var instance = this;
+    this.selectbox = select;
     jQuery.each(data, function(index, value) {
       instance.list.push({
         label: $.trim(value),
@@ -308,6 +369,8 @@
 
   // Set base class.
   Drupal.autocomplete_deluxe.listSource.prototype = new Drupal.autocomplete_deluxe.source();
+  
+  Drupal.autocomplete_deluxe.listSource.prototype.selectbox = null;
 
   /**
    * Will be called by the JQuery autocomplete source function to retrieve the
@@ -357,14 +420,27 @@
    */
   Drupal.autocomplete_deluxe.listSource.prototype.select = function(input, ui) {
     input.value = ui.item.label;
-    this.selectInputOptions(ui);
   };
-
+  
   /**
-   * Override change event function.
+   * Overrides the  add new value function.
    */
-  Drupal.autocomplete_deluxe.listSource.prototype.change = function(input, ui) {
-    this.selectInputOptions(ui);
+  Drupal.autocomplete_deluxe.listSource.prototype.addValue = function(value) {
+    for (var i=0; i < this.list.length; i++) {
+      if (value == this.list[i].label) {
+        this.selectbox.children('option:contains("' + value + '")').attr("selected", true);
+        new Drupal.autocomplete_deluxe.value(value, this);
+        this.list.splice(i, 1);
+      }
+    };
+  };
+  
+  /**
+   * Removes a value.
+   */
+  Drupal.autocomplete_deluxe.source.prototype.removeValue = function(value) {
+    this.list.push(value);
+    this.selectbox.children('option:contains("' + value + '")').attr("selected", false);
   };
 
   /**

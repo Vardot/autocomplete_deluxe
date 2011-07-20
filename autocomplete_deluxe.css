@@ -12,3 +12,25 @@ ul.ui-autocomplete {
   overflow: scroll;
   max-height: 250px;
 }
+
+div.autocomplete-deluxe-values {
+  width: 528px;
+  /*border: solid 1px #CCCCCC;*/
+}
+
+span.autocomplete-deluxe-value {
+  display: inline-block;
+  margin-right: 5px;
+  margin-top: 5px;
+  padding: 2px;
+  border: solid 1px #CCCCCC;
+  cursor: pointer;
+}
+
+span.autocomplete-deluxe-value-delete {
+  display: inline-block;
+  float: right;
+  background:url('x.gif') no-repeat center;
+  width: 18px;
+  width: 18px;
+}
