@@ -259,12 +259,6 @@ function autocomplete_deluxe_element_process($element) {
       '#default_value' => isset($element['#default_value']) ? $element['#default_value'] : '',
     );
 
-    // Add delimiters to the default values.
-    $addon = (! empty($element['#multiple'])) ? $element['#autocomplete_multiple_delimiter'] : '';
-    foreach ($element['#default_value'] as $key) {
-      $element['textfield']['#default_value'] .= $element['#options'][$key] . $addon;
-    }
-
     // Hide textfield so that, in case javascript is deactivated
     $element['textfield']['#attributes']['style'] = 'display: none;';
     $js_settings['autocomplete_deluxe'][$html_id]['select_input'] = $html_id_select;
