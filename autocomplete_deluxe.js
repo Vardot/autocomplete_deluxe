@@ -470,11 +470,13 @@
    * Initialization function for setting the default states.
    */
   Drupal.autocomplete_deluxe.ajaxSource.prototype.init = function() {
-    this.valueField = this.autocomplete.jqObject.parent().parent().children('input.autocomplete-deluxe-value-field');
-    this.values = this.valueField.val().split(',');
-    for (var i in this.values) {
-      if (this.values[i] != "" && this.values[i] != " ") {
-        new Drupal.autocomplete_deluxe.value(this.values[i], this);
+    if (this.multiple) {
+      this.valueField = this.autocomplete.jqObject.parent().parent().children('input.autocomplete-deluxe-value-field');
+      this.values = this.valueField.val().split(',');
+      for (var i in this.values) {
+        if (this.values[i] != "" && this.values[i] != " ") {
+          new Drupal.autocomplete_deluxe.value(this.values[i], this);
+        }
       }
     }
   };
