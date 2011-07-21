@@ -1,4 +1,9 @@
 
+/**
+ * @file:
+ * Converts textfield to a autocomplete deluxe widget.
+ */
+
 (function($) {
   Drupal.autocomplete_deluxe = Drupal.autocomplete_deluxe || {};
 
@@ -67,7 +72,6 @@
       if (eventObject.originalEvent === undefined) {
         return false;
       }
-
       instance.open();
       instance.opendByFocus = true;
     });
@@ -223,7 +227,7 @@
       this.open(emptySearch);
     }
   };
-  
+
   /**
    * Handles value elements for multiple entries.
    */
@@ -234,15 +238,15 @@
     this.source = source;
     source.container.append(this.span);
     this.span.append(this.removeLink);
-    
+
     var object = this;
-    
+
     this.removeLink.click(function(){
       object.span.remove();
       object.source.removeValue(object.value)
     });
   };
-  
+
   Drupal.autocomplete_deluxe.value.prototype.value = null;
   Drupal.autocomplete_deluxe.value.prototype.span = null;
   Drupal.autocomplete_deluxe.value.prototype.source = null;
@@ -319,25 +323,28 @@
    */
   Drupal.autocomplete_deluxe.source.prototype.change = function(input, ui) {
   };
-  
+
   /**
    * Keypress event function.
    */
   Drupal.autocomplete_deluxe.source.prototype.keypress = function(event) {
     if (this.multiple && event.which == 44) {
-      this.addValue(this.autocomplete.jqObject.val());
+      var val = this.autocomplete.jqObject.val();
+      if (val != '') {
+        this.addValue(val);
+      }
     }
   };
-  
+
   /**
    * Adds a new value.
    */
   Drupal.autocomplete_deluxe.source.prototype.addValue = function(value) {
     new Drupal.autocomplete_deluxe.value(value, this);
   }
-  
+
   /**
-   * Removes a value.
+   * Will be called if a value is removed.
    */
   Drupal.autocomplete_deluxe.source.prototype.removeValue = function(value) {
   }
@@ -359,7 +366,7 @@
       });
     });
   };
-  
+
   /**
    * Sort function for the list entries.
    */
@@ -373,8 +380,7 @@
 
   // Set base class.
   Drupal.autocomplete_deluxe.listSource.prototype = new Drupal.autocomplete_deluxe.source();
-  
-  
+
   /**
    * Override init function,
    */
@@ -389,7 +395,7 @@
       this.autocomplete.jqObject.val(this.selectbox.children("option:selected").text());
     }
   }
-  
+
   Drupal.autocomplete_deluxe.listSource.prototype.selectbox = null;
 
   /**
@@ -410,7 +416,7 @@
       this.selectbox.children('option:contains("' + input.value + '")').attr("selected", true);
     }
   };
-  
+
   /**
    * Overrides the  add new value function.
    */
@@ -423,11 +429,11 @@
       }
     };
   };
-  
+
   /**
-   * Removes a value.
+   * Overrides the remove item event function.
    */
-  Drupal.autocomplete_deluxe.source.prototype.removeValue = function(value) {
+  Drupal.autocomplete_deluxe.listSource.prototype.removeValue = function(value) {
     this.selectbox.children('option:contains("' + value + '")').attr("selected", false);
     this.list.push({
       label: $.trim(value),
@@ -457,6 +463,21 @@
 
   // Set base class.
   Drupal.autocomplete_deluxe.ajaxSource.prototype = new Drupal.autocomplete_deluxe.source();
+  Drupal.autocomplete_deluxe.ajaxSource.prototype.valueField = null;
+  Drupal.autocomplete_deluxe.ajaxSource.prototype.values = new Array();
+
+  /**
+   * Initialization function for setting the default states.
+   */
+  Drupal.autocomplete_deluxe.ajaxSource.prototype.init = function() {
+    this.valueField = this.autocomplete.jqObject.parent().parent().children('input.autocomplete-deluxe-value-field');
+    this.values = this.valueField.val().split(',');
+    for (var i in this.values) {
+      if (this.values[i] != "" && this.values[i] != " ") {
+        new Drupal.autocomplete_deluxe.value(this.values[i], this);
+      }
+    }
+  };
 
   /**
    * Will be called by the JQuery autocomplete source function to retrieve the
@@ -499,4 +520,24 @@
   Drupal.autocomplete_deluxe.ajaxSource.prototype.select = function(input, ui) {
     input.value = ui.item.value;
   };
+
+  /**
+   * Overrides the  add new value function.
+   */
+  Drupal.autocomplete_deluxe.ajaxSource.prototype.addValue = function(value) {
+    new Drupal.autocomplete_deluxe.value(value, this);
+    this.values.push(value);
+    this.valueField.val(this.values.join(','))
+  }
+
+  /**
+   * Overrides the remove item event function.
+   */
+  Drupal.autocomplete_deluxe.ajaxSource.prototype.removeValue = function(value) {
+    var idx = this.values.indexOf(value);
+    if (idx >-1) {
+      this.values.splice(idx, 1);
+    }
+    this.valueField.val(this.values.join(','))
+  }
 })(jQuery);

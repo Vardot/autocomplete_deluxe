@@ -237,7 +237,11 @@ function autocomplete_deluxe_element_process($element) {
   );
 
   if (isset($element['#autocomplete_path'])) {
-    $element['textfield']['#default_value'] = isset($element['#default_value']) ? $element['#default_value'] : '';
+    $element['value_field'] = array(
+      '#type' => 'hidden',
+      '#attributes' => array('class' => array('autocomplete-deluxe-value-field')),
+      '#default_value' => isset($element['#default_value']) ? $element['#default_value'] : '',
+    );
 
     $js_settings['autocomplete_deluxe'][$html_id] += array(
       'type' => 'ajax',
@@ -306,7 +310,7 @@ function autocomplete_deluxe_value_filter($var) {
  */
 function autocomplete_deluxe_after_build($element, &$form_state) {
   if (!isset($element['list_value'])) {
-    $element['#value'] = $element['textfield']['#value'];
+    $element['#value'] = $element['value_field']['#value'];
   }
   else {
     $element['#value'] = $element['list_value']['#value'];
