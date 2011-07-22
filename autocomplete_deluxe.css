@@ -10,6 +10,7 @@ span.autocomplete-deluxe-button {
 
 ul.ui-autocomplete {
   overflow: scroll;
+  min-height: 3em;
   max-height: 250px;
 }
 

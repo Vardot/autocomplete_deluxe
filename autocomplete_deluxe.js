@@ -61,20 +61,36 @@
     // Add a custom class, so we can style the autocomplete box without
     // interfering with other jquery autocomplete widgets.
     this.jqObject.autocomplete("widget").addClass('autocomplete-deluxe-widget');
+    
+    this.hasFocus = false;
 
     // Save the current autocomplete object, so it can be used in
     // handlers.
     var instance = this;
 
+    // Override enter keypress for the form, but only when the input hasn't
+    // the focus and it isn\t empty.
+    $('form').keypress(function(event) {
+      if (event.keyCode == 13 && instance.hasFocus && instance.jqObject.val() !== "") return false;
+    });
+
     // Event handlers.
     this.jqObject.focus( function(eventObject) {
-      // Overlay causes a second focus, wich has to be catched.
+      // Overlay causes a second focus, wich has to be instance.catched.
       if (eventObject.originalEvent === undefined) {
         return false;
       }
       instance.open();
       instance.opendByFocus = true;
     });
+    
+    this.jqObject.focusin(function(){
+      instance.hasFocus = true;
+    })
+    
+    this.jqObject.focusout(function(){
+      instance.hasFocus = false;
+    })
 
     // Needed when the window is closed but the textfield has the focus.
     this.jqObject.click( function() {
@@ -141,8 +157,9 @@
       instance.source.keypress(event);
     });
     this.jqObject.keyup(function(event) {
-      if (instance.multiple && event.which == 188) {
+      if (instance.multiple && event.which == 188 || event.which == 13) {
         instance.jqObject.val('');
+        instance.close();
       }
     });
 
@@ -328,7 +345,7 @@
    * Keypress event function.
    */
   Drupal.autocomplete_deluxe.source.prototype.keypress = function(event) {
-    if (this.multiple && event.which == 44) {
+    if (this.multiple && event.which == 44 || event.which == 13) {
       var val = this.autocomplete.jqObject.val();
       if (val != '') {
         this.addValue(val);
