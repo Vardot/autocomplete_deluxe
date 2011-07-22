@@ -134,6 +134,32 @@ function autocomplete_deluxe_field_widget_settings_form($field, $instance) {
 }
 
 /**
+ * Implodes the tags from the taxonomy module.
+ * 
+ * This function is essentially the same as axonomy_implode_tags, with the
+ * difference, that it uses only a comma instead of a comma and a space to
+ * implode the tags. It will help keep problems with delimiters to a minimum.
+ */
+function autocomplete_deluxe_taxonomy_implode_tags($tags, $vid = NULL) {
+  $typed_tags = array();
+  foreach ($tags as $tag) {
+    // Extract terms belonging to the vocabulary in question.
+    if (!isset($vid) || $tag->vid == $vid) {
+      // Make sure we have a completed loaded taxonomy term.
+      if (isset($tag->name)) {
+        // Commas and quotes in tag names are special cases, so encode 'em.
+        if (strpos($tag->name, ',') !== FALSE || strpos($tag->name, '"') !== FALSE) {
+          $tag->name = '"' . str_replace('"', '""', $tag->name) . '"';
+        }
+
+        $typed_tags[] = $tag->name;
+      }
+    }
+  }
+  return implode(',', $typed_tags);
+}
+ 
+/**
  * Implements hook_field_widget_error().
  */
 function autocomplete_deluxe_field_widget_error($element, $error, $form, &$form_state) {
@@ -162,7 +188,7 @@ function autocomplete_deluxe_field_widget_form(&$form, &$form_state, $field, $in
         '#multiple' => $multiple,
         '#element_validate' => array('taxonomy_autocomplete_validate'),
         '#autocomplete_path' => url($instance['widget']['settings']['autocomplete_path'] . '/' . $field['field_name'], array('absolute' => TRUE)),
-        '#default_value' => taxonomy_implode_tags($tags),
+        '#default_value' => autocomplete_deluxe_taxonomy_implode_tags($tags),
       );
       break;
     case 'list':
@@ -233,16 +259,18 @@ function autocomplete_deluxe_element_process($element) {
     'input_id' => $html_id,
     'min_length' => isset($element['#autocomplete_min_length']) ? $element['#autocomplete_min_length'] : 0,
     'multiple' => $element['#multiple'],
-    'multiple_delimeter' => $element['#autocomplete_multiple_delimiter'] = isset($element['#autocomplete_multiple_delimiter']) ? $element['#autocomplete_multiple_delimiter'] : ', ',
   );
 
   if (isset($element['#autocomplete_path'])) {
     if ($element['#multiple']) {
       $element['value_field'] = array(
-        '#type' => 'hidden',
+        '#type' => 'textfield',
         '#attributes' => array('class' => array('autocomplete-deluxe-value-field')),
         '#default_value' => isset($element['#default_value']) ? $element['#default_value'] : '',
+        '#prefix' => '<div class="autocomplete-deluxe-value-container">',
+        '#suffix' => '</div>',
       );
+      $element['textfield']['#attributes']['style'] = array('display:none');
     }
     else {
       $element['textfield']['#default_value'] = isset($element['#default_value']) ? $element['#default_value'] : '';

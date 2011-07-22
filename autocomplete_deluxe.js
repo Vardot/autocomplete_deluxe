@@ -481,16 +481,19 @@
   // Set base class.
   Drupal.autocomplete_deluxe.ajaxSource.prototype = new Drupal.autocomplete_deluxe.source();
   Drupal.autocomplete_deluxe.ajaxSource.prototype.valueField = null;
-  Drupal.autocomplete_deluxe.ajaxSource.prototype.values = new Array();
+  Drupal.autocomplete_deluxe.ajaxSource.prototype.values = null;
 
   /**
    * Initialization function for setting the default states.
    */
   Drupal.autocomplete_deluxe.ajaxSource.prototype.init = function() {
     if (this.multiple) {
-      this.valueField = this.autocomplete.jqObject.parent().parent().children('input.autocomplete-deluxe-value-field');
-      this.values = this.valueField.val().split(',');
+      this.valueField = this.autocomplete.jqObject.parent().parent().children('div.autocomplete-deluxe-value-container').children().children();
+      //this.valueField.hide();
+      this.autocomplete.jqObject.show();
+      this.values = (this.valueField.val().split(',') != "") ? this.valueField.val().split(',')  : new Array();
       for (var i in this.values) {
+        console.log(this.values);
         if (this.values[i] != "" && this.values[i] != " ") {
           new Drupal.autocomplete_deluxe.value(this.values[i], this);
         }
@@ -505,7 +508,16 @@
   Drupal.autocomplete_deluxe.ajaxSource.prototype.setResponse = function(request, response) {
     var instance = this;
     if (request.term in this.cache) {
-      instance.response(request, response, (this.cache[request.term]));
+      var instance = this;
+      var terms = this.cache[request.term].filter(function(val) {
+        for (var i in instance.values) {
+          if (instance.values[i] == val.value) {
+            return false;
+          }
+        }
+        return true;
+      });
+      instance.response(request, response, (terms));
       return;
     }
     $.ajax({
@@ -521,16 +533,25 @@
    * Success function for the autocomplete object.
    */
   Drupal.autocomplete_deluxe.ajaxSource.prototype.success = function(data, request) {
-    var list = new Array();
+    var instance = this;
+    this.cache[request.term] = new Array();
     jQuery.each(data, function(index, value) {
-      list.push({
+      instance.cache[request.term].push({
         label: value,
         value: index
       });
     });
 
-    this.cache[request.term] = list;
-    return list;
+    var terms = this.cache[request.term].filter(function(val) {
+      for (var i in instance.values) {
+          console.log(instance.values[i]);
+        if (instance.values[i] == val.value) {
+          return false;
+        }
+      }
+      return true;
+    });
+    return terms;
   };
 
   /**
