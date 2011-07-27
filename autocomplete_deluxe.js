@@ -61,7 +61,7 @@
     // Add a custom class, so we can style the autocomplete box without
     // interfering with other jquery autocomplete widgets.
     this.jqObject.autocomplete("widget").addClass('autocomplete-deluxe-widget');
-    
+
     this.hasFocus = false;
 
     // Save the current autocomplete object, so it can be used in
@@ -83,11 +83,11 @@
       instance.open();
       instance.opendByFocus = true;
     });
-    
+
     this.jqObject.focusin(function(){
       instance.hasFocus = true;
     })
-    
+
     this.jqObject.focusout(function(){
       instance.hasFocus = false;
     })
@@ -489,11 +489,10 @@
   Drupal.autocomplete_deluxe.ajaxSource.prototype.init = function() {
     if (this.multiple) {
       this.valueField = this.autocomplete.jqObject.parent().parent().children('div.autocomplete-deluxe-value-container').children().children();
-      //this.valueField.hide();
+      this.valueField.hide();
       this.autocomplete.jqObject.show();
       this.values = (this.valueField.val().split(',') != "") ? this.valueField.val().split(',')  : new Array();
       for (var i in this.values) {
-        console.log(this.values);
         if (this.values[i] != "" && this.values[i] != " ") {
           new Drupal.autocomplete_deluxe.value(this.values[i], this);
         }
@@ -544,7 +543,6 @@
 
     var terms = this.cache[request.term].filter(function(val) {
       for (var i in instance.values) {
-          console.log(instance.values[i]);
         if (instance.values[i] == val.value) {
           return false;
         }

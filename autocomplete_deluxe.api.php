@@ -36,7 +36,7 @@ function somefunction() {
     case 'list':
       $element = array(
         '#type' => 'autocomplete_deluxe',
-        '#options' => $options,
+        '#autocomplete_options' => $options,
         '#multiple' => FALSE,
         '#autocomplete_min_length' => 0,
       );
