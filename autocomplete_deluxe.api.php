@@ -15,7 +15,7 @@
  * - #autocomplete_path expects a string with an url, that points to the ajax
  *   callback. The response should be encoded as json(like for the core
  *   autocomplete).
- * - #options needs an array in the form of an array(similar to #options in core
+ * - #autocomplete_options needs an array in the form of an array(similar to #options in core
  *   for selects or checkboxes): array('a', 'b', 'c') or array(1 => 'a', 2 =>
  *   'b', 3 => 'c').
  *
