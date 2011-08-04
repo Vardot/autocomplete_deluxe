@@ -12,7 +12,7 @@
  * When you want to use the Autocomplete Deluxe element, you have to choose
  * between two types sources for the suggestion data: Ajax Callbacks or Lists.
  * You can set the source type by using the appropriate options:
- * - #autocomplete_path expects a string with an url, that points to the ajax
+ * - #autocomplete_deluxe_path expects a string with an url, that points to the ajax
  *   callback. The response should be encoded as json(like for the core
  *   autocomplete).
  * - #autocomplete_options needs an array in the form of an array(similar to #options in core
@@ -44,7 +44,7 @@ function somefunction() {
     case 'ajax':
       $element = array(
         '#type' => 'autocomplete_deluxe',
-        '#autocomplete_path' => url('some_uri', array('absolute' => TRUE)),
+        '#autocomplete_deluxe_path' => url('some_uri', array('absolute' => TRUE)),
         '#multiple' => TRUE,
         '#autocomplete_min_length' => 1,
         '#autocomplete_multiple_delimiter' => '|',

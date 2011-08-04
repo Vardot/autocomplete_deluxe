@@ -15,7 +15,7 @@ function autocomplete_deluxe_field_widget_info() {
       'field types' => array('taxonomy_term_reference'),
       'settings' => array(
         'size' => 60,
-        'autocomplete_path' => 'autocomplete_deluxe/taxonomy',
+        'autocomplete_deluxe_path' => 'autocomplete_deluxe/taxonomy',
       ),
       'behaviors' => array(
         'multiple values' => FIELD_BEHAVIOR_CUSTOM,
@@ -35,7 +35,7 @@ function autocomplete_deluxe_field_widget_info() {
 }
 
 /**
- * Costume taxonomy callback, which also accepts an empty string search.
+ * Custom taxonomy callback, which also accepts an empty string search.
  */
 function taxonomy_autocomplete_deluxe($field_name, $tags_typed = '') {
   $field = field_info_field($field_name);
@@ -175,6 +175,7 @@ function autocomplete_deluxe_field_widget_form(&$form, &$form_state, $field, $in
     '#type' => 'autocomplete_deluxe',
     '#size' => $instance['widget']['settings']['size'],
   );
+  dpm($instance);
 
   $multiple = $field['cardinality'] > 1 || $field['cardinality'] == FIELD_CARDINALITY_UNLIMITED ? TRUE : FALSE;
 
@@ -200,7 +201,7 @@ function autocomplete_deluxe_field_widget_form(&$form, &$form_state, $field, $in
       else {
         $element += array(
           '#multiple' => $multiple,
-          '#autocomplete_path' => url($instance['widget']['settings']['autocomplete_path'] . '/' . $field['field_name'], array('absolute' => TRUE)),
+          '#autocomplete_deluxe_path' => url($instance['widget']['settings']['autocomplete_deluxe_path'] . '/' . $field['field_name'], array('absolute' => TRUE)),
           '#default_value' => autocomplete_deluxe_taxonomy_implode_tags($tags),
         );
       }
@@ -276,7 +277,7 @@ function autocomplete_deluxe_element_process($element) {
     'multiple' => $element['#multiple'],
   );
 
-  if (isset($element['#autocomplete_path'])) {
+  if (isset($element['#autocomplete_deluxe_path'])) {
     if ($element['#multiple']) {
       $element['value_field'] = array(
         '#type' => 'textfield',
@@ -293,7 +294,7 @@ function autocomplete_deluxe_element_process($element) {
 
     $js_settings['autocomplete_deluxe'][$html_id] += array(
       'type' => 'ajax',
-      'uri' => $element['#autocomplete_path'],
+      'uri' => $element['#autocomplete_deluxe_path'],
     );
   }
   elseif (isset($element['#autocomplete_options'])) {
