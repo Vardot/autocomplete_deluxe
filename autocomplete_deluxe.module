@@ -175,7 +175,6 @@ function autocomplete_deluxe_field_widget_form(&$form, &$form_state, $field, $in
     '#type' => 'autocomplete_deluxe',
     '#size' => $instance['widget']['settings']['size'],
   );
-  dpm($instance);
 
   $multiple = $field['cardinality'] > 1 || $field['cardinality'] == FIELD_CARDINALITY_UNLIMITED ? TRUE : FALSE;
 
