@@ -1,6 +1,6 @@
 name = Autocomplete Deluxe
-description = Enhanced autocomplete using Jquery UI autocomplete. 
-package = CCK
+description = Enhanced autocomplete using Jquery UI autocomplete.
+package = User interface
 version = VERSION
 core = 7.x
 files[] = autocomplete_deluxe.module
