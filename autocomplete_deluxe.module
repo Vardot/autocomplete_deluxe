@@ -265,7 +265,6 @@ function autocomplete_deluxe_element_process($element) {
   $element['textfield'] = array(
     '#type' => 'textfield',
     '#size' => isset($element['#size']) ? $element['#size'] : '',
-    '#required' => isset($element['#required']) ? $element['#required'] : '',
     '#attributes' => array('class' => array('autocomplete-deluxe-form', 'form-autocomplete'), 'id' => array($html_id)),
     '#default_value' => '',
   );
@@ -337,19 +336,6 @@ function autocomplete_deluxe_value(&$element, $input = FALSE, $form_state = NULL
   // array containing the child element values. Then finally the after build
   // callback converts it back to the numeric value and sets that.
   return array();
-}
-
-/**
- * Helper function for array_filter.
- */
-function autocomplete_deluxe_value_filter($var) {
-  $string = trim($var);
-  if (empty($string)) {
-    return FALSE;
-  }
-  else {
-    return TRUE;
-  }
 }
 
 /**
