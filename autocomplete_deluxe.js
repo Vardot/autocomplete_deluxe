@@ -4,6 +4,8 @@
  * Converts textfield to a autocomplete deluxe widget.
  */
 
+
+
 (function($) {
   Drupal.autocomplete_deluxe = Drupal.autocomplete_deluxe || {};
 
@@ -287,15 +289,17 @@
     else {
       // Create a new data array, so we can keep our original data clean
       // (without <strong> tags).
-      var newData = new Array();
       var regex = new RegExp("(?![^&;]+;)(?!<[^<>]*)(" + term + ")(?![^<>]*>)(?![^&;]+;)", "gi");
-      for ( var i in data) {
+      var newData = new Array();
+
+      for (var i=0; i<data.length; i++) {
         var nterm = data[i].label.replace(regex, "<strong>$1</strong>");
         newData.push({
           label: nterm,
           value: data[i].value
         });
       }
+
       return newData;
     }
   };
@@ -508,7 +512,7 @@
     var instance = this;
     if (request.term in this.cache) {
       var instance = this;
-      var terms = this.cache[request.term].filter(function(val) {
+      var terms = $(this.cache[request.term]).filter(function(val) {
         for (var i in instance.values) {
           if (instance.values[i] == val.value) {
             return false;
@@ -541,7 +545,7 @@
       });
     });
 
-    var terms = this.cache[request.term].filter(function(val) {
+    var terms = $(this.cache[request.term]).filter(function(val) {
       for (var i in instance.values) {
         if (instance.values[i] == val.value) {
           return false;
