@@ -262,7 +262,7 @@
 
     this.removeLink.click(function(){
       object.span.remove();
-      object.source.removeValue(object.value)
+      object.source.removeValue(object.value);
     });
   };
 
@@ -505,6 +505,22 @@
   };
 
   /**
+   * Filters the selected values out of the ajax list.
+   */
+  Drupal.autocomplete_deluxe.ajaxSource.prototype.filterValues = function(request, terms) {
+    var instance = this;
+    var terms = $(this.cache[request.term]).filter(function(val) {
+      for (var i in instance.values) {
+        if (instance.values[i] == instance.cache[request.term][val].value) {
+          return false;
+        }
+      }
+      return true;
+    });
+    return terms;
+  }
+
+  /**
    * Will be called by the JQuery autocomplete source function to retrieve the
    * data.
    */
@@ -520,20 +536,22 @@
         }
         return true;
       });
-      instance.response(request, response, (terms));
+      terms = this.filterValues(request, terms);
+      this.response(request, response, (terms));
       return;
     }
     $.ajax({
       url: this.uri + '/' + request.term,
       dataType: this.dataType,
       success: function(data) {
-        instance.response(request, response, instance.success(data, request));
+        terms = instance.filterValues(request, instance.success(data, request));
+        instance.response(request, response, terms);
       }
     });
   };
 
   /**
-   * Success function for the autocomplete object.
+   * AJAX success function, which stores the returned elements into the cache.
    */
   Drupal.autocomplete_deluxe.ajaxSource.prototype.success = function(data, request) {
     var instance = this;
@@ -545,15 +563,7 @@
       });
     });
 
-    var terms = $(this.cache[request.term]).filter(function(val) {
-      for (var i in instance.values) {
-        if (instance.values[i] == val.value) {
-          return false;
-        }
-      }
-      return true;
-    });
-    return terms;
+    return this.cache[request.term];
   };
 
   /**
@@ -564,7 +574,7 @@
   };
 
   /**
-   * Overrides the  add new value function.
+   * Overrides the add new value function.
    */
   Drupal.autocomplete_deluxe.ajaxSource.prototype.addValue = function(value) {
     new Drupal.autocomplete_deluxe.value(value, this);
