@@ -23,7 +23,7 @@ function autocomplete_deluxe_field_widget_info() {
     ),
     'autocomplete_deluxe_list' => array(
       'label' => t('Autocomplete Deluxe'),
-      'field types' => array('list', 'list_text', 'list_number'),
+      'field types' => array('list', 'list_text', 'list_text', 'list_integer', 'list_float'),
       'settings' => array(
         'size' => 60,
       ),
