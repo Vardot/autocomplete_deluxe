@@ -434,7 +434,7 @@
   Drupal.autocomplete_deluxe.listSource.prototype.select = function(input, ui) {
     input.value = ui.item.label;
     if (!this.multiple) {
-      this.selectbox.children('option:contains("' + input.value + '")').attr("selected", true);
+      this.selectbox.children('option[value="' + input.value + '"]').attr("selected", true);
     }
   };
 
@@ -444,7 +444,7 @@
   Drupal.autocomplete_deluxe.listSource.prototype.addValue = function(value) {
     for (var i=0; i < this.list.length; i++) {
       if (value == this.list[i].label) {
-        this.selectbox.children('option:contains("' + value + '")').attr("selected", true);
+        this.selectbox.children('option[value="' + value + '"]').attr("selected", true);
         new Drupal.autocomplete_deluxe.value(value, this);
         this.list.splice(i, 1);
       }
@@ -455,10 +455,10 @@
    * Overrides the remove item event function.
    */
   Drupal.autocomplete_deluxe.listSource.prototype.removeValue = function(value) {
-    this.selectbox.children('option:contains("' + value + '")').attr("selected", false);
+    this.selectbox.children('option[value="' + value + '"]').attr("selected", false);
     this.list.push({
       label: $.trim(value),
-      value: this.selectbox.children('option:contains("' + value + '")').val()
+      value: this.selectbox.children('option[value="' + value + '"]').val()
     });
     this.list.sort(Drupal.autocomplete_deluxe.listSource. sortList);
   };
