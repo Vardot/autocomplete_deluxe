@@ -343,8 +343,15 @@ function autocomplete_deluxe_value(&$element, $input = FALSE, $form_state = NULL
  * Fixes up the form value by applying the multiplier.
  */
 function autocomplete_deluxe_after_build($element, &$form_state) {
+  // By default drupal sets the maxlength to 128 if the property isn't
+  // specified, but since the limit isn't usefull in some cases,
+  // we unset the property.
+  unset($element['textfield']['#maxlength']);
+
   if (!isset($element['list_value'])) {
     $element['#value'] = isset($element['value_field']) ? $element['value_field']['#value'] : $element['textfield']['#value'];
+    // Do the same for similar reasons as before.
+    unset($element['value_field']['#maxlength']);
   }
   else {
     if (!empty($form_state['autocomplete_deluxe']['terms']) && !empty($element['#multiple'])) {
