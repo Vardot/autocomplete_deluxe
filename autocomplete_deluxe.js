@@ -251,11 +251,12 @@
    * Handles value elements for multiple entries.
    */
   Drupal.autocomplete_deluxe.value = function(value, source) {
-    this.removeLink = $('<span class="autocomplete-deluxe-value-delete">&nbsp;</span>')
-    this.span = $('<span class="autocomplete-deluxe-value ui-corner-all ui-button ui-state-default">' + value + '</span>');
+    this.removeLink = $('<span class="autocomplete-deluxe-value-delete">&nbsp;</span>');
+    this.span = $('<span class="autocomplete-deluxe-value ui-corner-all ui-button ui-state-default"></span>');
     this.value = value;
     this.source = source;
     source.container.append(this.span);
+    this.span.text(value);
     this.span.append(this.removeLink);
 
     var object = this;
