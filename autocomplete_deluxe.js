@@ -168,7 +168,8 @@
     // Since jquery autocomplete by default strips html text by using .text()
     // we need our own _renderItem function to display html content.
     this.jqObject.data("autocomplete")._renderItem = function(ul, item) {
-      return $("<li></li>").data("item.autocomplete", item).append("<a>" + item.label + "</a>").appendTo(ul);
+      var clean_label = $("<span/>").text(item.label).html().replace(/(&lt;)(strong)(&gt;)/gi, "<strong>").replace(/(&lt;)(\/)(strong)(&gt;)/gi, "</strong>");
+      return $("<li></li>").data("item.autocomplete", item).append("<a>" + clean_label + "</a>").appendTo(ul);
     };
 
     // Costume response callback to delete the throbbing class. Could be deleted
@@ -256,7 +257,7 @@
     this.value = value;
     this.source = source;
     source.container.append(this.span);
-    this.span.text(value);
+    this.span.append(value);
     this.span.append(this.removeLink);
 
     var object = this;
@@ -411,7 +412,8 @@
       var instance = this;
       // Add all selected(probably by #default_value) to the selected list.
       this.selectbox.children("option:selected").each( function() {
-        instance.addValue($(this).text());
+        var entry = $("<span/>").text($(this).text()).html();
+        instance.addValue(entry);
       });
     } else {
       this.autocomplete.jqObject.val(this.selectbox.children("option:selected").text());
@@ -440,12 +442,12 @@
   };
 
   /**
-   * Overrides the  add new value function.
+   * Overrides the add new value function.
    */
   Drupal.autocomplete_deluxe.listSource.prototype.addValue = function(value) {
     for (var i=0; i < this.list.length; i++) {
       if (value == this.list[i].label) {
-        this.selectbox.children('option[value="' + value + '"]').attr("selected", true);
+        this.selectbox.children('option[value="' + $("<div/>").html(value).text() + '"]').attr("selected", true);
         new Drupal.autocomplete_deluxe.value(value, this);
         this.list.splice(i, 1);
       }
@@ -457,6 +459,7 @@
    */
   Drupal.autocomplete_deluxe.listSource.prototype.removeValue = function(value) {
     this.selectbox.children('option[value="' + value + '"]').attr("selected", false);
+    var label = $("<div/>").html(value).text();
     this.list.push({
       label: $.trim(value),
       value: this.selectbox.children('option[value="' + value + '"]').val()
