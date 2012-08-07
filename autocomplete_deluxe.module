@@ -80,7 +80,7 @@ function taxonomy_autocomplete_deluxe($field_name, $tags_typed = '') {
       $n = '"' . str_replace('"', '""', $name) . '"';
     }
     else {
-      $term_matches[$prefix . $n] = check_plain($name);
+      $term_matches[] = check_plain($name);
     }
   }
 
@@ -216,6 +216,8 @@ function autocomplete_deluxe_element_process($element) {
     '#size' => isset($element['#size']) ? $element['#size'] : '',
     '#attributes' => array('class' => array('autocomplete-deluxe-form', 'form-autocomplete'), 'id' => array($html_id)),
     '#default_value' => '',
+    '#prefix' => '<div class="autocomplete-deluxe-container">',
+    '#suffix' => '</div>',
   );
 
   $js_settings['autocomplete_deluxe'][$html_id] = array(
