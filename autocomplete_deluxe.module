@@ -46,8 +46,6 @@ function taxonomy_autocomplete_deluxe($field_name, $tags_typed = '') {
   $query = db_select('taxonomy_term_data', 't');
   $query->addTag('translatable');
   $query->addTag('term_access');
-  $query->addTag('autocomplete_deluxe_taxonomy_autocomplete');
-  $query->addMetadata('field_name', $field_name);
 
   if ($tag_last != '') {
     // Do not select already entered terms.
@@ -59,6 +57,7 @@ function taxonomy_autocomplete_deluxe($field_name, $tags_typed = '') {
       ->fields('t', array('tid', 'name'))
       ->condition('t.vid', $vids)
       ->condition('t.name', '%' . db_like($tag_last) . '%', 'LIKE')
+      ->range(0, 10)
       ->execute()
       ->fetchAllKeyed();
   }
@@ -66,11 +65,12 @@ function taxonomy_autocomplete_deluxe($field_name, $tags_typed = '') {
     $tags_return = $query
       ->fields('t', array('tid', 'name'))
       ->condition('t.vid', $vids)
+      ->range(0, 10)
       ->execute()
       ->fetchAllKeyed();
   }
 
-  $prefix = count($tags_typed) ? implode(', ', $tags_typed) . ', ' : '';
+  $prefix = count($tags_typed) ? drupal_implode_tags($tags_typed) . ', ' : '';
 
   $term_matches = array();
   foreach ($tags_return as $tid => $name) {
@@ -79,9 +79,7 @@ function taxonomy_autocomplete_deluxe($field_name, $tags_typed = '') {
     if (strpos($name, ',') !== FALSE || strpos($name, '"') !== FALSE) {
       $n = '"' . str_replace('"', '""', $name) . '"';
     }
-    else {
-      $term_matches[$prefix . $n] = check_plain($name);
-    }
+    $term_matches[$prefix . $n] = check_plain($name);
   }
 
   drupal_json_output($term_matches);

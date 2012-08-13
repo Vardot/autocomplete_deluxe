@@ -81,10 +81,10 @@
     var generateValues = function(data) {
       var result = new Array();
       for (terms in data) {
-        if (self.acceptTerm(data[terms])) {
+        if (self.acceptTerm(terms)) {
           result.push({
             label: data[terms],
-            value: data[terms]
+            value: terms
           });
         }
       }
@@ -226,8 +226,11 @@
     for (var index in default_values) {
       var value = default_values[index];
       if (value != '') {
+        // If a terms is encoded in double quotes, then the label should have
+        // no double quotes.
+        var label = value.match(/["][\w|\s|\D|]*["]/gi) !== null ? value.substr(1, value.length-2) : value;
         var item = {
-          label : value,
+          label : label,
           value : value
         };
         var item = new Drupal.autocomplete_deluxe.MultipleWidget.item(self, item);
