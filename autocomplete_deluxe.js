@@ -181,7 +181,7 @@
     return !(term in this.items);
   };
 
-  Drupal.autocomplete_deluxe.MultipleWidget.item = function (widget, item) {
+  Drupal.autocomplete_deluxe.MultipleWidget.Item = function (widget, item) {
     this.value = item.value;
     this.element = $('<span class="autocomplete-deluxe-item">' + item.label + '</span>');
     this.widget = widget;
@@ -193,11 +193,11 @@
     var input = $('<input type="hidden" value=\'' + this.value + '\'/>').appendTo(this.element);
 
     close.mousedown(function() {
-      self.delete(item);
+      self.remove(item);
     });
   };
 
-  Drupal.autocomplete_deluxe.MultipleWidget.item.prototype.delete = function () {
+  Drupal.autocomplete_deluxe.MultipleWidget.Item.prototype.remove = function() {
     this.element.remove();
     var values = this.widget.valueForm.val();
     var regex = new RegExp('( )*""' + this.item.value + '""|' + this.item.value + '( )*', 'gi');
@@ -233,7 +233,7 @@
           label : label,
           value : value
         };
-        var item = new Drupal.autocomplete_deluxe.MultipleWidget.item(self, item);
+        var item = new Drupal.autocomplete_deluxe.MultipleWidget.Item(self, item);
         item.element.insertBefore(jqObject);
         items[item.value] = item;
       }
@@ -244,7 +244,7 @@
 
 
     this.addValue = function(ui_item) {
-      var item = new Drupal.autocomplete_deluxe.MultipleWidget.item(self, ui_item);
+      var item = new Drupal.autocomplete_deluxe.MultipleWidget.Item(self, ui_item);
       item.element.insertBefore(jqObject);
       items[ui_item.value] = item;
       var new_value = ' ""' + ui_item.value + '""';
@@ -301,7 +301,7 @@
         // then mark the last item for deletion or deleted it if already marked.
         if (last_element.hasClass('autocomplete-deluxe-item-focus')) {
           var value = last_element.children('input').val();
-          self.items[value].delete(self.items[value]);
+          self.items[value].remove(self.items[value]);
           jqObject.autocomplete('search', '');
         } else {
           last_element.addClass('autocomplete-deluxe-item-focus');
