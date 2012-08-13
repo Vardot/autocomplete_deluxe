@@ -36,6 +36,9 @@ a.autocomplete-deluxe-single:hover {
   display: inline-block;
   position: relative;
   padding: 0;
+  width: 503px;
+  line-height:20pt;
+  cursor: text;
 }
 
 .autocomplete-deluxe-single-container {

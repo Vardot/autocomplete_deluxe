@@ -203,7 +203,6 @@
     var regex = new RegExp('( )*""' + this.item.value + '""|' + this.item.value + '( )*', 'gi');
     this.widget.valueForm.val(values.replace(regex, ''));
     delete this.widget.items[this.value];
-
   };
 
   Drupal.autocomplete_deluxe.MultipleWidget.prototype.setup = function() {
@@ -252,7 +251,7 @@
     };
 
 
-    jqObject.mousedown(function() {
+    parent.mousedown(function() {
       if (parent.hasClass('autocomplete-deluxe-single-open')) {
         jqObject.autocomplete('close');
       } else {
