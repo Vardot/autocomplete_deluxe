@@ -4,8 +4,6 @@
  * Converts textfield to a autocomplete deluxe widget.
  */
 
-
-
 (function($) {
   Drupal.autocomplete_deluxe = Drupal.autocomplete_deluxe || {};
 
@@ -43,10 +41,7 @@
   };
 
   Drupal.autocomplete_deluxe.Widget = function() {
-    this.cache = {};
-    this.lastXhr;
   };
-
 
   Drupal.autocomplete_deluxe.Widget.prototype.cache = {};
   Drupal.autocomplete_deluxe.Widget.prototype.uri = null;
@@ -63,6 +58,10 @@
   };
 
   Drupal.autocomplete_deluxe.Widget.prototype.init = function(settings) {
+    if ($.browser.msie && $.browser.version === "6.0") {
+      return;
+    }
+
     this.id = settings.input_id;
     this.jqObject = $('#' + this.id);
 
@@ -127,6 +126,9 @@
     return result;
   };
 
+  /**
+   * Generates a single selecting widget.
+   */
   Drupal.autocomplete_deluxe.SingleWidget = function(settings) {
     this.init(settings);
     this.setup();
@@ -167,6 +169,9 @@
     });
   };
 
+  /**
+   * Creates a multiple selecting widget.
+   */
   Drupal.autocomplete_deluxe.MultipleWidget = function(input, settings) {
     this.init(settings);
     this.setup();
@@ -176,7 +181,8 @@
   Drupal.autocomplete_deluxe.MultipleWidget.prototype.items = new Object();
 
 
-  Drupal.autocomplete_deluxe.Widget.prototype.acceptTerm = function(term) {
+  Drupal.autocomplete_deluxe.MultipleWidget.prototype.acceptTerm = function(term) {
+    alert(this.items);
     // Accept only terms, that are not in our items list.
     return !(term in this.items);
   };
@@ -214,6 +220,10 @@
     var self = this;
     this.valueForm = value_input;
 
+    // Override the resize function, so that the suggestion list doesn't resizes
+    // all the time.
+    this.jqObject.data("autocomplete")._resizeMenu = function()  {};
+
     jqObject.show();
     value_container.hide();
 
@@ -242,7 +252,7 @@
     jqObject.addClass('autocomplete-deluxe-multiple');
     parent.addClass('autocomplete-deluxe-multiple');
 
-
+    // Adds a value to the list.
     this.addValue = function(ui_item) {
       var item = new Drupal.autocomplete_deluxe.MultipleWidget.Item(self, ui_item);
       item.element.insertBefore(jqObject);
@@ -323,6 +333,4 @@
       jqObject.width(cur_width+9);
     });
   };
-
-
 })(jQuery);

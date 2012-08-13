@@ -36,8 +36,6 @@ a.autocomplete-deluxe-single:hover {
   display: inline-block;
   position: relative;
   padding: 0;
-  width: 503px;
-  cursor: text;
 }
 
 .autocomplete-deluxe-single-container {
@@ -135,6 +133,8 @@ div.autocomplete-deluxe-multiple {
   padding: 5px;
   position: relative;
   line-height:15pt;
+  width: 503px;
+  cursor: text;
 }
 
 input.autocomplete-deluxe-form.autocomplete-deluxe-multiple {
