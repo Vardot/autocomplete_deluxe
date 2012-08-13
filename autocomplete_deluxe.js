@@ -188,7 +188,7 @@
     this.item = item;
     var self = this;
 
-    var close = $('<a class="autocomplete-deluxe-item-close" href="javascript:void(0)"></a>').appendTo(this.element);
+    var close = $('<a class="autocomplete-deluxe-item-delete" href="javascript:void(0)"></a>').appendTo(this.element);
     // Use single quotes because of the double quote encoded stuff.
     var input = $('<input type="hidden" value=\'' + this.value + '\'/>').appendTo(this.element);
 
@@ -215,7 +215,7 @@
     this.valueForm = value_input;
 
     jqObject.show();
-    //value_container.hide();
+    value_container.hide();
 
     // Add the default values to the box.
     var default_values = value_input.val();
@@ -254,16 +254,14 @@
     };
 
 
-    parent.mousedown(function() {
-      if (parent.hasClass('autocomplete-deluxe-single-open')) {
-        jqObject.autocomplete('close');
-      } else {
-        jqObject.autocomplete('search', '');
-      }
+    parent.mouseup(function() {
+      jqObject.autocomplete('search', '');
+      jqObject.focus();
     });
 
     jqObject.bind("autocompleteselect", function(event, ui) {
       self.addValue(ui.item);
+      jqObject.width(25);
       // Return false to prevent setting the last term as value for the jqObject.
       return false;
     });
@@ -313,6 +311,7 @@
       }
     });
 
+
     jqObject.keydown(function (event) {
       if (clear) {
         jqObject.val('');
@@ -320,6 +319,8 @@
         // Return false to prevent entering the last character.
         return false;
       }
+      var cur_width = jqObject.width();
+      jqObject.width(cur_width+9);
     });
   };
 
