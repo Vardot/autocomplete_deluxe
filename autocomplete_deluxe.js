@@ -182,7 +182,6 @@
 
 
   Drupal.autocomplete_deluxe.MultipleWidget.prototype.acceptTerm = function(term) {
-    alert(this.items);
     // Accept only terms, that are not in our items list.
     return !(term in this.items);
   };
