@@ -80,7 +80,7 @@ function taxonomy_autocomplete_deluxe($field_name, $tags_typed = '') {
       $n = '"' . str_replace('"', '""', $name) . '"';
     }
     else {
-      $term_matches[] = check_plain($name);
+      $term_matches[$prefix . $n] = check_plain($name);
     }
   }
 
@@ -201,8 +201,6 @@ function autocomplete_deluxe_element_process($element) {
 
   // Set default options for multiple values.
   $element['#multiple'] = isset($element['#multiple']) ? $element['#multiple'] : FALSE;
-  $element['#prefix'] = '<div class="clearfix autocomplete-container">';
-  $element['#suffix'] = '</div>';
 
   $element['values'] = array(
     '#type' => 'container',
@@ -224,14 +222,26 @@ function autocomplete_deluxe_element_process($element) {
     'input_id' => $html_id,
     'min_length' => isset($element['#autocomplete_min_length']) ? $element['#autocomplete_min_length'] : 0,
     'multiple' => $element['#multiple'],
+    'required' => $element['#required'],
   );
 
   if (isset($element['#autocomplete_deluxe_path'])) {
+    if (isset($element['#default_value'])) {
+      // Split on the comma only if that comma has zero, or an even number of
+      // quotes in ahead of it.
+      // http://stackoverflow.com/questions/1757065/java-splitting-a-comma-separated-string-but-ignoring-commas-in-quotes
+      $default_value = preg_replace('/,(?=([^\"]*\"[^\"]*\")*[^\"]*$)/i', '"" ""', $element['#default_value']);
+      $default_value = '""' . $default_value . '""';
+    }
+    else {
+      $default_value = '';
+    }
+
     if ($element['#multiple']) {
       $element['value_field'] = array(
         '#type' => 'textfield',
         '#attributes' => array('class' => array('autocomplete-deluxe-value-field')),
-        '#default_value' => isset($element['#default_value']) ? $element['#default_value'] : '',
+        '#default_value' => $default_value,
         '#prefix' => '<div class="autocomplete-deluxe-value-container">',
         '#suffix' => '</div>',
       );
@@ -276,23 +286,22 @@ function autocomplete_deluxe_value(&$element, $input = FALSE, $form_state = NULL
  */
 function autocomplete_deluxe_after_build($element, &$form_state) {
   // By default drupal sets the maxlength to 128 if the property isn't
-  // specified, but since the limit isn't usefull in some cases,
+  // specified, but since the limit isn't useful in some cases,
   // we unset the property.
   unset($element['textfield']['#maxlength']);
 
-  if (!isset($element['list_value'])) {
-    $element['#value'] = isset($element['value_field']) ? $element['value_field']['#value'] : $element['textfield']['#value'];
-    // Do the same for similar reasons as before.
-    unset($element['value_field']['#maxlength']);
-  }
-  else {
-    if (!empty($form_state['autocomplete_deluxe']['terms']) && !empty($element['#multiple'])) {
-      $element['#value'] = (!empty($element['list_value']['#value'])) ? implode(',', $element['list_value']['#value']) : "";
-    }
-    else {
-      $element['#value'] = $element['list_value']['#value'];
-    }
-  }
+  // Set the elements value from either the value field or text field input.
+  $element['#value'] = isset($element['value_field']) ? $element['value_field']['#value'] : $element['textfield']['#value'];
+
+  $element['#value'] = trim($element['#value']);
+  // Replace all double double quotes and space with a comma. This will allows
+  // us to keep entries in double quotes.
+  $element['#value'] = str_replace('"" ""', ',', $element['#value']);
+  // Remove the double quotes at the beginning and the end from the first and
+  // the last term.
+  $element['#value'] = substr($element['#value'], 2, strlen($element['#value']) - 4);
+  unset($element['value_field']['#maxlength']);
+
 
   form_set_value($element, $element['#value'], $form_state);
   return $element;

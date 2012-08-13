@@ -5,8 +5,17 @@ ul.ui-autocomplete {
   max-height: 240px;
   overflow-x: hidden;
   overflow-y: auto;
-  padding: 0 0 0 4px;
+  padding: 0;
   position: relative;
+}
+
+a.autocomplete-deluxe-single:hover {
+  text-decoration: none;
+}
+
+.autocomplete-deluxe-arrow {
+  display: inline-block;
+  height: 13px;
 }
 
 .ui-state-hover {
@@ -19,22 +28,42 @@ ul.ui-autocomplete {
   background-image: -ms-linear-gradient(top, #3875d7 20%, #2a62bc 90%);
   background-image: linear-gradient(top, #3875d7 20%, #2a62bc 90%);
   color: #fff;
+  padding: 0;
+  margin: 0;
 }
 
-.autocomplete-deluxe-container{
+.autocomplete-deluxe-container {
   display: inline-block;
-  width: 200px;
+  position: relative;
+  padding: 0;
+}
+
+.autocomplete-deluxe-single-container {
+  background-clip: padding-box;
+  background-color: #FFFFFF;
+  background-image: -webkit-linear-gradient(top, white 20%, #F6F6F6 50%, #EEE 52%, #F4F4F4 100%);
+  background-image: -moz-linear-gradient(top, white 20%, #F6F6F6 50%, #EEE 52%, #F4F4F4 100%);
+  background-image: -o-linear-gradient(top, white 20%, #F6F6F6 50%, #EEE 52%, #F4F4F4 100%);
+  background-image: -ms-linear-gradient(top, white 20%, #F6F6F6 50%, #EEE 52%, #F4F4F4 100%);
+  background-image: linear-gradient(top, white 20%, #F6F6F6 50%, #EEE 52%, #F4F4F4 100%);
+  border: 1px solid #AAAAAA;
+  border-radius: 5px 5px 5px 5px;
+  box-shadow: 0 0 3px #FFFFFF inset, 0 1px 1px rgba(0, 0, 0, 0.1);
+  color: #444444;
+  overflow: hidden;
+  text-decoration: none;
+  white-space: nowrap;
 }
 
 .autocomplete-deluxe-form {
   width: 185px;
-  background: #fff url('chosen-sprite.png') no-repeat -38px -22px;
-  background: url('chosen-sprite.png') no-repeat -38px -22px, -webkit-gradient(linear, 0% 0%, 0% 100%, color-stop(1%, #eeeeee), color-stop(15%, #ffffff));
-  background: url('chosen-sprite.png') no-repeat -38px -22px, -webkit-linear-gradient(top, #eeeeee 1%, #ffffff 15%);
-  background: url('chosen-sprite.png') no-repeat -38px -22px, -moz-linear-gradient(top, #eeeeee 1%, #ffffff 15%);
-  background: url('chosen-sprite.png') no-repeat -38px -22px, -o-linear-gradient(top, #eeeeee 1%, #ffffff 15%);
-  background: url('chosen-sprite.png') no-repeat -38px -22px, -ms-linear-gradient(top, #eeeeee 1%, #ffffff 15%);
-  background: url('chosen-sprite.png') no-repeat -38px -22px, linear-gradient(top, #eeeeee 1%, #ffffff 15%);
+  background: #fff no-repeat -38px -22px;
+  background: no-repeat -38px -22px, -webkit-gradient(linear, 0% 0%, 0% 100%, color-stop(1%, #eeeeee), color-stop(15%, #ffffff));
+  background: no-repeat -38px -22px, -webkit-linear-gradient(top, #eeeeee 1%, #ffffff 15%);
+  background: no-repeat -38px -22px, -moz-linear-gradient(top, #eeeeee 1%, #ffffff 15%);
+  background: no-repeat -38px -22px, -o-linear-gradient(top, #eeeeee 1%, #ffffff 15%);
+  background: no-repeat -38px -22px, -ms-linear-gradient(top, #eeeeee 1%, #ffffff 15%);
+  background: no-repeat -38px -22px, linear-gradient(top, #eeeeee 1%, #ffffff 15%);
   padding: 4px 5px 4px 20px;
 }
 
@@ -61,45 +90,6 @@ span.autocomplete-deluxe-value-delete {
   user-select: none;
 }
 
-.autocomplete-deluxe-dropdown {
-  -moz-border-bottom-colors: none;
-  -moz-border-image: none;
-  -moz-border-left-colors: none;
-  -moz-border-right-colors: none;
-  -moz-border-top-colors: none;
-  background: none repeat scroll 0 0 #FFFFFF;
-  border-color: -moz-use-text-color #AAAAAA #AAAAAA;
-  border-right: 1px solid #AAAAAA;
-  border-style: none solid solid;
-  border-width: 0 1px 1px;
-  box-shadow: 0 4px 5px rgba(0, 0, 0, 0.15);
-  z-index: 1010;
-  border-bottom-left-radius : 5px;
-  border-bottom-right-radius: 5px;
-}
-
-.autocomplete-deluxe-single {
-  background-clip: padding-box;
-  background-color: #FFFFFF;
-  background-image: -webkit-linear-gradient(top, white 20%, #F6F6F6 50%, #EEE 52%, #F4F4F4 100%);
-  background-image: -moz-linear-gradient(top, white 20%, #F6F6F6 50%, #EEE 52%, #F4F4F4 100%);
-  background-image: -o-linear-gradient(top, white 20%, #F6F6F6 50%, #EEE 52%, #F4F4F4 100%);
-  background-image: -ms-linear-gradient(top, white 20%, #F6F6F6 50%, #EEE 52%, #F4F4F4 100%);
-  background-image: linear-gradient(top, white 20%, #F6F6F6 50%, #EEE 52%, #F4F4F4 100%);
-  border: 1px solid #AAAAAA;
-  border-radius: 5px 5px 5px 5px;
-  box-shadow: 0 0 3px #FFFFFF inset, 0 1px 1px rgba(0, 0, 0, 0.1);
-  color: #444444;
-  display: block;
-  height: 23px;
-  line-height: 24px;
-  overflow: hidden;
-  padding: 0 0 0 8px;
-  position: relative;
-  text-decoration: none;
-  white-space: nowrap;
-}
-
 .autocomplete-deluxe-single-open {
   border: 1px solid #aaa;
   -webkit-box-shadow: 0 1px 0 #fff inset;
@@ -120,4 +110,52 @@ span.autocomplete-deluxe-value-delete {
   -moz-border-radius-bottomright: 0;
   border-bottom-left-radius : 0;
   border-bottom-right-radius: 0;
+}
+
+div.autocomplete-deluxe-multiple {
+  display: inline-block;
+  font-size: 13px;
+  position: relative;
+  background-color: #FFFFFF;
+  background-image: -moz-linear-gradient(center top , #EEEEEE 1%, #FFFFFF 15%);
+  border: 1px solid #AAAAAA;
+  cursor: text;
+  height: auto !important;
+  margin: 0;
+  overflow: hidden;
+  padding: 4px;
+  position: relative;
+}
+
+input.autocomplete-deluxe-form.autocomplete-deluxe-multiple {
+  border: 3px none;
+}
+
+.autocomplete-deluxe-item {
+  background-clip: padding-box;
+  background-color: #E4E4E4;
+  background-image: -moz-linear-gradient(center top , #F4F4F4 20%, #F0F0F0 50%, #E8E8E8 52%, #EEEEEE 100%);
+  border: 1px solid #AAAAAA;
+  border-radius: 3px 3px 3px 3px;
+  box-shadow: 0 0 2px #FFFFFF inset, 0 1px 0 rgba(0, 0, 0, 0.05);
+  color: #333333;
+  cursor: default;
+  line-height: 13px;
+  margin: 3px 0 3px 5px;
+  padding: 3px 20px 3px 5px;
+  position: relative;
+}
+
+.autocomplete-deluxe-item-close {
+  background: url("x.gif");
+  display: block;
+  font-size: 1px;
+  height: 13px;
+  position: absolute;
+  right: 3px;
+  top: 4px;
+  width: 12px;
+}
+.autocomplete-deluxe-item-focus {
+  background: none repeat scroll 0 0 #D4D4D4;
 }

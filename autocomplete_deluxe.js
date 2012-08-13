@@ -14,111 +14,16 @@
       var autocomplete_settings = Drupal.settings.autocomplete_deluxe;
 
       $('input.autocomplete-deluxe-form').once( function() {
-        new Drupal.autocomplete_deluxe(this, autocomplete_settings[$(this).attr('id')]);
+        if (autocomplete_settings[$(this).attr('id')].multiple === true) {
+          new Drupal.autocomplete_deluxe.MultipleWidget(this, autocomplete_settings[$(this).attr('id')]);
+        } else {
+          new Drupal.autocomplete_deluxe.SingleWidget(autocomplete_settings[$(this).attr('id')]);
+        }
       });
     }
   };
 
-  /**
-   * Autocomplete deluxe object.
-   */
-  Drupal.autocomplete_deluxe = function(input, settings) {
-    this.id = settings.input_id;
-    this.jqObject = $('#' + this.id);
-
-
-    this.multiple = settings.multiple;
-
-    this.jqObject.autocomplete({
-      'source' : [
-        "ActionScript",
-        "AppleScript",
-        "Asp",
-        "BASIC",
-        "C",
-        "C++",
-        "Clojure",
-        "COBOL",
-        "ColdFusion",
-        "Erlang",
-        "Fortran",
-        "Groovy",
-        "Haskell",
-        "Java",
-        "JavaScript",
-        "Lisp",
-        "Perl",
-        "PHP",
-        "Python",
-        "Ruby",
-        "Scala",
-        "Scheme"
-      ],
-      'minLength': settings.min_length
-    });
-
-    var parent = this.jqObject.parent();
-    var widget = $('<a href="javascript:void(0)" class="autocomplete-deluxe-single"></a>');
-
-    parent.append(widget);
-    widget.append($('<span>- ' + Drupal.t('None') + ' -</span>'));
-
-    var search = $('<div class="autocomplete-deluxe-search"></div>');
-    search.append(this.jqObject);
-
-
-    var list = this.jqObject.autocomplete( "widget" );
-    list.css('position', 'relative');
-    list.css('float', 'none');
-
-    var dropdown = $('<div class="autocomplete-deluxe-dropdown"></div>');
-    dropdown.insertAfter(widget)
-    dropdown.append(search);
-    dropdown.append(list);
-    dropdown.hide();
-
-
-    var jqObject = this.jqObject;
-
-    var close = function() {
-      jqObject.autocomplete('close', '');
-      dropdown.hide();
-      widget.removeClass('autocomplete-deluxe-single-open');
-    };
-
-    var open = function() {
-      dropdown.show();
-      widget.addClass('autocomplete-deluxe-single-open');
-      jqObject.autocomplete('search', '');
-    };
-
-    widget.mousedown(function() {
-      if ($(this).hasClass('autocomplete-deluxe-single-open')) {
-        close();
-      }
-      else {
-        open();
-      }
-    });//*/
-
-    jqObject.bind('autocompleteselect', function (event, ui) {
-      widget.children('span').text(ui.item.value).html();
-      close();
-    });
-
-    jqObject.bind('autocompletechange', function(event, ui) {
-      event.stopImmediatePropagation();
-    });
-
-    jqObject.bind( "autocompleteclose", function(event, ui) {
-      // Prevent result list from closing when blurred.
-      if (event.originalEvent !== undefined) {
-        if (event.originalEvent.type == 'blur') {
-          list.show();
-        }
-      }
-    });
-  };
+  Drupal.autocomplete_deluxe.empty =  {label: '- ' + Drupal.t('None') + ' -', value: "" };
 
   /**
    * EscapeRegex function from jquery autocomplete, is not included in drupal.
@@ -137,8 +42,284 @@
     });
   };
 
-  Drupal.autocomplete_deluxe.singleWidget = function() {
+  Drupal.autocomplete_deluxe.Widget = function() {
+    this.cache = {};
+    this.lastXhr;
+  };
 
-  }
+
+  Drupal.autocomplete_deluxe.Widget.prototype.cache = {};
+  Drupal.autocomplete_deluxe.Widget.prototype.uri = null;
+
+  /**
+   * Allows widgets to filter terms.
+   * @param term
+   *   A term that should be accepted or not.
+   * @return {Boolean}
+   *   True if the term should be accepted.
+   */
+  Drupal.autocomplete_deluxe.Widget.prototype.acceptTerm = function(term) {
+    return true;
+  };
+
+  Drupal.autocomplete_deluxe.Widget.prototype.init = function(settings) {
+    this.id = settings.input_id;
+    this.jqObject = $('#' + this.id);
+
+    this.uri = settings.uri;
+    this.multiple = settings.multiple;
+    this.required = settings.required;
+
+    var self = this;
+    var parent = this.jqObject.parent();
+    var parents_parent = this.jqObject.parent().parent();
+
+    parents_parent.append(this.jqObject);
+    parent.remove();
+    parent = parents_parent;
+
+    var generateValues = function(data) {
+      var result = new Array();
+      for (terms in data) {
+        if (self.acceptTerm(data[terms])) {
+          result.push({
+            label: data[terms],
+            value: data[terms]
+          });
+        }
+      }
+      return result;
+    };
+
+    var cache = this.cache;
+    var lastXhr = this.lastXhr;
+
+    this.source = function(request, response) {
+      var term = request.term;
+      if (term in cache) {
+        response(generateValues(cache[term]));
+        return;
+      }
+
+      lastXhr = $.getJSON(settings.uri + '/' + term, request, function(data, status, xhr) {
+        cache[term] = data;
+        if (xhr === lastXhr) {
+          response(generateValues(data));
+        }
+      });
+    };
+
+    this.jqObject.autocomplete({
+      'source' : this.source,
+      'minLength': settings.min_length
+    });
+
+    this.jqObject.data("autocomplete")._renderItem = function(ul, item) {
+      return $("<li></li>").data("item.autocomplete", item).append("<a>" + item.label + "</a>").appendTo(ul);
+    };
+  };
+
+  Drupal.autocomplete_deluxe.Widget.prototype.generateValues = function(data) {
+    var result = new Array();
+    for (var index in data) {
+      result.push(data[index]);
+    }
+    return result;
+  };
+
+  Drupal.autocomplete_deluxe.SingleWidget = function(settings) {
+    this.init(settings);
+    this.setup();
+
+  };
+
+  Drupal.autocomplete_deluxe.SingleWidget.prototype = new Drupal.autocomplete_deluxe.Widget();
+
+  Drupal.autocomplete_deluxe.SingleWidget.prototype.setup = function() {
+    var jqObject = this.jqObject;
+    var parent = jqObject.parent();
+
+    parent.addClass('autocomplete-deluxe-single-container');
+
+    parent.mousedown(function() {
+      if (parent.hasClass('autocomplete-deluxe-single-open')) {
+        jqObject.autocomplete('close');
+      } else {
+        jqObject.autocomplete('search', '');
+      }
+    });
+
+    var arrow = $('<span class="autocomplete-deluxe-arrow ui-icon ui-icon-triangle-1-s">&nbsp;</span>').insertAfter(jqObject);
+
+    jqObject.addClass('ui-corner-left');
+
+    jqObject.bind( "autocompleteopen", function(event, ui) {
+      arrow.removeClass('ui-icon-triangle-1-s')
+      arrow.addClass('ui-icon-triangle-1-n');
+
+      parent.addClass('autocomplete-deluxe-single-open');
+    });
+
+    jqObject.bind( "autocompleteclose", function(event, ui) {
+      arrow.removeClass('ui-icon-triangle-1-n')
+      arrow.addClass('ui-icon-triangle-1-s');
+      parent.removeClass('autocomplete-deluxe-single-open');
+    });
+  };
+
+  Drupal.autocomplete_deluxe.MultipleWidget = function(input, settings) {
+    this.init(settings);
+    this.setup();
+  };
+
+  Drupal.autocomplete_deluxe.MultipleWidget.prototype = new Drupal.autocomplete_deluxe.Widget();
+  Drupal.autocomplete_deluxe.MultipleWidget.prototype.items = new Object();
+
+
+  Drupal.autocomplete_deluxe.Widget.prototype.acceptTerm = function(term) {
+    // Accept only terms, that are not in our items list.
+    return !(term in this.items);
+  };
+
+  Drupal.autocomplete_deluxe.MultipleWidget.item = function (widget, item) {
+    this.value = item.value;
+    this.element = $('<span class="autocomplete-deluxe-item">' + item.label + '</span>');
+    this.widget = widget;
+    this.item = item;
+    var self = this;
+
+    var close = $('<a class="autocomplete-deluxe-item-close" href="javascript:void(0)"></a>').appendTo(this.element);
+    // Use single quotes because of the double quote encoded stuff.
+    var input = $('<input type="hidden" value=\'' + this.value + '\'/>').appendTo(this.element);
+
+    close.mousedown(function() {
+      self.delete(item);
+    });
+  };
+
+  Drupal.autocomplete_deluxe.MultipleWidget.item.prototype.delete = function () {
+    this.element.remove();
+    var values = this.widget.valueForm.val();
+    var regex = new RegExp('( )*""' + this.item.value + '""|' + this.item.value + '( )*', 'gi');
+    this.widget.valueForm.val(values.replace(regex, ''));
+    delete this.widget.items[this.value];
+
+  };
+
+  Drupal.autocomplete_deluxe.MultipleWidget.prototype.setup = function() {
+    var jqObject = this.jqObject;
+    var parent = jqObject.parent();
+    var value_container = jqObject.parent().parent().children('.autocomplete-deluxe-value-container');
+    var value_input = value_container.children().children();
+    var items = this.items;
+    var self = this;
+    this.valueForm = value_input;
+
+    jqObject.show();
+    //value_container.hide();
+
+    // Add the default values to the box.
+    var default_values = value_input.val();
+    default_values = $.trim(default_values);
+    default_values = default_values.substr(2, default_values.length-4);
+    default_values = default_values.split('"" ""');
+
+    for (var index in default_values) {
+      var value = default_values[index];
+      if (value != '') {
+        var item = {
+          label : value,
+          value : value
+        };
+        var item = new Drupal.autocomplete_deluxe.MultipleWidget.item(self, item);
+        item.element.insertBefore(jqObject);
+        items[item.value] = item;
+      }
+    }
+
+    jqObject.addClass('autocomplete-deluxe-multiple');
+    parent.addClass('autocomplete-deluxe-multiple');
+
+
+    this.addValue = function(ui_item) {
+      var item = new Drupal.autocomplete_deluxe.MultipleWidget.item(self, ui_item);
+      item.element.insertBefore(jqObject);
+      items[ui_item.value] = item;
+      var new_value = ' ""' + ui_item.value + '""';
+      var values = value_input.val();
+      value_input.val(values + new_value);
+      jqObject.val('');
+    };
+
+
+    jqObject.mousedown(function() {
+      if (parent.hasClass('autocomplete-deluxe-single-open')) {
+        jqObject.autocomplete('close');
+      } else {
+        jqObject.autocomplete('search', '');
+      }
+    });
+
+    jqObject.bind("autocompleteselect", function(event, ui) {
+      self.addValue(ui.item);
+      // Return false to prevent setting the last term as value for the jqObject.
+      return false;
+    });
+
+    jqObject.bind("autocompletechange", function(event, ui) {
+      jqObject.val('');
+    });
+
+    jqObject.blur(function() {
+      var last_element = jqObject.parent().children('.autocomplete-deluxe-item').last();
+      last_element.removeClass('autocomplete-deluxe-item-focus');
+    });
+
+    var clear = false;
+
+    jqObject.keydown(function (event) {
+      var value = jqObject.val();
+      // If a comma was entered and there is none or more then one comma,
+      // then enter the new term.
+      if (event.which == 188 && (value.split('"').length - 1) != 1) {
+        value = value.substr(0, value.length);
+        if (self.items[value] === undefined && value != '') {
+          var ui_item = {
+            label: value,
+            value: value
+          };
+          self.addValue(ui_item);
+        }
+        clear = true;
+      }
+
+      // If the Backspace key was hit and the input is empty
+      if (event.which == 8 && value == '') {
+        var last_element = jqObject.parent().children('.autocomplete-deluxe-item').last();
+        // then mark the last item for deletion or deleted it if already marked.
+        if (last_element.hasClass('autocomplete-deluxe-item-focus')) {
+          var value = last_element.children('input').val();
+          self.items[value].delete(self.items[value]);
+          jqObject.autocomplete('search', '');
+        } else {
+          last_element.addClass('autocomplete-deluxe-item-focus');
+        }
+      } else {
+        // Remove the focus class if any other key was hit.
+        var last_element = jqObject.parent().children('.autocomplete-deluxe-item').last();
+        last_element.removeClass('autocomplete-deluxe-item-focus');
+      }
+    });
+
+    jqObject.keydown(function (event) {
+      if (clear) {
+        jqObject.val('');
+        clear = false;
+        // Return false to prevent entering the last character.
+        return false;
+      }
+    });
+  };
+
 
 })(jQuery);
