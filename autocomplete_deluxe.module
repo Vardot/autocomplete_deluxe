@@ -40,7 +40,11 @@ function taxonomy_autocomplete_deluxe($field_name, $tags_typed = '') {
   $vids = array();
   $vocabularies = taxonomy_vocabulary_get_names();
   foreach ($field['settings']['allowed_values'] as $tree) {
-    $vids[] = $vocabularies[$tree['vocabulary']]->vid;
+    // If the content taxonomy setting content_taxonomy_ignore_in_suggestions
+    // is set, then the vocabulary is ignored.
+    if (empty($tree['content_taxonomy_ignore_in_suggestions'])) {
+      $vids[] = $vocabularies[$tree['vocabulary']]->vid;
+    }
   }
 
   $query = db_select('taxonomy_term_data', 't');
