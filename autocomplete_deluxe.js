@@ -76,7 +76,7 @@
     parent.remove();
     parent = parents_parent;
 
-    var generateValues = function(data) {
+    var generateValues = function(data, term) {
       var result = new Array();
       for (terms in data) {
         if (self.acceptTerm(terms)) {
@@ -85,6 +85,13 @@
             value: terms
           });
         }
+      }
+      if ($.isEmptyObject(result)) {
+        result.push({
+          label: Drupal.t("The term '@term' will be added.", {'@term' : term}),
+          value: term,
+          newTerm: true
+        });
       }
       return result;
     };
@@ -95,14 +102,14 @@
     this.source = function(request, response) {
       var term = request.term;
       if (term in cache) {
-        response(generateValues(cache[term]));
+        response(generateValues(cache[term], term));
         return;
       }
 
       lastXhr = $.getJSON(settings.uri + '/' + term, request, function(data, status, xhr) {
         cache[term] = data;
         if (xhr === lastXhr) {
-          response(generateValues(data));
+          response(generateValues(data, term));
         }
       });
     };
@@ -186,6 +193,10 @@
   };
 
   Drupal.autocomplete_deluxe.MultipleWidget.Item = function (widget, item) {
+    if (item.newTerm === true) {
+      item.label = item.value;
+    }
+
     this.value = item.value;
     this.element = $('<span class="autocomplete-deluxe-item">' + item.label + '</span>');
     this.widget = widget;
@@ -260,7 +271,6 @@
       value_input.val(values + new_value);
       jqObject.val('');
     };
-
 
     parent.mouseup(function() {
       jqObject.autocomplete('search', '');
