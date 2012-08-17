@@ -43,7 +43,6 @@
   Drupal.autocomplete_deluxe.Widget = function() {
   };
 
-  Drupal.autocomplete_deluxe.Widget.prototype.cache = {};
   Drupal.autocomplete_deluxe.Widget.prototype.uri = null;
 
   /**
@@ -90,8 +89,8 @@
       return result;
     };
 
-    var cache = this.cache;
-    var lastXhr = this.lastXhr;
+    var cache = {}
+    var lastXhr = null;
 
     this.source = function(request, response) {
       var term = request.term;
