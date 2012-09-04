@@ -297,9 +297,9 @@
 
     jqObject.keydown(function (event) {
       var value = jqObject.val();
-      // If a comma was entered and there is none or more then one comma,
-      // then enter the new term.
-      if (event.which == 188 && (value.split('"').length - 1) != 1) {
+      // If a comma was entered and there is none or more then one comma,or the
+      // enter key was entered, then enter the new term.
+      if ((event.which == 188 && (value.split('"').length - 1) != 1) || (event.which == 13 && jqObject.val() != "")) {
         value = value.substr(0, value.length);
         if (self.items[value] === undefined && value != '') {
           var ui_item = {
@@ -309,6 +309,9 @@
           self.addValue(ui_item);
         }
         clear = true;
+        if (event.which == 13) {
+          return false;
+        }
       }
 
       // If the Backspace key was hit and the input is empty
@@ -330,8 +333,10 @@
     });
 
 
-    jqObject.keydown(function (event) {
+    jqObject.keyup(function (event) {
       if (clear) {
+        // Trigger the search, so it display the values for an empty string.
+        jqObject.autocomplete('search', '');
         jqObject.val('');
         clear = false;
         // Return false to prevent entering the last character.
