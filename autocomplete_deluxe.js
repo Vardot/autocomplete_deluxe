@@ -119,8 +119,17 @@
       'minLength': settings.min_length
     });
 
-    this.jqObject.data("autocomplete")._renderItem = function(ul, item) {
-      return $("<li></li>").data("item.autocomplete", item).append("<a>" + item.label + "</a>").appendTo(ul);
+    // Monkey patch the _renderItem function jquery so we can highlight the
+    // text, that we already entered.
+    $.ui.autocomplete.prototype._renderItem = function( ul, item) {
+      var re = new RegExp(this.term, 'i') ;
+      var t = item.label.replace(re,"<span style='font-weight:bold;color:Blue;'>" +
+        this.term +
+        "</span>");
+      return $( "<li></li>" )
+        .data( "item.autocomplete", item )
+        .append( "<a>" + t + "</a>" )
+        .appendTo( ul );
     };
   };
 
