@@ -6,7 +6,6 @@ ul.ui-autocomplete {
   overflow-x: hidden;
   overflow-y: scroll;
   padding: 3px;
-  position: relative;
 }
 
 a.autocomplete-deluxe-single:hover {
