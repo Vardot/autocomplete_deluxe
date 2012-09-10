@@ -119,6 +119,19 @@
       'minLength': settings.min_length
     });
 
+    var jqObject = this.jqObject;
+    var throbber = $('<div class="autocomplete-deluxe-throbber autocomplete-deluxe-closed">&nbsp;</div>').insertAfter(jqObject);
+
+    this.jqObject.bind("autocompletesearch", function(event, ui) {
+      throbber.removeClass('autocomplete-deluxe-closed');
+      throbber.addClass('autocomplete-deluxe-open');
+    });
+
+    this.jqObject.bind("autocompleteopen", function(event, ui) {
+      throbber.addClass('autocomplete-deluxe-closed');
+      throbber.removeClass('autocomplete-deluxe-open');
+    });
+
     // Monkey patch the _renderItem function jquery so we can highlight the
     // text, that we already entered.
     $.ui.autocomplete.prototype._renderItem = function( ul, item) {
@@ -156,31 +169,12 @@
     var jqObject = this.jqObject;
     var parent = jqObject.parent();
 
-    parent.addClass('autocomplete-deluxe-single-container');
-
     parent.mousedown(function() {
       if (parent.hasClass('autocomplete-deluxe-single-open')) {
         jqObject.autocomplete('close');
       } else {
         jqObject.autocomplete('search', '');
       }
-    });
-
-    var arrow = $('<span class="autocomplete-deluxe-arrow ui-icon ui-icon-triangle-1-s">&nbsp;</span>').insertAfter(jqObject);
-
-    jqObject.addClass('ui-corner-left');
-
-    jqObject.bind( "autocompleteopen", function(event, ui) {
-      arrow.removeClass('ui-icon-triangle-1-s')
-      arrow.addClass('ui-icon-triangle-1-n');
-
-      parent.addClass('autocomplete-deluxe-single-open');
-    });
-
-    jqObject.bind( "autocompleteclose", function(event, ui) {
-      arrow.removeClass('ui-icon-triangle-1-n')
-      arrow.addClass('ui-icon-triangle-1-s');
-      parent.removeClass('autocomplete-deluxe-single-open');
     });
   };
 
@@ -269,6 +263,7 @@
 
     jqObject.addClass('autocomplete-deluxe-multiple');
     parent.addClass('autocomplete-deluxe-multiple');
+
 
     // Adds a value to the list.
     this.addValue = function(ui_item) {

@@ -12,11 +12,6 @@ a.autocomplete-deluxe-single:hover {
   text-decoration: none;
 }
 
-.autocomplete-deluxe-arrow {
-  display: inline-block;
-  height: 13px;
-}
-
 .ui-state-hover {
   background-color: #3875d7;
   filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#3875d7', endColorstr='#2a62bc', GradientType=0 );
@@ -111,6 +106,9 @@ span.autocomplete-deluxe-value-delete {
   border-bottom-right-radius: 0;
 }
 
+input.autocomplete-deluxe-closed {
+}
+
 div.autocomplete-deluxe-multiple {
   display: inline-block;
   font-size: 13px;
@@ -137,11 +135,29 @@ div.autocomplete-deluxe-multiple {
 }
 
 input.autocomplete-deluxe-form.autocomplete-deluxe-multiple {
-  background: none;
   border: 3px none;
   width: 25px;
   margin-left: 5px;
   float: left;
+}
+
+div.autocomplete-deluxe-throbber {
+  position: absolute;
+  width: 16px;
+  right: 1px;
+  bottom: 9px;
+}
+
+div.autocomplete-deluxe-container div.autocomplete-deluxe-throbber {
+  bottom: 6px;
+}
+
+.autocomplete-deluxe-closed {
+  background: url(throbber.gif) no-repeat 100% 6px;
+}
+
+.autocomplete-deluxe-open {
+  background: url(throbber.gif) no-repeat 100% -14px;
 }
 
 .autocomplete-deluxe-item {
