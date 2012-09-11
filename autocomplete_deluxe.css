@@ -43,6 +43,9 @@ div.autocomplete-deluxe-container input.autocomplete-deluxe-form {
   background: #fff no-repeat -38px -22px;
   padding: 4px 5px 4px 5px;
   border: none;
+}
+
+div.autocomplete-deluxe-container input.autocomplete-deluxe-form-single  {
   background: no-repeat -38px -22px, -webkit-gradient(linear, 0% 0%, 0% 100%, color-stop(1%, #eeeeee), color-stop(15%, #ffffff));
   background: no-repeat -38px -22px, -webkit-linear-gradient(top, #eeeeee 1%, #ffffff 15%);
   background: no-repeat -38px -22px, -moz-linear-gradient(top, #eeeeee 1%, #ffffff 15%);

@@ -160,7 +160,7 @@
   Drupal.autocomplete_deluxe.SingleWidget = function(settings) {
     this.init(settings);
     this.setup();
-
+    this.jqObject.addClass('autocomplete-deluxe-form-single');
   };
 
   Drupal.autocomplete_deluxe.SingleWidget.prototype = new Drupal.autocomplete_deluxe.Widget();
