@@ -27,7 +27,7 @@ function autocomplete_deluxe_field_widget_info() {
 /**
  * Custom taxonomy callback, which also accepts an empty string search.
  */
-function taxonomy_autocomplete_deluxe($field_name, $tags_typed = '') {
+function taxonomy_autocomplete_deluxe($field_name, $tags_typed = '', $limit = 10) {
   $field = field_info_field($field_name);
 
   // The user enters a comma-separated list of tags. We only autocomplete the last tag.
@@ -57,20 +57,28 @@ function taxonomy_autocomplete_deluxe($field_name, $tags_typed = '') {
       $query->condition('t.name', $tags_typed, 'NOT IN');
     }
     // Select rows that match by term name.
-    $tags_return = $query
+    $query
       ->fields('t', array('tid', 'name'))
       ->condition('t.vid', $vids)
-      ->condition('t.name', '%' . db_like($tag_last) . '%', 'LIKE')
-      ->range(0, 10)
-      ->execute()
+      ->condition('t.name', '%' . db_like($tag_last) . '%', 'LIKE');
+
+    if (isset($limit) && $limit > 0) {
+      $query->range(0, $limit);
+    }
+
+    $tags_return = $query->execute()
       ->fetchAllKeyed();
   }
   else {
-    $tags_return = $query
+    $query
       ->fields('t', array('tid', 'name'))
-      ->condition('t.vid', $vids)
-      ->range(0, 10)
-      ->execute()
+      ->condition('t.vid', $vids);
+
+    if (isset($limit) && $limit > 0) {
+      $query->range(0, $limit);
+    }
+
+    $tags_return = $query->execute()
       ->fetchAllKeyed();
   }
 
@@ -120,6 +128,13 @@ function autocomplete_deluxe_field_widget_settings_form($field, $instance) {
     '#element_validate' => array('_element_validate_integer_positive'),
     '#required' => TRUE,
   );
+  $form['limit'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Limit of the output.'),
+    '#description' => t('If set to zero no limit will be used'),
+    '#default_value' => isset($settings['limit']) ? $settings['limit'] : 10,
+    '#element_validate' => array('_element_validate_integer'),
+  );
 
   return $form;
 }
@@ -164,6 +179,7 @@ function autocomplete_deluxe_field_widget_form(&$form, &$form_state, $field, $in
   $element += array(
     '#type' => 'autocomplete_deluxe',
     '#size' => $instance['widget']['settings']['size'],
+    '#limit' => isset($instance['widget']['settings']['limit']) ? $instance['widget']['settings']['limit'] : 10,
   );
 
   $multiple = $field['cardinality'] > 1 || $field['cardinality'] == FIELD_CARDINALITY_UNLIMITED ? TRUE : FALSE;
@@ -225,6 +241,7 @@ function autocomplete_deluxe_element_process($element) {
     'min_length' => isset($element['#autocomplete_min_length']) ? $element['#autocomplete_min_length'] : 0,
     'multiple' => $element['#multiple'],
     'required' => $element['#required'],
+    'limit' => isset($element['#limit']) ? $element['#limit'] : 10,
   );
 
   if (isset($element['#autocomplete_deluxe_path'])) {

@@ -129,6 +129,7 @@
     this.uri = settings.uri;
     this.multiple = settings.multiple;
     this.required = settings.required;
+    this.limit = settings.limit;
 
     var self = this;
     var parent = this.jqObject.parent();
@@ -168,7 +169,7 @@
         return;
       }
 
-      lastXhr = $.getJSON(settings.uri + '/' + term, request, function(data, status, xhr) {
+      lastXhr = $.getJSON(settings.uri + '/' + term +'/' +  self.limit, request, function(data, status, xhr) {
         cache[term] = data;
         if (xhr === lastXhr) {
           response(generateValues(data, term));
