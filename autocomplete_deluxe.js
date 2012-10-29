@@ -169,6 +169,12 @@
         return;
       }
 
+      // Some server collapse two slashes if the term is empty, so insert at
+      // least a whitespace. This whitespace will later on be trimmed in the
+      // autocomplete callback.
+      if (!term) {
+        term = " ";
+      }
       lastXhr = $.getJSON(settings.uri + '/' + term +'/' +  self.limit, request, function(data, status, xhr) {
         cache[term] = data;
         if (xhr === lastXhr) {
