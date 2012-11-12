@@ -204,7 +204,8 @@
     // Monkey patch the _renderItem function jquery so we can highlight the
     // text, that we already entered.
     $.ui.autocomplete.prototype._renderItem = function( ul, item) {
-      var re = new RegExp(this.term, 'i') ;
+      var escapedValue = Drupal.autocomplete_deluxe.escapeRegex( this.term );
+      var re = new RegExp('( )*""' + escapedValue + '""|' + escapedValue + '( )*', 'gi');
       var t = item.label.replace(re,"<span style='font-weight:bold;color:Blue;'>" +
         this.term +
         "</span>");
@@ -287,7 +288,8 @@
   Drupal.autocomplete_deluxe.MultipleWidget.Item.prototype.remove = function() {
     this.element.remove();
     var values = this.widget.valueForm.val();
-    var regex = new RegExp('( )*""' + this.item.value + '""|' + this.item.value + '( )*', 'gi');
+    var escapedValue = Drupal.autocomplete_deluxe.escapeRegex( this.item.value );
+    var regex = new RegExp('( )*""' + escapedValue + '""|' + escapedValue + '( )*', 'gi');
     this.widget.valueForm.val(values.replace(regex, ''));
     delete this.widget.items[this.value];
   };
