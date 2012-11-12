@@ -130,6 +130,7 @@
     this.multiple = settings.multiple;
     this.required = settings.required;
     this.limit = settings.limit;
+    this.items = {};
 
     var self = this;
     var parent = this.jqObject.parent();
