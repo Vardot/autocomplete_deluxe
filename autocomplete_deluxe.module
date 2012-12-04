@@ -220,13 +220,6 @@ function autocomplete_deluxe_element_process($element) {
   // Set default options for multiple values.
   $element['#multiple'] = isset($element['#multiple']) ? $element['#multiple'] : FALSE;
 
-  $element['values'] = array(
-    '#type' => 'container',
-    '#attributes' => array(
-      'class' => array('autocomplete-deluxe-values'),
-    ),
-  );
-
   $element['textfield'] = array(
     '#type' => 'textfield',
     '#size' => isset($element['#size']) ? $element['#size'] : '',
