@@ -177,3 +177,8 @@ div.autocomplete-deluxe-throbber {
 .autocomplete-deluxe-item-focus {
   background: none repeat scroll 0 0 #D4D4D4;
 }
+
+.autocomplete-deluxe-highlight-char {
+  color: blue;
+  font-weight: bold;
+}

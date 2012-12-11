@@ -142,7 +142,7 @@
 
     var generateValues = function(data, term) {
       var result = new Array();
-      for (terms in data) {
+      for (var terms in data) {
         if (self.acceptTerm(terms)) {
           result.push({
             label: data[terms],
@@ -205,11 +205,14 @@
     // Monkey patch the _renderItem function jquery so we can highlight the
     // text, that we already entered.
     $.ui.autocomplete.prototype._renderItem = function( ul, item) {
-      var escapedValue = Drupal.autocomplete_deluxe.escapeRegex( this.term );
-      var re = new RegExp('( )*""' + escapedValue + '""|' + escapedValue + '( )*', 'gi');
-      var t = item.label.replace(re,"<span style='font-weight:bold;color:Blue;'>" +
-        this.term +
-        "</span>");
+      var t = item.label;
+      if (this.term != "") {
+        var escapedValue = Drupal.autocomplete_deluxe.escapeRegex( this.term );
+        var re = new RegExp('( )*""' + escapedValue + '""|' + escapedValue + '( )*', 'gi');
+        var t = item.label.replace(re,"<span class='autocomplete-deluxe-highlight-char'>" +
+          this.term +
+          "</span>");
+      }
       return $( "<li></li>" )
         .data( "item.autocomplete", item )
         .append( "<a>" + t + "</a>" )
