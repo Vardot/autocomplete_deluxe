@@ -14,7 +14,6 @@ a.autocomplete-deluxe-single:hover {
 
 .ui-state-hover {
   background-color: #3875d7;
-  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#3875d7', endColorstr='#2a62bc', GradientType=0 );
   background-image: -webkit-gradient(linear, 0% 0%, 0% 100%, color-stop(20%, #3875d7), color-stop(90%, #2a62bc));
   background-image: -webkit-linear-gradient(top, #3875d7 20%, #2a62bc 90%);
   background-image: -moz-linear-gradient(top, #3875d7 20%, #2a62bc 90%);
@@ -45,7 +44,8 @@ div.autocomplete-deluxe-container input.autocomplete-deluxe-form {
 }
 
 div.autocomplete-deluxe-container input.autocomplete-deluxe-form-single  {
-  width: 185px;
+  width: 90%;
+  border: none;
   background: no-repeat -38px -22px, -webkit-gradient(linear, 0% 0%, 0% 100%, color-stop(1%, #eeeeee), color-stop(15%, #ffffff));
   background: no-repeat -38px -22px, -webkit-linear-gradient(top, #eeeeee 1%, #ffffff 15%);
   background: no-repeat -38px -22px, -moz-linear-gradient(top, #eeeeee 1%, #ffffff 15%);
