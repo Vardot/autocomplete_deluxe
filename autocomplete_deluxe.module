@@ -135,6 +135,13 @@ function autocomplete_deluxe_field_widget_settings_form($field, $instance) {
     '#default_value' => isset($settings['limit']) ? $settings['limit'] : 10,
     '#element_validate' => array('_element_validate_integer'),
   );
+  $form['min_length'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Mininum length.'),
+    '#description' => t('The minimum length of characters to enter to open the suggestion list.'),
+    '#default_value' => isset($settings['min_length']) ? $settings['min_length'] : 0,
+    '#element_validate' => array('_element_validate_integer'),
+  );
 
   return $form;
 }
@@ -180,6 +187,7 @@ function autocomplete_deluxe_field_widget_form(&$form, &$form_state, $field, $in
     '#type' => 'autocomplete_deluxe',
     '#size' => $instance['widget']['settings']['size'],
     '#limit' => isset($instance['widget']['settings']['limit']) ? $instance['widget']['settings']['limit'] : 10,
+    '#min_length' => isset($instance['widget']['settings']['min_length']) ? $instance['widget']['settings']['min_length'] : 0,
   );
 
   $multiple = $field['cardinality'] > 1 || $field['cardinality'] == FIELD_CARDINALITY_UNLIMITED ? TRUE : FALSE;
@@ -235,6 +243,7 @@ function autocomplete_deluxe_element_process($element) {
     'multiple' => $element['#multiple'],
     'required' => $element['#required'],
     'limit' => isset($element['#limit']) ? $element['#limit'] : 10,
+    'min_length' => isset($element['#min_length']) ? $element['#min_length'] : 0,
   );
 
   if (isset($element['#autocomplete_deluxe_path'])) {
