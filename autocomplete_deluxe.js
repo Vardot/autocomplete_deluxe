@@ -209,9 +209,8 @@
       if (this.term != "") {
         var escapedValue = Drupal.autocomplete_deluxe.escapeRegex( this.term );
         var re = new RegExp('()*""' + escapedValue + '""|' + escapedValue + '()*', 'gi');
-        var t = item.label.replace(re,"<span class='autocomplete-deluxe-highlight-char'>" +
-          this.term +
-          "</span>");
+        console.log(this.term);
+        var t = item.label.replace(re,"<span class='autocomplete-deluxe-highlight-char'>$&</span>");
       }
       return $( "<li></li>" )
         .data( "item.autocomplete", item )
