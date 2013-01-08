@@ -208,7 +208,7 @@
       var t = item.label;
       if (this.term != "") {
         var escapedValue = Drupal.autocomplete_deluxe.escapeRegex( this.term );
-        var re = new RegExp('( )*""' + escapedValue + '""|' + escapedValue + '( )*', 'gi');
+        var re = new RegExp('()*""' + escapedValue + '""|' + escapedValue + '()*', 'gi');
         var t = item.label.replace(re,"<span class='autocomplete-deluxe-highlight-char'>" +
           this.term +
           "</span>");
@@ -293,7 +293,7 @@
     this.element.remove();
     var values = this.widget.valueForm.val();
     var escapedValue = Drupal.autocomplete_deluxe.escapeRegex( this.item.value );
-    var regex = new RegExp('( )*""' + escapedValue + '""|' + escapedValue + '( )*', 'gi');
+    var regex = new RegExp('()*""' + escapedValue + '""|' + escapedValue + '()*', 'gi');
     this.widget.valueForm.val(values.replace(regex, ''));
     delete this.widget.items[this.value];
   };
