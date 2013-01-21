@@ -29,6 +29,7 @@ function autocomplete_deluxe_field_widget_info() {
  */
 function taxonomy_autocomplete_deluxe($field_name, $tags_typed = '', $limit = 10) {
   $field = field_info_field($field_name);
+  $use_synonyms = !empty($_GET['synonyms']);
 
   // The user enters a comma-separated list of tags. We only autocomplete the last tag.
   $tags_typed = drupal_explode_tags($tags_typed);
@@ -51,6 +52,10 @@ function taxonomy_autocomplete_deluxe($field_name, $tags_typed = '', $limit = 10
   $query->addTag('translatable');
   $query->addTag('term_access');
 
+  if (module_exists('synonyms') && !empty($use_synonyms)) {
+    $query->leftJoin('field_data_synonyms_synonym', 'fdss', 'fdss.entity_id = t.tid');
+  }
+
   if ($tag_last != '') {
     // Do not select already entered terms.
     if (!empty($tags_typed)) {
@@ -59,8 +64,17 @@ function taxonomy_autocomplete_deluxe($field_name, $tags_typed = '', $limit = 10
     // Select rows that match by term name.
     $query
       ->fields('t', array('tid', 'name'))
-      ->condition('t.vid', $vids)
-      ->condition('t.name', '%' . db_like($tag_last) . '%', 'LIKE');
+      ->condition('t.vid', $vids);
+
+    if (module_exists('synonyms') && !empty($use_synonyms)) {
+      $or = db_or();
+      $or->condition('fdss.synonyms_synonym_value', '%' . db_like($tag_last) . '%', 'LIKE');
+      $or->condition('t.name', '%' . db_like($tag_last) . '%', 'LIKE');
+      $query->condition($or);
+    }
+    else {
+      $query->condition('t.name', '%' . db_like($tag_last) . '%', 'LIKE');
+    }
 
     if (isset($limit) && $limit > 0) {
       $query->range(0, $limit);
@@ -143,6 +157,14 @@ function autocomplete_deluxe_field_widget_settings_form($field, $instance) {
     '#element_validate' => array('_element_validate_integer'),
   );
 
+  if (module_exists('synonyms')) {
+    $form['use_synonyms'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Allow synonyms'),
+      '#description' => t('Should users be able to search for synonyms of terms?'),
+      '#default_value' => isset($settings['use_synonyms']) ? $settings['use_synonyms'] : FALSE,
+    );
+  }
   return $form;
 }
 
@@ -188,6 +210,7 @@ function autocomplete_deluxe_field_widget_form(&$form, &$form_state, $field, $in
     '#size' => $instance['widget']['settings']['size'],
     '#limit' => isset($instance['widget']['settings']['limit']) ? $instance['widget']['settings']['limit'] : 10,
     '#min_length' => isset($instance['widget']['settings']['min_length']) ? $instance['widget']['settings']['min_length'] : 0,
+    '#use_synonyms' =>isset($instance['widget']['settings']['use_synonyms']) ? $instance['widget']['settings']['use_synonyms'] : 0,
   );
 
   $multiple = $field['cardinality'] > 1 || $field['cardinality'] == FIELD_CARDINALITY_UNLIMITED ? TRUE : FALSE;
@@ -244,6 +267,7 @@ function autocomplete_deluxe_element_process($element) {
     'required' => $element['#required'],
     'limit' => isset($element['#limit']) ? $element['#limit'] : 10,
     'min_length' => isset($element['#min_length']) ? $element['#min_length'] : 0,
+    'use_synonyms' => isset($element['#use_synonyms']) ? $element['#use_synonyms'] : 0,
   );
 
   if (isset($element['#autocomplete_deluxe_path'])) {

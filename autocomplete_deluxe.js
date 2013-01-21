@@ -130,6 +130,7 @@
     this.multiple = settings.multiple;
     this.required = settings.required;
     this.limit = settings.limit;
+    this.synonyms = settings.use_synonyms === undefined ? false : settings.use_synonyms;
     this.items = {};
 
     var self = this;
@@ -176,7 +177,9 @@
       if (!term) {
         term = " ";
       }
-      lastXhr = $.getJSON(settings.uri + '/' + term +'/' +  self.limit, request, function(data, status, xhr) {
+      request.synonyms = self.synonyms;
+      var url = settings.uri + '/' + term +'/' +  self.limit;
+      lastXhr = $.getJSON(url, request, function(data, status, xhr) {
         cache[term] = data;
         if (xhr === lastXhr) {
           response(generateValues(data, term));
