@@ -329,6 +329,8 @@
 
     jqObject.show();
 
+    value_container.hide();
+
     // Add the default values to the box.
     var default_values = value_input.val();
     default_values = $.trim(default_values);
