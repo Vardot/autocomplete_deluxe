@@ -304,7 +304,7 @@
     this.element.remove();
     var values = this.widget.valueForm.val();
     var escapedValue = Drupal.autocomplete_deluxe.escapeRegex( this.item.value );
-    var regex = new RegExp('()*""' + escapedValue + '""|' + escapedValue + '()*', 'gi');
+    var regex = new RegExp('()*""' + escapedValue + '""()*', 'gi');
     this.widget.valueForm.val(values.replace(regex, ''));
     delete this.widget.items[this.value];
   };
