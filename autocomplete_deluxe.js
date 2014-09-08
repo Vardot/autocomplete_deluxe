@@ -324,9 +324,9 @@
 
   Drupal.autocomplete_deluxe.MultipleWidget.prototype.setup = function() {
     var jqObject = this.jqObject;
-    var parent = jqObject.parent();
-    var value_container = jqObject.parent().parent().children('.autocomplete-deluxe-value-container');
-    var value_input = value_container.children().children();
+    var parent = jqObject.parents('.autocomplete-deluxe-container');
+    var value_container = parent.next();
+    var value_input = value_container.find('input');
     var items = this.items;
     var self = this;
     this.valueForm = value_input;
