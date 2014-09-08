@@ -114,11 +114,6 @@
   Drupal.autocomplete_deluxe.Widget.prototype.uri = null;
 
   /**
-   * Newer versions of jQuery UI use element.data('ui-autocomplete'), older versions use element.data('autocomplete').
-   */
-  Drupal.autocomplete_deluxe.Widget.prototype.autocompleteDataKey = null;
-
-  /**
    * Allows widgets to filter terms.
    * @param term
    *   A term that should be accepted or not.
@@ -150,8 +145,6 @@
     } else {
       this.delimiter =  settings.delimiter.charCodeAt(0);
     }
-
-    this.autocompleteDataKey = typeof(this.jqObject.data('autocomplete')) === 'object' ? 'autocomplete' : 'ui-autocomplete';
 
     this.items = {};
 
@@ -215,6 +208,9 @@
     });
 
     var jqObject = this.jqObject;
+
+    var autocompleteDataKey = typeof(this.jqObject.data('autocomplete')) === 'object' ? 'item.autocomplete' : 'ui-autocomplete';
+
     var throbber = $('<div class="autocomplete-deluxe-throbber autocomplete-deluxe-closed">&nbsp;</div>').insertAfter(jqObject);
 
     this.jqObject.bind("autocompletesearch", function(event, ui) {
@@ -238,7 +234,7 @@
       }
 
       return $( "<li></li>" )
-        .data(self.autocompleteDataKey, item)
+        .data(autocompleteDataKey, item)
         .append( "<a>" + t + "</a>" )
         .appendTo( ul );
     };
@@ -333,7 +329,9 @@
     
     // Override the resize function, so that the suggestion list doesn't resizes
     // all the time.
-    jqObject.data(self.autocompleteDataKey)._resizeMenu = function()  {};
+    var autocompleteDataKey = typeof(this.jqObject.data('autocomplete')) === 'object' ? 'autocomplete' : 'ui-autocomplete';
+
+    jqObject.data(autocompleteDataKey)._resizeMenu = function()  {};
 
     jqObject.show();
 
