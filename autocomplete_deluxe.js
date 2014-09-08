@@ -82,7 +82,10 @@
     return this;
   };
 
-
+  /**
+   * If there is no result this label will be shown.
+   * @type {{label: string, value: string}}
+   */
   Drupal.autocomplete_deluxe.empty =  {label: '- ' + Drupal.t('None') + ' -', value: "" };
 
   /**
@@ -105,7 +108,15 @@
   Drupal.autocomplete_deluxe.Widget = function() {
   };
 
+  /**
+   * Url for the callback.
+   */
   Drupal.autocomplete_deluxe.Widget.prototype.uri = null;
+
+  /**
+   * Newer versions of jQuery UI use element.data('ui-autocomplete'), older versions use element.data('autocomplete').
+   */
+  Drupal.autocomplete_deluxe.Widget.prototype.autocompleteDataKey = null;
 
   /**
    * Allows widgets to filter terms.
@@ -118,8 +129,8 @@
     return true;
   };
 
-  Drupal.autocomplete_deluxe.Widget.prototype.init = function(settings) {
-    if ($.browser.msie && $.browser.version === "6.0") {
+  Drupal.autocomplete_deluxe.Widget.prototype.init = function(settings) {	
+	if(navigator.appVersion.indexOf("MSIE 6.") != -1) {
       return;
     }
 
@@ -140,6 +151,7 @@
       this.delimiter =  settings.delimiter.charCodeAt(0);
     }
 
+    this.autocompleteDataKey = typeof(this.jqObject.data('autocomplete')) === 'object' ? 'autocomplete' : 'ui-autocomplete';
 
     this.items = {};
 
@@ -224,8 +236,9 @@
         var re = new RegExp('()*""' + escapedValue + '""|' + escapedValue + '()*', 'gi');
         var t = item.label.replace(re,"<span class='autocomplete-deluxe-highlight-char'>$&</span>");
       }
+
       return $( "<li></li>" )
-        .data( "item.autocomplete", item )
+        .data(self.autocompleteDataKey, item)
         .append( "<a>" + t + "</a>" )
         .appendTo( ul );
     };
@@ -317,10 +330,10 @@
     var items = this.items;
     var self = this;
     this.valueForm = value_input;
-
+    
     // Override the resize function, so that the suggestion list doesn't resizes
     // all the time.
-    jqObject.data("autocomplete")._resizeMenu = function()  {};
+    jqObject.data(self.autocompleteDataKey)._resizeMenu = function()  {};
 
     jqObject.show();
 
