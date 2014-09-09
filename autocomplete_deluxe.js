@@ -124,8 +124,8 @@
     return true;
   };
 
-  Drupal.autocomplete_deluxe.Widget.prototype.init = function(settings) {	
-	if(navigator.appVersion.indexOf("MSIE 6.") != -1) {
+  Drupal.autocomplete_deluxe.Widget.prototype.init = function(settings) {
+    if(navigator.appVersion.indexOf("MSIE 6.") != -1) {
       return;
     }
 
@@ -326,7 +326,7 @@
     var items = this.items;
     var self = this;
     this.valueForm = value_input;
-    
+
     // Override the resize function, so that the suggestion list doesn't resizes
     // all the time.
     var autocompleteDataKey = typeof(this.jqObject.data('autocomplete')) === 'object' ? 'autocomplete' : 'ui-autocomplete';
