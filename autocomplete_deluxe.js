@@ -137,6 +137,7 @@
     this.required = settings.required;
     this.limit = settings.limit;
     this.synonyms = typeof settings.use_synonyms == 'undefined' ? false : settings.use_synonyms;
+    this.not_found_message = typeof settings.use_synonyms == 'undefined' ? "The term '@term' will be added." : settings.not_found_message;
 
     this.wrapper = '""';
 
@@ -168,7 +169,7 @@
       }
       if ($.isEmptyObject(result)) {
         result.push({
-          label: Drupal.t("The term '@term' will be added.", {'@term' : term}),
+          label: Drupal.t(self.not_found_message, {'@term' : term}),
           value: term,
           newTerm: true
         });
