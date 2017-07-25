@@ -356,18 +356,25 @@ function autocomplete_deluxe_after_build($element, &$form_state) {
   $element['#value'] = isset($element['value_field']) ? $element['value_field']['#value'] : $element['textfield']['#value'];
 
   if (isset($element['value_field'])) {
+    // Remove any empty double double quoted strings that throw
+    // off downstream str_replace functions, then trim whitespace
+    $element['#value'] = str_replace('""""', '', $element['#value']);
     $element['#value'] = trim($element['#value']);
     // Replace all double double quotes and space with a comma. This will allows
     // us to keep entries in double quotes.
-    $element['#value'] = str_replace('"" ""', ',', $element['#value']);
-    $element['#value'] = str_replace('""  ""', ',', $element['#value']);
+    $element['#value'] = str_replace('"" ""', '", "', $element['#value']);
+    $element['#value'] = str_replace('""  ""', '", "', $element['#value']);
     // Remove the double quotes at the beginning and the end from the first and
     // the last term.
-    $element['#value'] = substr($element['#value'], 2, strlen($element['#value']) - 4);
-
+    $element['#value'] = substr($element['#value'], 1, strlen($element['#value']) - 2);
+    // One final check to turn all double double quotes into single double quotes.
+    // Necessary when re-saving existing values.
+    $element['#value'] = str_replace('""', '"', $element['#value']);
     unset($element['value_field']['#maxlength']);
   }
-
+  else if ($form_state['process_input']) {
+    $element['#value'] = '"'.$element['#value'].'"';
+  }
 
   form_set_value($element, $element['#value'], $form_state);
   return $element;
