@@ -347,6 +347,22 @@
     var self = this;
     this.valueForm = value_input;
 
+    // Order values based on the UI. Usually called after a manual sort.
+    this.orderValues = function() {
+      var items = [];
+      parent.find('.autocomplete-deluxe-item input').each( function(index, value) {
+        items[index] = $(value).val();
+      });
+
+      value_input.val('""' + items.join('"" ""') + '""');
+    };
+
+    parent.sortable({
+      update: self.orderValues,
+      containment: 'parent',
+      tolerance: 'pointer',
+    });
+
     // Override the resize function, so that the suggestion list doesn't resizes
     // all the time.
     var autocompleteDataKey = typeof(this.jqObject.data('autocomplete')) === 'object' ? 'autocomplete' : 'ui-autocomplete';
