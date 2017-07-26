@@ -151,7 +151,7 @@ function autocomplete_deluxe_field_widget_settings_form($field, $instance) {
   );
   $form['min_length'] = array(
     '#type' => 'textfield',
-    '#title' => t('Mininum length.'),
+    '#title' => t('Minimum length.'),
     '#description' => t('The minimum length of characters to enter to open the suggestion list.'),
     '#default_value' => isset($settings['min_length']) ? $settings['min_length'] : 0,
     '#element_validate' => array('_element_validate_integer'),
@@ -335,7 +335,7 @@ function autocomplete_deluxe_element_process($element) {
 function autocomplete_deluxe_value(&$element, $input = FALSE, $form_state = NULL) {
   // This runs before child elements are processed, so we cannot calculate the
   // value here. But we have to make sure the value is an array, so the form
-  // API is able to proccess the children to set their values in the array. Thus
+  // API is able to process the children to set their values in the array. Thus
   // once the form API has finished processing the element, the value is an
   // array containing the child element values. Then finally the after build
   // callback converts it back to the numeric value and sets that.
