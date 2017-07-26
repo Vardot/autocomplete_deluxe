@@ -377,7 +377,7 @@
     var default_values = value_input.val();
     default_values = $.trim(default_values);
     default_values = default_values.substr(2, default_values.length-4);
-    default_values = default_values.split('"" ""');
+    default_values = default_values.split(/"" +""/);
 
     for (var index in default_values) {
       var value = default_values[index];
