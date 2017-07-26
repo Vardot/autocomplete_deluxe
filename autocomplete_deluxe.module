@@ -31,7 +31,8 @@ function autocomplete_deluxe_taxonomy_callback($field_name, $tags_typed = '', $l
   $field = field_info_field($field_name);
   $use_synonyms = !empty($_GET['synonyms']);
 
-  // The user enters a comma-separated list of tags. We only autocomplete the last tag.
+  // The user enters a comma-separated list of tags. We only autocomplete the
+  // last tag.
   $tags_typed = drupal_explode_tags($tags_typed);
   $tag_last = drupal_strtolower(array_pop($tags_typed));
 
@@ -223,9 +224,9 @@ function autocomplete_deluxe_field_widget_form(&$form, &$form_state, $field, $in
     '#size' => $instance['widget']['settings']['size'],
     '#limit' => isset($instance['widget']['settings']['limit']) ? $instance['widget']['settings']['limit'] : 10,
     '#min_length' => isset($instance['widget']['settings']['min_length']) ? $instance['widget']['settings']['min_length'] : 0,
-    '#use_synonyms' =>isset($instance['widget']['settings']['use_synonyms']) ? $instance['widget']['settings']['use_synonyms'] : 0,
-    '#delimiter' =>isset($instance['widget']['settings']['delimiter']) ? $instance['widget']['settings']['delimiter'] : '',
-    '#not_found_message' =>isset($instance['widget']['settings']['not_found_message']) ? $instance['widget']['settings']['not_found_message'] : "The term '@term' will be added.",
+    '#use_synonyms' => isset($instance['widget']['settings']['use_synonyms']) ? $instance['widget']['settings']['use_synonyms'] : 0,
+    '#delimiter' => isset($instance['widget']['settings']['delimiter']) ? $instance['widget']['settings']['delimiter'] : '',
+    '#not_found_message' => isset($instance['widget']['settings']['not_found_message']) ? $instance['widget']['settings']['not_found_message'] : "The term '@term' will be added.",
   );
 
   $multiple = $field['cardinality'] > 1 || $field['cardinality'] == FIELD_CARDINALITY_UNLIMITED ? TRUE : FALSE;
@@ -250,7 +251,11 @@ function autocomplete_deluxe_field_widget_form(&$form, &$form_state, $field, $in
  */
 function autocomplete_deluxe_element_process($element) {
   $element['#attached'] = array(
-    'library' => array(array('system', 'ui.autocomplete'), array('system', 'ui.button'), array('system', 'ui.sortable')),
+    'library' => array(
+      array('system', 'ui.autocomplete'),
+      array('system', 'ui.button'),
+      array('system', 'ui.sortable'),
+    ),
     'js' => array(drupal_get_path('module', 'autocomplete_deluxe') . '/autocomplete_deluxe.js'),
     'css' => array(drupal_get_path('module', 'autocomplete_deluxe') . '/autocomplete_deluxe.css'),
   );
@@ -269,7 +274,11 @@ function autocomplete_deluxe_element_process($element) {
   $element['textfield'] = array(
     '#type' => 'textfield',
     '#size' => isset($element['#size']) ? $element['#size'] : '',
-    '#attributes' => array('class' => array('autocomplete-deluxe-form'), 'id' => array($html_id), 'aria-label' => t('Autocomplete')),
+    '#attributes' => array(
+      'class' => array('autocomplete-deluxe-form'),
+      'id' => array($html_id),
+      'aria-label' => t('Autocomplete'),
+    ),
     '#default_value' => '',
     '#prefix' => '<div class="autocomplete-deluxe-container">',
     '#suffix' => '</div>',
@@ -305,6 +314,9 @@ function autocomplete_deluxe_element_process($element) {
         '#default_value' => $default_value,
         '#prefix' => '<div class="autocomplete-deluxe-value-container">',
         '#suffix' => '</div>',
+        '#required' => isset($element['#required']) ? $element['#required'] : FALSE,
+        '#element_validate' => array('autocomplete_deluxe_validate_multiple'),
+        '#parent_element' => &$element,
       );
       $element['textfield']['#attributes']['style'] = array('display:none');
     }
@@ -329,8 +341,34 @@ function autocomplete_deluxe_element_process($element) {
 }
 
 /**
- * Helper function to determine the value for a autocomplete deluxe form
- * element.
+ * Validation callback for "multiple" mode.
+ */
+function autocomplete_deluxe_validate_multiple($element, &$form_state) {
+  if (isset($element['#required']) && $element['#required']) {
+    $tags = autocomplete_deluxe_extract_tags($element['#value']);
+    if (!$tags) {
+      form_error($element['#parent_element'], t('!name field is required.', array('!name' => $element['#parent_element']['#title'])));
+    }
+  }
+}
+
+/**
+ * Extracts tags from string which is a result of tags implosion.
+ */
+function autocomplete_deluxe_extract_tags($str) {
+  preg_match_all('/""([^"]*)""/', $str, $matches);
+  $tags = $matches[1];
+  foreach ($tags as $key => &$tag) {
+    $tag = trim($tag);
+    if (!$tag) {
+      unset($tags[$key]);
+    }
+  }
+  return empty($tags) ? NULL : $tags;
+}
+
+/**
+ * Helper function-determines the value for an autocomplete deluxe form element.
  */
 function autocomplete_deluxe_value(&$element, $input = FALSE, $form_state = NULL) {
   // This runs before child elements are processed, so we cannot calculate the
@@ -344,6 +382,7 @@ function autocomplete_deluxe_value(&$element, $input = FALSE, $form_state = NULL
 
 /**
  * FAPI after build callback for the duration parameter type form.
+ *
  * Fixes up the form value by applying the multiplier.
  */
 function autocomplete_deluxe_after_build($element, &$form_state) {
@@ -357,7 +396,7 @@ function autocomplete_deluxe_after_build($element, &$form_state) {
 
   if (isset($element['value_field'])) {
     // Remove any empty double double quoted strings that throw
-    // off downstream str_replace functions, then trim whitespace
+    // off downstream str_replace functions, then trim whitespace.
     $element['#value'] = str_replace('""""', '', $element['#value']);
     $element['#value'] = trim($element['#value']);
     // Replace all cases of double double quotes and one or more spaces with a
@@ -366,13 +405,13 @@ function autocomplete_deluxe_after_build($element, &$form_state) {
     // Remove the double quotes at the beginning and the end from the first and
     // the last term.
     $element['#value'] = substr($element['#value'], 1, strlen($element['#value']) - 2);
-    // One final check to turn all double double quotes into single double quotes.
-    // Necessary when re-saving existing values.
+    // One final check to turn all double double quotes into single double
+    // quotes. Necessary when re-saving existing values.
     $element['#value'] = str_replace('""', '"', $element['#value']);
     unset($element['value_field']['#maxlength']);
   }
-  else if ($form_state['process_input']) {
-    $element['#value'] = '"'.$element['#value'].'"';
+  elseif ($form_state['process_input']) {
+    $element['#value'] = '"' . $element['#value'] . '"';
   }
 
   form_set_value($element, $element['#value'], $form_state);
