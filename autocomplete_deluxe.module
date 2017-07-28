@@ -36,7 +36,8 @@ function autocomplete_deluxe_taxonomy_callback($field_name, $tags_typed = '', $l
   $tags_typed = drupal_explode_tags($tags_typed);
   $tag_last = drupal_strtolower(array_pop($tags_typed));
 
-  $matches = array();
+  // Initiate tag collections.
+  $tags_return = $beginning_tags = $middle_tags = array();
 
   // Part of the criteria for the query come from the field's own settings.
   $vids = array();
@@ -67,22 +68,60 @@ function autocomplete_deluxe_taxonomy_callback($field_name, $tags_typed = '', $l
       ->fields('t', array('tid', 'name'))
       ->condition('t.vid', $vids);
 
-    if (module_exists('synonyms') && !empty($use_synonyms)) {
-      $or = db_or();
-      $or->condition('fdss.synonyms_synonym_value', '%' . db_like($tag_last) . '%', 'LIKE');
-      $or->condition('t.name', '%' . db_like($tag_last) . '%', 'LIKE');
-      $query->condition($or);
-    }
-    else {
-      $query->condition('t.name', '%' . db_like($tag_last) . '%', 'LIKE');
-    }
+    // Clone query, because we need the current state for the "middle" query.
+    $middle_query = clone $query;
 
+    // Apply general limit.
     if (isset($limit) && $limit > 0) {
       $query->range(0, $limit);
     }
 
-    $tags_return = $query->execute()
+    // Check for terms beginning with the given term first.
+    if (module_exists('synonyms') && !empty($use_synonyms)) {
+      $or = db_or();
+      $or->condition('fdss.synonyms_synonym_value', db_like($tag_last) . '%', 'LIKE');
+      $or->condition('t.name', db_like($tag_last) . '%', 'LIKE');
+      $query->condition($or);
+    }
+    else {
+      $query->condition('t.name', db_like($tag_last) . '%', 'LIKE');
+    }
+
+    $beginning_tags = $query->execute()
       ->fetchAllKeyed();
+
+    // Check for terms having the term somewhere in it second.
+    // Apply new limit, which is the general one minus the results of the
+    // beginning query.
+    $middle_limit = $limit - count($beginning_tags);
+
+    // Only proceed, if we really need more results.
+    if ($middle_limit > 0) {
+      // Apply limit.
+      $middle_query->range(0, $middle_limit);
+
+      // Make sure we are not getting the same results as for the query above.
+      if (!empty($beginning_tags)) {
+        $beginning_term_ids = array_keys($beginning_tags);
+        $middle_query->condition('t.tid', $beginning_term_ids, 'NOT IN');
+      }
+
+      if (module_exists('synonyms') && !empty($use_synonyms)) {
+        $or = db_or();
+        $or->condition('fdss.synonyms_synonym_value', '%' . db_like($tag_last) . '%', 'LIKE');
+        $or->condition('t.name', '%' . db_like($tag_last) . '%', 'LIKE');
+        $middle_query->condition($or);
+      }
+      else {
+        $middle_query->condition('t.name', '%' . db_like($tag_last) . '%', 'LIKE');
+      }
+
+      $middle_tags = $middle_query->execute()
+        ->fetchAllKeyed();
+    }
+
+    // Build tags.
+    $tags_return = $beginning_tags + $middle_tags;
   }
   else {
     $query
