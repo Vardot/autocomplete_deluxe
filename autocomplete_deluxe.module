@@ -207,7 +207,7 @@ function autocomplete_deluxe_field_widget_settings_form($field, $instance) {
     '#type' => 'textfield',
     '#title' => t('Term not found message.'),
     '#description' => t('A message text which will be displayed, if the entered term was not found.'),
-    '#default_value' => isset($settings['not_found_message']) ? $settings['not_found_message'] : "The term '@term' will be added.",
+    '#default_value' => isset($settings['not_found_message']) ? t($settings['not_found_message']) : t("The term '@term' will be added."),
   );
 
   if (module_exists('synonyms')) {
@@ -224,7 +224,7 @@ function autocomplete_deluxe_field_widget_settings_form($field, $instance) {
 /**
  * Implodes the tags from the taxonomy module.
  *
- * This function is essentially the same as axonomy_implode_tags, with the
+ * This function is essentially the same as taxonomy_implode_tags, with the
  * difference, that it uses only a comma instead of a comma and a space to
  * implode the tags. It will help keep problems with delimiters to a minimum.
  */
@@ -265,7 +265,7 @@ function autocomplete_deluxe_field_widget_form(&$form, &$form_state, $field, $in
     '#min_length' => isset($instance['widget']['settings']['min_length']) ? $instance['widget']['settings']['min_length'] : 0,
     '#use_synonyms' => isset($instance['widget']['settings']['use_synonyms']) ? $instance['widget']['settings']['use_synonyms'] : 0,
     '#delimiter' => isset($instance['widget']['settings']['delimiter']) ? $instance['widget']['settings']['delimiter'] : '',
-    '#not_found_message' => isset($instance['widget']['settings']['not_found_message']) ? $instance['widget']['settings']['not_found_message'] : "The term '@term' will be added.",
+    '#not_found_message' => isset($instance['widget']['settings']['not_found_message']) ? $instance['widget']['settings']['not_found_message'] : t("The term '@term' will be added."),
   );
 
   $multiple = $field['cardinality'] > 1 || $field['cardinality'] == FIELD_CARDINALITY_UNLIMITED ? TRUE : FALSE;
@@ -334,7 +334,7 @@ function autocomplete_deluxe_element_process($element) {
     'min_length' => isset($element['#min_length']) ? $element['#min_length'] : 0,
     'use_synonyms' => isset($element['#use_synonyms']) ? $element['#use_synonyms'] : 0,
     'delimiter' => isset($element['#delimiter']) ? $element['#delimiter'] : '',
-    'not_found_message' => isset($element['#not_found_message']) ? $element['#not_found_message'] : "The term '@term' will be added.",
+    'not_found_message' => isset($element['#not_found_message']) ? $element['#not_found_message'] : t("The term '@term' will be added."),
   );
 
   if (isset($element['#autocomplete_deluxe_path'])) {
