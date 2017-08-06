@@ -210,7 +210,8 @@
         term = " ";
       }
       request.synonyms = self.synonyms;
-      var url = settings.uri + '/' + term +'/' +  self.limit;
+      // Encode twice to allow passing forward slashes.
+      var url = settings.uri + '/' + encodeURIComponent(encodeURIComponent(term)) +'/' +  self.limit;
       lastXhr = $.getJSON(url, request, function(data, status, xhr) {
         cache[term] = data;
         if (xhr === lastXhr) {
