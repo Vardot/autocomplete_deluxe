@@ -1,0 +1,5 @@
+name: Autocomplete Deluxe
+type: module
+description: Enhanced autocomplete using Jquery UI autocomplete.
+package: User interface
+core: 8.x

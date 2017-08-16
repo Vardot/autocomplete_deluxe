@@ -1,6 +1,0 @@
-name = Autocomplete Deluxe
-description = Enhanced autocomplete using Jquery UI autocomplete.
-package = User interface
-core = 7.x
-files[] = autocomplete_deluxe.module
-dependencies[] = taxonomy

@@ -4,14 +4,14 @@
  * Converts textfield to a autocomplete deluxe widget.
  */
 
-(function($) {
+(function($, drupalSettings) {
   Drupal.autocomplete_deluxe = Drupal.autocomplete_deluxe || {};
 
   Drupal.behaviors.autocomplete_deluxe = {
     attach: function(context) {
-      var autocomplete_settings = Drupal.settings.autocomplete_deluxe;
+      var autocomplete_settings = drupalSettings.autocomplete_deluxe;
 
-      $('input.autocomplete-deluxe-form').once( function() {
+      $('input.autocomplete-deluxe-form').once('attachAutocompleteDeluxe').each( function() {
         if (autocomplete_settings[$(this).attr('id')].multiple === true) {
           new Drupal.autocomplete_deluxe.MultipleWidget(this, autocomplete_settings[$(this).attr('id')]);
         } else {
@@ -83,36 +83,20 @@
   };
 
   /**
-   * Unescapes the given string.
-   */
-  Drupal.autocomplete_deluxe.unescape = function (input) {
-    // Unescaping is done via a textarea, since the text inside of it is never
-    // executed. This method also allows us to support older browsers like
-    // IE 9 and below.
-    var textArea = document.createElement('textarea');
-    textArea.innerHTML = input;
-    var decoded = textArea.value;
-    if ('remove' in Element.prototype) {
-      textArea.remove();
-    }
-    return decoded;
-  };
-
-  /**
    * If there is no result this label will be shown.
    * @type {{label: string, value: string}}
    */
   Drupal.autocomplete_deluxe.empty =  {label: '- ' + Drupal.t('None') + ' -', value: "" };
 
   /**
-   * EscapeRegex function from jquery autocomplete, is not included in drupal.
+   * EscapeRegex function from jquery autocomplete, is not included in Drupal.
    */
   Drupal.autocomplete_deluxe.escapeRegex = function(value) {
     return value.replace(/[-[\]{}()*+?.,\\^$|#\s]/gi, "\\$&");
   };
 
   /**
-   * Filter function from jquery autocomplete, is not included in drupal.
+   * Filter function from jquery autocomplete, is not included in Drupal.
    */
   Drupal.autocomplete_deluxe.filter = function(array, term) {
     var matcher = new RegExp(Drupal.autocomplete_deluxe.escapeRegex(term), "i");
@@ -153,7 +137,9 @@
     this.required = settings.required;
     this.limit = settings.limit;
     this.synonyms = typeof settings.use_synonyms == 'undefined' ? false : settings.use_synonyms;
-    this.not_found_message = typeof settings.use_synonyms == 'undefined' ? Drupal.t("The term '@term' will be added.") : settings.not_found_message;
+    this.not_found_message = typeof settings.use_synonyms == 'undefined' ? "The entity '@term' will be added." : settings.not_found_message;
+    this.not_found_message_allow = typeof settings.not_found_message_allow == 'undefined' ? false : settings.not_found_message_allow;
+    this.new_terms = typeof settings.new_terms == 'undefined' ? false : settings.new_terms;
 
     this.wrapper = '""';
 
@@ -183,7 +169,10 @@
           });
         }
       }
-      if ($.isEmptyObject(result)) {
+
+      // If there are no results and new terms OR not found message can be
+      // displayed, push the result, so the menu can be shown.
+      if ($.isEmptyObject(result) && (self.new_terms || self.not_found_message_allow)) {
         result.push({
           label: Drupal.t(self.not_found_message, {'@term' : term}),
           value: term,
@@ -193,7 +182,7 @@
       return result;
     };
 
-    var cache = {};
+    var cache = {}
     var lastXhr = null;
 
     this.source = function(request, response) {
@@ -210,8 +199,7 @@
         term = " ";
       }
       request.synonyms = self.synonyms;
-      // Encode twice to allow passing forward slashes.
-      var url = settings.uri + '/' + encodeURIComponent(encodeURIComponent(term)) +'/' +  self.limit;
+      var url = settings.uri + '?q=' + term;
       lastXhr = $.getJSON(url, request, function(data, status, xhr) {
         cache[term] = data;
         if (xhr === lastXhr) {
@@ -313,17 +301,14 @@
     }
 
     this.value = item.value;
-    this.element = $('<span class="autocomplete-deluxe-item"></span>');
-    this.element.text(item.label);
+    this.element = $('<span class="autocomplete-deluxe-item">' + item.label + '</span>');
     this.widget = widget;
     this.item = item;
     var self = this;
 
-    var close = $('<a class="autocomplete-deluxe-item-delete" href="javascript:void(0)"><span class="element-invisible">Remove</span></a>').appendTo(this.element);
+    var close = $('<a class="autocomplete-deluxe-item-delete" href="javascript:void(0)"></a>').appendTo(this.element);
     // Use single quotes because of the double quote encoded stuff.
-    var input = $('<input type="hidden"/>')
-    input.val(this.value);
-    input.appendTo(this.element);
+    var input = $('<input type="hidden" value=\'' + this.value + '\'/>').appendTo(this.element);
 
     close.mousedown(function() {
       self.remove(item);
@@ -363,7 +348,7 @@
       containment: 'parent',
       tolerance: 'pointer',
     });
-
+    
     // Override the resize function, so that the suggestion list doesn't resizes
     // all the time.
     var autocompleteDataKey = typeof(this.jqObject.data('autocomplete')) === 'object' ? 'autocomplete' : 'ui-autocomplete';
@@ -372,13 +357,13 @@
 
     jqObject.show();
 
-    value_container.hide();
+    value_input.hide();
 
     // Add the default values to the box.
     var default_values = value_input.val();
     default_values = $.trim(default_values);
     default_values = default_values.substr(2, default_values.length-4);
-    default_values = default_values.split(/"" +""/);
+    default_values = default_values.split('"" ""');
 
     for (var index in default_values) {
       var value = default_values[index];
@@ -417,13 +402,14 @@
     });
 
     jqObject.bind("autocompleteselect", function(event, ui) {
-      // JQuery ui autocomplete needs the terms escaped, otherwise it would be
-      // open to XSS issues. Drupal.autocomplete.Item also escapes on rendering
-      // the DOM elements. Thus we have to unescape the label here before adding
-      // the new item.
-      var item = ui.item;
-      item.label = Drupal.autocomplete_deluxe.unescape(item.label);
-      self.addValue(item);
+      var allow_new_terms = drupalSettings.autocomplete_deluxe[this.id].new_terms;
+      // If new terms are not allowed to be added as per the field widget
+      // settings, do not continue to process and add that value.
+      if (!allow_new_terms && ui.item.newTerm) {
+        $(this).val('');
+        return;
+      }
+      self.addValue(ui.item);
       jqObject.width(25);
       // Return false to prevent setting the last term as value for the jqObject.
       return false;
@@ -442,9 +428,17 @@
 
     jqObject.keypress(function (event) {
       var value = jqObject.val();
-      // If a comma was entered and there is none or more then one comma,or the
+      // If a comma was entered and there is none or more then one comma, or the
       // enter key was entered, then enter the new term.
       if ((event.which == self.delimiter && (value.split('"').length - 1) != 1) || (event.which == 13 && jqObject.val() != "")) {
+        var allow_new_terms = drupalSettings.autocomplete_deluxe[this.id].new_terms;
+        // If new terms are not allowed to be added as per the field widget
+        // settings, do not continue to process and add that value.
+        if (!allow_new_terms) {
+          $(this).val('');
+          return;
+        }
+
         value = value.substr(0, value.length);
         if (typeof self.items[value] == 'undefined' && value != '') {
           var ui_item = {
@@ -495,4 +489,4 @@
       }
     });
   };
-})(jQuery);
+})(jQuery, drupalSettings);
