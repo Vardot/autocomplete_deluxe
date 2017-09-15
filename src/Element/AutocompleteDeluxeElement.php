@@ -168,10 +168,9 @@ class AutocompleteDeluxeElement extends FormElement {
 
     if (isset($element['value_field'])) {
       $element['#value'] = trim($element['#value']);
-      // Replace all double double quotes and space with a comma. This will
-      // allow us to keep entries in double quotes.
-      $element['#value'] = str_replace('"" ""', ',', $element['#value']);
-      $element['#value'] = str_replace('""  ""', ',', $element['#value']);
+      // Replace all cases of double double quotes and one or more spaces with a
+      // comma. This will allow us to keep entries in double quotes.
+      $element['#value'] = preg_replace('/"" +""/', ',', $element['#value']);
       // Remove the double quotes at the beginning and the end from the first
       // and the last term.
       $element['#value'] = substr($element['#value'], 2, strlen($element['#value']) - 4);
