@@ -140,6 +140,7 @@
     this.not_found_message = typeof settings.use_synonyms == 'undefined' ? "The entity '@term' will be added." : settings.not_found_message;
     this.not_found_message_allow = typeof settings.not_found_message_allow == 'undefined' ? false : settings.not_found_message_allow;
     this.new_terms = typeof settings.new_terms == 'undefined' ? false : settings.new_terms;
+    this.no_empty_message = typeof settings.no_empty_message == 'undefined' ? 'No terms could be found. Please type in order to add a new term.' : settings.no_empty_message;
 
     this.wrapper = '""';
 
@@ -173,11 +174,19 @@
       // If there are no results and new terms OR not found message can be
       // displayed, push the result, so the menu can be shown.
       if ($.isEmptyObject(result) && (self.new_terms || self.not_found_message_allow)) {
-        result.push({
-          label: Drupal.t(self.not_found_message, {'@term' : term}),
-          value: term,
-          newTerm: true
-        });
+        if (term !== ' ') {
+          result.push({
+            label: Drupal.t(self.not_found_message, {'@term': term}),
+            value: term,
+            newTerm: true
+          });
+        }
+        else {
+          result.push({
+            label: Drupal.t(self.no_empty_message),
+            noTerms: true
+          });
+        }
       }
       return result;
     };
@@ -298,6 +307,9 @@
   Drupal.autocomplete_deluxe.MultipleWidget.Item = function (widget, item) {
     if (item.newTerm === true) {
       item.label = item.value;
+    }
+    else if (item.noTerms === true) {
+      return;
     }
 
     this.value = item.value;
