@@ -69,6 +69,7 @@ A: Why yes, yes you can!  First, add the field as a traditional exposed
    never written a module before), where your .module file contains
    something like the following:
 
+```
    function MY_MODULE_form_alter(&$form, Drupal\Core\Form\FormStateInterface
      $form_state, $form_id) {
      // Variables specific to your View.
@@ -122,14 +123,19 @@ A: Why yes, yes you can!  First, add the field as a traditional exposed
        );
      }
    }
+```
 
 
 MAINTAINERS
 -----------
 
 Current maintainers:
+
  * Edward Chan (edwardchiapet) - https://www.drupal.org/u/edwardchiapet
  * Lee Nakamura (LNakamura) - https://www.drupal.org/u/lnakamura
 
 Active support and ongoing development by Mediacurrent -
 http://www.mediacurrent.com/
+
+For additional information, see the project page on Drupal.org
+<https://www.drupal.org/project/autocomplete_deluxe>
