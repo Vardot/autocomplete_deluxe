@@ -85,9 +85,6 @@ class AutocompleteDeluxeWidget extends WidgetBase implements ContainerFactoryPlu
    * {@inheritdoc}
    */
   public function settingsForm(array $form, FormStateInterface $form_state) {
-    $instance = $this->fieldDefinition;
-    $settings = $instance->getSettings();
-
     $element['limit'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Limit of the output.'),
