@@ -3,7 +3,6 @@
 namespace Drupal\autocomplete_deluxe\Controller;
 
 use Drupal\Component\Utility\Crypt;
-use Drupal\Component\Utility\Html;
 use Drupal\Component\Utility\Tags;
 use Drupal\Core\Site\Settings;
 use Drupal\system\Controller\EntityAutocompleteController;
@@ -48,7 +47,7 @@ class AutocompleteDeluxeController extends EntityAutocompleteController {
 
       $items = array();
       foreach ($matches as $item) {
-        $items[$item['value']] = Html::escape($item['label']);
+        $items[$item['value']] = $item['label'];
       }
 
       $matches = $items;
