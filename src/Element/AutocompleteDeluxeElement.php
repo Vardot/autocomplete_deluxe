@@ -25,7 +25,7 @@ class AutocompleteDeluxeElement extends FormElement {
     // Apply default form element properties.
     $info['#target_type'] = NULL;
     $info['#selection_handler'] = 'default';
-    $info['#selection_settings'] = array();
+    $info['#selection_settings'] = [];
     $info['#tags'] = TRUE;
     $info['#autocreate'] = NULL;
     // This should only be set to FALSE if proper validation by the selection
@@ -62,7 +62,7 @@ class AutocompleteDeluxeElement extends FormElement {
     $element['#multiple'] = isset($element['#multiple']) ? $element['#multiple'] : FALSE;
 
     // Add label_display and label variables to template.
-    $element['label'] = array('#theme' => 'form_element_label');
+    $element['label'] = ['#theme' => 'form_element_label'];
     $element['label'] += array_intersect_key(
       $element,
       array_flip(
@@ -87,7 +87,7 @@ class AutocompleteDeluxeElement extends FormElement {
       '#suffix' => '</div>',
     ];
 
-    $js_settings[$html_id] = array(
+    $js_settings[$html_id] = [
       'input_id' => $html_id,
       'multiple' => $element['#multiple'],
       'required' => $element['#required'],
@@ -98,7 +98,7 @@ class AutocompleteDeluxeElement extends FormElement {
       'not_found_message_allow' => isset($element['#not_found_message_allow']) ? $element['#not_found_message_allow'] : FALSE,
       'not_found_message' => isset($element['#not_found_message']) ? $element['#not_found_message'] : "The term '@term' will be added.",
       'new_terms' => isset($element['#new_terms']) ? $element['#new_terms'] : FALSE,
-    );
+    ];
 
     if (isset($element['#autocomplete_deluxe_path'])) {
       if (isset($element['#default_value'])) {

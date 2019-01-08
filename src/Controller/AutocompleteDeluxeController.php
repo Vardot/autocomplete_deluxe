@@ -19,7 +19,7 @@ class AutocompleteDeluxeController extends EntityAutocompleteController {
    * {@inheritdoc}
    */
   public function handleAutocomplete(Request $request, $target_type, $selection_handler, $selection_settings_key) {
-    $matches = array();
+    $matches = [];
     // Get the typed string from the URL, if it exists.
     if ($input = $request->query->get('q')) {
       $typed_string = Tags::explode($input);
@@ -45,7 +45,7 @@ class AutocompleteDeluxeController extends EntityAutocompleteController {
 
       $matches = $this->matcher->getMatches($target_type, $selection_handler, $selection_settings, $typed_string);
 
-      $items = array();
+      $items = [];
       foreach ($matches as $item) {
         $items[$item['value']] = $item['label'];
       }

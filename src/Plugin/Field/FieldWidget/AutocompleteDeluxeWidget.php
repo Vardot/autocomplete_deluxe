@@ -39,6 +39,16 @@ class AutocompleteDeluxeWidget extends WidgetBase implements ContainerFactoryPlu
   /**
    * {@inheritdoc}
    *
+   * @param string $plugin_id
+   *   The plugin_id for the plugin instance.
+   * @param mixed $plugin_definition
+   *   The plugin implementation definition.
+   * @param \Drupal\Core\Field\FieldDefinitionInterface $field_definition
+   *   The field definition for the operation.
+   * @param array $settings
+   *   The formatter settings.
+   * @param array $third_party_settings
+   *   Any third party settings.
    * @param \Drupal\Core\Extension\ModuleHandlerInterface $module_handler
    *   The module handler.
    */
@@ -188,10 +198,10 @@ class AutocompleteDeluxeWidget extends WidgetBase implements ContainerFactoryPlu
     // If new terms are allowed to be created, set the bundle and the uid of the
     // term.
     if ($this->getSetting('new_terms') && $this->getSelectionHandlerSetting('auto_create') && ($bundle = $this->getAutocreateBundle())) {
-      $element['#autocreate'] = array(
+      $element['#autocreate'] = [
         'bundle' => $bundle,
         'uid' => ($entity instanceof EntityOwnerInterface) ? $entity->getOwnerId() : \Drupal::currentUser()->id(),
-      );
+      ];
     }
 
     $entities = [];
@@ -214,11 +224,11 @@ class AutocompleteDeluxeWidget extends WidgetBase implements ContainerFactoryPlu
       'selection_settings_key' => $selection_settings_key,
     ];
 
-    $element += array(
+    $element += [
       '#multiple' => $multiple,
       '#autocomplete_deluxe_path' => Url::fromRoute('autocomplete_deluxe.autocomplete', $route_parameters, ['absolute' => TRUE])->toString(),
       '#default_value' => self::implodeEntities($entities),
-    );
+    ];
 
     return ['target_id' => $element];
   }
@@ -235,7 +245,7 @@ class AutocompleteDeluxeWidget extends WidgetBase implements ContainerFactoryPlu
    *   Imploded list of entity labels.
    */
   public static function implodeEntities(array $entities, $bundle = NULL) {
-    $typed_entities = array();
+    $typed_entities = [];
     foreach ($entities as $entity) {
       $label = $entity->label();
 
