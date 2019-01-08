@@ -233,9 +233,21 @@
       throbber.addClass('autocomplete-deluxe-open');
     });
 
-    this.jqObject.bind("autocompleteopen", function(event, ui) {
+    this.jqObject.bind("autocompleteresponse", function(event, ui) {
       throbber.addClass('autocomplete-deluxe-closed');
       throbber.removeClass('autocomplete-deluxe-open');
+      // If no results found, show a message and prevent selecting it as a tag.
+      if (!drupalSettings.autocomplete_deluxe[this.id].new_terms && ui.item.newTerm) {
+        var uiWidgetContent = $('.ui-widget-content');
+        uiWidgetContent.css('pointer-events', '');
+        if (!ui.content.length) {
+          ui.content[0] = {
+            'label': Drupal.t('No results found'),
+            'value': ''
+          };
+          uiWidgetContent.css('pointer-events', 'none');
+        }
+      }
     });
 
     // Monkey patch the _renderItem function jquery so we can highlight the
