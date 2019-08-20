@@ -79,7 +79,6 @@ class AutocompleteDeluxeWidget extends WidgetBase implements ContainerFactoryPlu
     return [
       'match_operator' => 'CONTAINS',
       'autocomplete_route_name' => 'autocomplete_deluxe.autocomplete',
-      'target_type' => 'taxonomy_term',
       'size' => 60,
       'selection_handler' => 'default',
       'limit' => 10,
@@ -161,6 +160,7 @@ class AutocompleteDeluxeWidget extends WidgetBase implements ContainerFactoryPlu
     $entity = $items->getEntity();
     $instance = $this->fieldDefinition;
     $cardinality = $instance->getFieldStorageDefinition()->getCardinality();
+    $target_type = $instance->getFieldStorageDefinition()->getSetting('target_type');
     $settings = $this->getSettings();
     $referenced_entities = $items->referencedEntities();
 
@@ -181,7 +181,7 @@ class AutocompleteDeluxeWidget extends WidgetBase implements ContainerFactoryPlu
     $element += [
       '#type' => 'autocomplete_deluxe',
       '#title' => $this->fieldDefinition->getLabel(),
-      '#target_type' => $this->getFieldSetting('target_type'),
+      '#target_type' => $target_type,
       '#selection_handler' => $this->getFieldSetting('handler'),
       '#selection_settings' => $selection_settings,
       '#size' => 60,
@@ -219,7 +219,7 @@ class AutocompleteDeluxeWidget extends WidgetBase implements ContainerFactoryPlu
     }
 
     $route_parameters = [
-      'target_type' => $settings['target_type'],
+      'target_type' => $target_type,
       'selection_handler' => $element['#selection_handler'],
       'selection_settings_key' => $selection_settings_key,
     ];
