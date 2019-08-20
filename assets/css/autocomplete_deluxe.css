@@ -9,14 +9,15 @@ a.autocomplete-deluxe-single:hover {
   text-decoration: none;
 }
 
-
 .ui-autocomplete .ui-menu-item a {
   color: black;
+  display: block;
 }
 
 .ui-autocomplete .ui-menu-item a:hover {
-  color: white;
   text-decoration: none;
+  background: #0072b9;
+  color: white;
 }
 
 .ui-autocomplete .ui-state-hover {
