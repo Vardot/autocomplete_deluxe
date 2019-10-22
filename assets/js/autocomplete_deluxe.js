@@ -333,7 +333,9 @@
 
     var close = $('<a class="autocomplete-deluxe-item-delete" href="javascript:void(0)"></a>').appendTo(this.element);
     // Use single quotes because of the double quote encoded stuff.
-    var input = $('<input type="hidden" value=\'' + this.value + '\'/>').appendTo(this.element);
+    // .. then to make this work for single quotes in names, like O'Brian, enocde '.
+    var encodedVal = this.value.replace("'", "&#039;");
+    var input = $('<input type="hidden" value=\'' + encodedVal + '\'/>').appendTo(this.element);
 
     close.mousedown(function() {
       self.remove(item);
