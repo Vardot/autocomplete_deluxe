@@ -208,7 +208,7 @@
         term = " ";
       }
       request.synonyms = self.synonyms;
-      var url = settings.uri + '?q=' + term;
+      var url = Drupal.url(settings.uri + '?q=' + term);
       lastXhr = $.getJSON(url, request, function(data, status, xhr) {
         cache[term] = data;
         if (xhr === lastXhr) {
