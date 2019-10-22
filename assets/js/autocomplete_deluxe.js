@@ -508,7 +508,7 @@
     });
 
 
-    jqObject.keyup(function (event) {
+    jqObject.keyup(function () {
       if (clear) {
         // Trigger the search, so it display the values for an empty string.
         jqObject.autocomplete('search', '');
