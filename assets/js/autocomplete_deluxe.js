@@ -237,7 +237,7 @@
       throbber.addClass('autocomplete-deluxe-closed');
       throbber.removeClass('autocomplete-deluxe-open');
       // If no results found, show a message and prevent selecting it as a tag.
-      if (!drupalSettings.autocomplete_deluxe[this.id].new_terms && ui.item.newTerm) {
+      if (!drupalSettings.autocomplete_deluxe[this.id].new_terms && typeof ui.item !== 'undefined' && ui.item.newTerm) {
         var uiWidgetContent = $('.ui-widget-content');
         uiWidgetContent.css('pointer-events', '');
         if (!ui.content.length) {
