@@ -111,7 +111,7 @@ class AutocompleteDeluxeWidget extends WidgetBase implements ContainerFactoryPlu
     $element['delimiter'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Delimiter.'),
-      '#description' => $this->t('A character which should be used beside the enter key, to seperate terms.'),
+      '#description' => $this->t('A character which should be used beside the enter key, to separate terms.'),
       '#default_value' => $this->getSetting('delimiter'),
       '#size' => 1,
     ];
