@@ -330,12 +330,15 @@
     this.item = item;
     var self = this;
 
+
     var close = $('<a class="autocomplete-deluxe-item-delete" href="javascript:void(0)"></a>').appendTo(this.element);
     // Use single quotes because of the double quote encoded stuff.
     var input = $('<input type="hidden" value=\'' + this.value + '\'/>').appendTo(this.element);
 
     close.mousedown(function() {
       self.remove(item);
+      var value_input = self.widget.jqObject.parents('.autocomplete-deluxe-container').next().find('input');
+      value_input.trigger('change');
     });
   };
 
@@ -365,6 +368,7 @@
       });
 
       value_input.val('""' + items.join('"" ""') + '""');
+      value_input.trigger('change');
     };
 
     parent.sortable({
