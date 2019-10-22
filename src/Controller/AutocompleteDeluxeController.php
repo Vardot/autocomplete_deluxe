@@ -21,10 +21,14 @@ class AutocompleteDeluxeController extends EntityAutocompleteController {
   public function handleAutocomplete(Request $request, $target_type, $selection_handler, $selection_settings_key) {
     $matches = [];
     // Get the typed string from the URL, if it exists.
-    if ($input = $request->query->get('q')) {
+    $input = trim($request->query->get('q'));
+    if (!empty($input)) {
       $typed_string = Tags::explode($input);
-
       $typed_string = array_pop($typed_string);
+    } else {
+            // Select without entering something.
+      $typed_string = '';
+    }
 
       // Selection settings are passed in as a hashed key of a serialized array
       // stored in the key/value store.
@@ -51,7 +55,6 @@ class AutocompleteDeluxeController extends EntityAutocompleteController {
       }
 
       $matches = $items;
-    }
 
     return new JsonResponse($matches);
   }
