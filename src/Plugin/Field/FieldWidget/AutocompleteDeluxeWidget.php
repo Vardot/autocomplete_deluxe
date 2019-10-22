@@ -119,7 +119,7 @@ class AutocompleteDeluxeWidget extends WidgetBase implements ContainerFactoryPlu
       '#type' => 'checkbox',
       '#title' => $this->t('Show Term not found message'),
       '#description' => $this->t('If this is enabled, a message will be displayed when the term is not found.'),
-      '#default_value' => $this->getSetting('new_terms'),
+      '#default_value' => $this->getSetting('not_found_message_allow'),
     ];
     $element['not_found_message'] = [
       '#type' => 'textfield',
