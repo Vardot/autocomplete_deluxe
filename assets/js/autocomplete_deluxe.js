@@ -137,10 +137,10 @@
     this.required = settings.required;
     this.limit = settings.limit;
     this.synonyms = typeof settings.use_synonyms == 'undefined' ? false : settings.use_synonyms;
-    this.not_found_message = typeof settings.use_synonyms == 'undefined' ? "The entity '@term' will be added." : settings.not_found_message;
+    this.not_found_message = typeof settings.use_synonyms == 'undefined' ? Drupal.t("The entity '@term' will be added.") : settings.not_found_message;
     this.not_found_message_allow = typeof settings.not_found_message_allow == 'undefined' ? false : settings.not_found_message_allow;
     this.new_terms = typeof settings.new_terms == 'undefined' ? false : settings.new_terms;
-    this.no_empty_message = typeof settings.no_empty_message == 'undefined' ? 'No terms could be found. Please type in order to add a new term.' : settings.no_empty_message;
+    this.no_empty_message = typeof settings.no_empty_message == 'undefined' ? Drupal.t('No terms could be found. Please type in order to add a new term.') : settings.no_empty_message;
 
     this.wrapper = '""';
 
@@ -176,14 +176,14 @@
       if ($.isEmptyObject(result) && (self.new_terms || self.not_found_message_allow)) {
         if (term !== ' ') {
           result.push({
-            label: Drupal.t(self.not_found_message, {'@term': term}),
+            label: Drupal.formatString(self.not_found_message, {'@term': term}),
             value: term,
             newTerm: true
           });
         }
         else {
           result.push({
-            label: Drupal.t(self.no_empty_message),
+            label: self.no_empty_message,
             noTerms: true
           });
         }
@@ -378,7 +378,7 @@
       containment: 'parent',
       tolerance: 'pointer',
     });
-    
+
     // Override the resize function, so that the suggestion list doesn't resizes
     // all the time.
     var autocompleteDataKey = typeof(this.jqObject.data('autocomplete')) === 'object' ? 'autocomplete' : 'ui-autocomplete';

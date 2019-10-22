@@ -189,7 +189,7 @@ class AutocompleteDeluxeWidget extends WidgetBase implements ContainerFactoryPlu
       '#min_length' => isset($settings['min_length']) ? $settings['min_length'] : 0,
       '#delimiter' => isset($settings['delimiter']) ? $settings['delimiter'] : '',
       '#not_found_message_allow' => $allow_message,
-      '#not_found_message' => $not_found_message,
+      '#not_found_message' => $this->t($not_found_message),
       '#new_terms' => isset($settings['new_terms']) ? $settings['new_terms'] : FALSE,
     ];
 
