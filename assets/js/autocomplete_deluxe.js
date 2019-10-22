@@ -402,7 +402,7 @@
         // no double quotes.
         var label = value.match(/["][\w|\s|\D|]*["]/gi) !== null ? value.substr(1, value.length-2) : value;
         var item = {
-          label : label,
+          label : Drupal.checkPlain(label),
           value : value
         };
         var item = new Drupal.autocomplete_deluxe.MultipleWidget.Item(self, item);
