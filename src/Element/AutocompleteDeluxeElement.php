@@ -85,6 +85,7 @@ class AutocompleteDeluxeElement extends FormElement {
       '#default_value' => '',
       '#prefix' => '<div class="autocomplete-deluxe-container">',
       '#suffix' => '</div>',
+      '#description' => isset($element['#description']) ? $element['#description'] : '',
     ];
 
     $js_settings[$html_id] = [
@@ -121,6 +122,7 @@ class AutocompleteDeluxeElement extends FormElement {
           '#default_value' => $default_value,
           '#prefix' => '<div class="autocomplete-deluxe-value-container">',
           '#suffix' => '</div>',
+          '#description' => isset($element['#description']) ? $element['#description'] : '',
         ];
         $element['textfield']['#attributes']['style'] = ['display: none'];
       }
