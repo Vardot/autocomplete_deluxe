@@ -11,6 +11,8 @@ use Drupal\Core\Field\WidgetBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Site\Settings;
+use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\Core\StringTranslation\TranslationInterface;
 use Drupal\Core\Url;
 use Drupal\user\EntityOwnerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -28,6 +30,8 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * )
  */
 class AutocompleteDeluxeWidget extends WidgetBase implements ContainerFactoryPluginInterface {
+
+  use StringTranslationTrait;
 
   /**
    * The module handler.
@@ -279,7 +283,7 @@ class AutocompleteDeluxeWidget extends WidgetBase implements ContainerFactoryPlu
   public static function validateInteger(&$element, FormStateInterface $form_state, &$complete_form) {
     $value = $element['#value'];
     if ($value !== '' && (!is_numeric($value) || intval($value) != $value)) {
-      $form_state->setError($element, t('%name must be an integer.', ['%name' => $element['#title']]));
+      $form_state->setError($element, $this->t('%name must be an integer.', ['%name' => $element['#title']]));
     }
   }
 
@@ -289,7 +293,7 @@ class AutocompleteDeluxeWidget extends WidgetBase implements ContainerFactoryPlu
   public static function validateIntegerPositive(&$element, FormStateInterface $form_state, &$complete_form) {
     $value = $element['#value'];
     if ($value !== '' && (!is_numeric($value) || intval($value) != $value || $value <= 0)) {
-      $form_state->setError($element, t('%name must be a positive integer.', ['%name' => $element['#title']]));
+      $form_state->setError($element, $this->t('%name must be a positive integer.', ['%name' => $element['#title']]));
     }
   }
 
@@ -344,8 +348,8 @@ class AutocompleteDeluxeWidget extends WidgetBase implements ContainerFactoryPlu
    */
   protected function getMatchOperatorOptions() {
     return [
-      'STARTS_WITH' => t('Starts with'),
-      'CONTAINS' => t('Contains'),
+      'STARTS_WITH' => $this->t('Starts with'),
+      'CONTAINS' => $this->t('Contains'),
     ];
   }
 
