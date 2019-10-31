@@ -91,6 +91,7 @@ class AutocompleteDeluxeWidget extends WidgetBase implements ContainerFactoryPlu
       'not_found_message_allow' => FALSE,
       'not_found_message' => "The term '@term' will be added",
       'new_terms' => FALSE,
+      'no_empty_message' => 'No terms could be found. Please type in order to add a new term.',
     ] + parent::defaultSettings();
   }
 
@@ -137,6 +138,12 @@ class AutocompleteDeluxeWidget extends WidgetBase implements ContainerFactoryPlu
       '#description' => $this->t('Should it be allowed, that user enter new terms?'),
       '#default_value' => $this->getSetting('new_terms'),
     ];
+    $element['no_empty_message'] = [
+      '#type' => 'textfield',
+      '#title' => $this->t('Empty value message.'),
+      '#description' => $this->t('A text message that will be displayed when the field is focused and it does not contain values.'),
+      '#default_value' => $this->getSetting('no_empty_message'),
+    ];
 
     return $element;
   }
@@ -153,6 +160,7 @@ class AutocompleteDeluxeWidget extends WidgetBase implements ContainerFactoryPlu
     $summary[] = $this->t('Allow Not Found message: @not_found_message_allow', ['@not_found_message_allow' => $this->getSetting('not_found_message_allow') ? 'Yes' : 'No']);
     $summary[] = $this->t('Not Found message: @not_found_message', ['@not_found_message' => $this->getSetting('not_found_message')]);
     $summary[] = $this->t('Allow new terms: @new_terms', ['@new_terms' => $this->getSetting('new_terms') ? 'Yes' : 'No']);
+    $summary[] = $this->t('Empty value message: @no_empty_message', ['@no_empty_message' => $this->getSetting('no_empty_message')]);
 
     return $summary;
   }
@@ -195,6 +203,7 @@ class AutocompleteDeluxeWidget extends WidgetBase implements ContainerFactoryPlu
       '#not_found_message_allow' => $allow_message,
       '#not_found_message' => $this->t($not_found_message),
       '#new_terms' => isset($settings['new_terms']) ? $settings['new_terms'] : FALSE,
+      '#no_empty_message' => isset($settings['no_empty_message']) ? $this->t($settings['no_empty_message']) : '',
     ];
 
     $multiple = $cardinality > 1 || $cardinality == FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED;

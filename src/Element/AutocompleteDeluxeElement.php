@@ -99,6 +99,7 @@ class AutocompleteDeluxeElement extends FormElement {
       'not_found_message_allow' => isset($element['#not_found_message_allow']) ? $element['#not_found_message_allow'] : FALSE,
       'not_found_message' => isset($element['#not_found_message']) ? $element['#not_found_message'] : "The term '@term' will be added.",
       'new_terms' => isset($element['#new_terms']) ? $element['#new_terms'] : FALSE,
+      'no_empty_message' => isset($element['#no_empty_message']) ? $element['#no_empty_message'] : 'No terms could be found. Please type in order to add a new term.',
     ];
 
     if (isset($element['#autocomplete_deluxe_path'])) {
