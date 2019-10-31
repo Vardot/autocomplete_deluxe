@@ -230,7 +230,7 @@ class AutocompleteDeluxeWidget extends WidgetBase implements ContainerFactoryPlu
 
     $element += [
       '#multiple' => $multiple,
-      '#autocomplete_deluxe_path' => Url::fromRoute('autocomplete_deluxe.autocomplete', $route_parameters, ['absolute' => FALSE])->toString(),
+      '#autocomplete_deluxe_path' => preg_replace('/^[^\\/]+/', '', Url::fromRoute('autocomplete_deluxe.autocomplete', $route_parameters, ['absolute' => TRUE])->toString()),
       '#default_value' => self::implodeEntities($entities),
     ];
 
