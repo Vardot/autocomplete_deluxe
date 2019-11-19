@@ -292,7 +292,7 @@ class AutocompleteDeluxeWidget extends WidgetBase implements ContainerFactoryPlu
   public static function validateInteger(&$element, FormStateInterface $form_state, &$complete_form) {
     $value = $element['#value'];
     if ($value !== '' && (!is_numeric($value) || intval($value) != $value)) {
-      $form_state->setError($element, $this->t('%name must be an integer.', ['%name' => $element['#title']]));
+      $form_state->setError($element, \Drupal::translation()->translate('%name must be an integer.', ['%name' => $element['#title']]));
     }
   }
 
@@ -302,7 +302,7 @@ class AutocompleteDeluxeWidget extends WidgetBase implements ContainerFactoryPlu
   public static function validateIntegerPositive(&$element, FormStateInterface $form_state, &$complete_form) {
     $value = $element['#value'];
     if ($value !== '' && (!is_numeric($value) || intval($value) != $value || $value <= 0)) {
-      $form_state->setError($element, $this->t('%name must be a positive integer.', ['%name' => $element['#title']]));
+      $form_state->setError($element, \Drupal::translation()->translate('%name must be a positive integer.', ['%name' => $element['#title']]));
     }
   }
 
