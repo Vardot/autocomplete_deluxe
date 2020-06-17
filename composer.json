@@ -1,26 +1,37 @@
 {
-  "name": "drupal/autocomplete_deluxe_8",
+  "name": "drupal/autocomplete_deluxe",
   "description": "Enhanced autocomplete using Jquery UI autocomplete.",
   "type": "drupal-module",
-  "homepage": "https://www.drupal.org/sandbox/edwardchan/2888186",
-  "authors": [{
-    "name": "Edward Chan"
-  }],
-  "support": {
-    "issues": "https://www.drupal.org/project/issues/2888186"
-  },
-  "license": "GPL-2.0+",
-  "repositories": [{
-    "type": "package",
-    "package": {
-      "name": "drupal/autocomplete_deluxe_8",
-      "version": "8.0.0",
-      "type": "drupal-module",
-      "source": {
-        "url": "https://git.drupal.org:sandbox/edwardchan/2888186.git",
-        "type": "git",
-        "reference": "refs/heads/8.x-1.x"
-      }
+  "homepage": "https://www.drupal.org/project/autocomplete_deluxe",
+  "license": "GPL-2.0-or-later",
+  "minimum-stability": "dev",
+  "authors": [
+    {
+      "name": "Mediacurrent",
+      "homepage": "https://www.drupal.org/mediacurrent",
+      "role": "Supporting organization"
+    },
+    {
+      "name": "Vardot",
+      "homepage": "https://www.drupal.org/vardot",
+      "role": "Maintenance for D8 and D9 versions"
+    },
+    {
+      "name": "Edward Chan",
+      "homepage": "https://www.drupal.org/u/edwardchiapet"
     }
-  }]
+  ],
+  "support": {
+    "issues": "https://www.drupal.org/project/issues/autocomplete_deluxe",
+    "source": "http://cgit.drupalcode.org/autocomplete_deluxe"
+  },
+  "repositories": {
+    "drupal": {
+      "type": "composer",
+      "url": "https://packages.drupal.org/8"
+    }
+  },
+  "require": {
+    "drupal/core": "^8 || ^9"
+  }
 }

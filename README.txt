@@ -133,9 +133,14 @@ Current maintainers:
 
  * Edward Chan (edwardchiapet) - https://www.drupal.org/u/edwardchiapet
  * Lee Nakamura (LNakamura) - https://www.drupal.org/u/lnakamura
+ * Mohammed J. Razem - https://www.drupal.org/u/mohammed-j-razem
+ * Rajab Natshah - https://www.drupal.org/u/rajabnatshah
 
 Active support and ongoing development by Mediacurrent -
 http://www.mediacurrent.com/
+
+Maintenance for D8 and D9 versions by Vardot -
+https://www.vardot.com/
 
 For additional information, see the project page on Drupal.org
 <https://www.drupal.org/project/autocomplete_deluxe>
