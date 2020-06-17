@@ -25,36 +25,37 @@ class AutocompleteDeluxeController extends EntityAutocompleteController {
     if (!empty($input)) {
       $typed_string = Tags::explode($input);
       $typed_string = array_pop($typed_string);
-    } else {
-            // Select without entering something.
+    }
+    else {
+      // Select without entering something.
       $typed_string = '';
     }
 
-      // Selection settings are passed in as a hashed key of a serialized array
-      // stored in the key/value store.
-      $selection_settings = $this->keyValue->get($selection_settings_key, FALSE);
-      if ($selection_settings !== FALSE) {
-        $selection_settings_hash = Crypt::hmacBase64(serialize($selection_settings) . $target_type . $selection_handler, Settings::getHashSalt());
-        if ($selection_settings_hash !== $selection_settings_key) {
-          // Disallow access when the selection settings hash does not match the
-          // passed-in key.
-          throw new AccessDeniedHttpException('Invalid selection settings key.');
-        }
+    // Selection settings are passed in as a hashed key of a serialized array
+    // stored in the key/value store.
+    $selection_settings = $this->keyValue->get($selection_settings_key, FALSE);
+    if ($selection_settings !== FALSE) {
+      $selection_settings_hash = Crypt::hmacBase64(serialize($selection_settings) . $target_type . $selection_handler, Settings::getHashSalt());
+      if ($selection_settings_hash !== $selection_settings_key) {
+        // Disallow access when the selection settings hash does not match the
+        // passed-in key.
+        throw new AccessDeniedHttpException('Invalid selection settings key.');
       }
-      else {
-        // Disallow access when the selection settings key is not found in the
-        // key/value store.
-        throw new AccessDeniedHttpException();
-      }
+    }
+    else {
+      // Disallow access when the selection settings key is not found in the
+      // key/value store.
+      throw new AccessDeniedHttpException();
+    }
 
-      $matches = $this->matcher->getMatches($target_type, $selection_handler, $selection_settings, $typed_string);
+    $matches = $this->matcher->getMatches($target_type, $selection_handler, $selection_settings, $typed_string);
 
-      $items = [];
-      foreach ($matches as $item) {
-        $items[$item['value']] = $item['label'];
-      }
+    $items = [];
+    foreach ($matches as $item) {
+      $items[$item['value']] = $item['label'];
+    }
 
-      $matches = $items;
+    $matches = $items;
 
     return new JsonResponse($matches);
   }

@@ -91,7 +91,6 @@ span.autocomplete-deluxe-value-delete {
   -o-box-shadow: 0 1px 0 #fff inset;
   box-shadow: 0 1px 0 #fff inset;
   background-color: #eee;
-  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#eeeeee', endColorstr='#ffffff', GradientType=0 );
   background-image: -webkit-gradient(linear, 0% 0%, 0% 100%, color-stop(20%, #eeeeee), color-stop(80%, #ffffff));
   background-image: -webkit-linear-gradient(top, #eeeeee 20%, #ffffff 80%);
   background-image: -moz-linear-gradient(top, #eeeeee 20%, #ffffff 80%);
@@ -105,9 +104,6 @@ span.autocomplete-deluxe-value-delete {
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
 }
-
-/*input.autocomplete-deluxe-closed {
-}*/
 
 div.autocomplete-deluxe-multiple {
   box-sizing: border-box;

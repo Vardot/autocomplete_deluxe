@@ -3,4 +3,4 @@ autocomplete_deluxe.autocomplete:
   defaults:
     _controller: '\Drupal\autocomplete_deluxe\Controller\AutocompleteDeluxeController::handleAutocomplete'
   requirements:
-    _access: 'TRUE'
+    _permission: 'access content'
