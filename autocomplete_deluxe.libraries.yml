@@ -12,7 +12,7 @@ assets:
     - core/jquery.once
     - core/jquery.ui.autocomplete
     - core/jquery.ui.button
-    - core/jquery.ui.sortable
+    - core/sortable
 
 assets.seven:
   version: VERSION

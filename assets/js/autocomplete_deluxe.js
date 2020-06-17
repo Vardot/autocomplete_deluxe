@@ -4,7 +4,7 @@
  * Converts textfield to a autocomplete deluxe widget.
  */
 
-(function($, drupalSettings) {
+(function($, drupalSettings, Sortable) {
   Drupal.autocomplete_deluxe = Drupal.autocomplete_deluxe || {};
 
   Drupal.behaviors.autocomplete_deluxe = {
@@ -373,10 +373,11 @@
       value_input.trigger('change');
     };
 
-    parent.sortable({
-      update: self.orderValues,
-      containment: 'parent',
-      tolerance: 'pointer',
+    Sortable.create(parent.get(0), {
+      draggable: '.autocomplete-deluxe-item',
+      onEnd: function onEnd() {
+        self.orderValues();
+      }
     });
 
     // Override the resize function, so that the suggestion list doesn't resizes
@@ -519,4 +520,4 @@
       }
     });
   };
-})(jQuery, drupalSettings);
+})(jQuery, drupalSettings, Sortable);
