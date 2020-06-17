@@ -7,18 +7,14 @@
   "minimum-stability": "dev",
   "authors": [
     {
-      "name": "Mediacurrent",
-      "homepage": "https://www.drupal.org/mediacurrent",
-      "role": "Supporting organization"
-    },
-    {
       "name": "Vardot",
       "homepage": "https://www.drupal.org/vardot",
       "role": "Maintenance for D8 and D9 versions"
     },
     {
-      "name": "Edward Chan",
-      "homepage": "https://www.drupal.org/u/edwardchiapet"
+      "name": "Mediacurrent",
+      "homepage": "https://www.drupal.org/mediacurrent",
+      "role": "Supporting organization"
     }
   ],
   "support": {
