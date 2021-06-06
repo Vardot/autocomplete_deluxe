@@ -201,23 +201,9 @@ class AutocompleteDeluxeWidget extends WidgetBase implements ContainerFactoryPlu
 
     $selection_settings = $this->getFieldSetting('handler_settings') + ['match_operator' => $this->getSetting('match_operator')];
 
-    $new_terms = isset($settings['new_terms']) ? $settings['new_terms'] : FALSE;
-    $allow_message = isset($settings['not_found_message_allow']) ? $settings['not_found_message_allow'] : FALSE;
-    $not_found_message = isset($settings['not_found_message']) ? $settings['not_found_message'] : FALSE;
+    $allow_message = $settings['not_found_message_allow'] ?? FALSE;
+    $not_found_message = $settings['not_found_message'] ?? "";
 
-    if (!$new_terms) {
-      if ($allow_message) {
-        if(!$not_found_message) {
-          $not_found_message = "Cannot add '@term' because 'Allow new terms' is disabled on the widget settings.";
-        }
-      }
-      else {
-        $not_found_message = '';
-      }
-    }
-    else {
-      $not_found_message = "The term '@term' will be added.";
-    }
 
     $element += [
       '#type' => 'autocomplete_deluxe',
@@ -226,12 +212,12 @@ class AutocompleteDeluxeWidget extends WidgetBase implements ContainerFactoryPlu
       '#selection_handler' => $this->getFieldSetting('handler'),
       '#selection_settings' => $selection_settings,
       '#size' => 60,
-      '#limit' => isset($settings['limit']) ? $settings['limit'] : 10,
-      '#min_length' => isset($settings['min_length']) ? $settings['min_length'] : 0,
-      '#delimiter' => isset($settings['delimiter']) ? $settings['delimiter'] : '',
+      '#limit' => $settings['limit'] ?? 10,
+      '#min_length' => $settings['min_length'] ?? 0,
+      '#delimiter' => $settings['delimiter'] ?? '',
       '#not_found_message_allow' => $allow_message,
       '#not_found_message' => $this->t('@not_found_message', ['@not_found_message' => $not_found_message]),
-      '#new_terms' => isset($settings['new_terms']) ? $settings['new_terms'] : FALSE,
+      '#new_terms' => $settings['new_terms'] ?? FALSE,
       '#no_empty_message' => isset($settings['no_empty_message']) ? $this->t('@no_empty_message', ['@no_empty_message' => $settings['no_empty_message']]) : '',
     ];
 
