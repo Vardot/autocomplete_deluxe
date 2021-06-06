@@ -48,9 +48,13 @@ class AutocompleteDeluxeElement extends FormElement {
   public static function processElement($element) {
     $element['#attached']['library'][] = 'autocomplete_deluxe/assets';
 
-    // Workaround for problems with jquery css in seven theme.
     $active_theme = \Drupal::theme()->getActiveTheme();
-    if ($active_theme->getName() == 'seven') {
+    if ($active_theme->getName() === 'claro') {
+      // Workaround for problems with jquery css in claro theme.
+      $element['#attached']['library'][] = 'autocomplete_deluxe/assets.claro';
+    }
+    elseif ($active_theme->getName() == 'seven') {
+      // Workaround for problems with jquery css in seven theme.
       $element['#attached']['library'][] = 'autocomplete_deluxe/assets.seven';
     }
 
