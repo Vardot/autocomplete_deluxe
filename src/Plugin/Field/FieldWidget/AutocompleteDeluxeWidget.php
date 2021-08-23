@@ -122,6 +122,13 @@ class AutocompleteDeluxeWidget extends WidgetBase implements ContainerFactoryPlu
    * {@inheritdoc}
    */
   public function settingsForm(array $form, FormStateInterface $form_state) {
+    $element['match_operator'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Match operator'),
+      '#description' => $this->t('Specify the matcting operator.'),
+      '#default_value' => $this->getSetting('match_operator'),
+      '#options' => $this->getMatchOperatorOptions(),
+    ];
     $element['limit'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Limit of the output.'),
@@ -177,6 +184,7 @@ class AutocompleteDeluxeWidget extends WidgetBase implements ContainerFactoryPlu
   public function settingsSummary() {
     $summary = [];
 
+    $summary[] = $this->t('Match operator: @match_operator', ['@match_operator' => $this->getSetting('match_operator')]);
     $summary[] = $this->t('Limit: @limit', ['@limit' => $this->getSetting('limit')]);
     $summary[] = $this->t('Min length: @min_length', ['@min_length' => $this->getSetting('min_length')]);
     $summary[] = $this->t('Delimiter: @delimiter', ['@delimiter' => $this->getSetting('delimiter')]);
