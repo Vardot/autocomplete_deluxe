@@ -1,3 +1,5 @@
+@charset "UTF-8";
+
 ul.ui-autocomplete {
   overflow-x: hidden;
   overflow-y: scroll;
@@ -9,26 +11,25 @@ a.autocomplete-deluxe-single:hover {
   text-decoration: none;
 }
 
-.ui-autocomplete .ui-menu-item a {
-  display: block;
-  color: black;
-}
+.ui-autocomplete {
+  .ui-menu-item a {
+    display: block;
+    color: black;
+  }
 
-.ui-autocomplete .ui-menu-item a:hover {
-  text-decoration: none;
-  color: white;
-  background: #0072b9;
-}
+  .ui-menu-item a:hover {
+    text-decoration: none;
+    color: white;
+    background: #0072b9;
+  }
 
-.ui-autocomplete .ui-state-hover {
-  margin: 0;
-  padding: 0;
-  color: #fff;
-  background-color: #3875d7;
-  background-image: -webkit-gradient(linear, left top, left bottom, color-stop(20%, #3875d7), color-stop(90%, #2a62bc));
-  background-image: -webkit-linear-gradient(top, #3875d7 20%, #2a62bc 90%);
-  background-image: -o-linear-gradient(top, #3875d7 20%, #2a62bc 90%);
-  background-image: linear-gradient(to bottom, #3875d7 20%, #2a62bc 90%);
+  .ui-state-hover {
+    margin: 0;
+    padding: 0;
+    color: #fff;
+    background-color: #3875d7;
+    background-image: linear-gradient(to bottom, #3875d7 20%, #2a62bc 90%);
+  }
 }
 
 .autocomplete-deluxe-container {
@@ -36,24 +37,18 @@ a.autocomplete-deluxe-single:hover {
   display: inline-block;
   padding: 0;
   border: 1px solid #ccc;
-  background: no-repeat -38px -22px, -webkit-gradient(linear, left top, left bottom, color-stop(1%, #eee), color-stop(15%, #fff));
-  background: no-repeat -38px -22px, -webkit-linear-gradient(top, #eee 1%, #fff 15%);
-  background: no-repeat -38px -22px, -o-linear-gradient(top, #eee 1%, #fff 15%);
   background: no-repeat -38px -22px, linear-gradient(to bottom, #eee 1%, #fff 15%);
-}
 
-.autocomplete-deluxe-container input.autocomplete-deluxe-form {
-  padding: 4px 5px 4px 5px;
-  border: none;
-  background: #fff no-repeat -38px -22px;
+  input.autocomplete-deluxe-form {
+    padding: 4px 5px 4px 5px;
+    border: none;
+    background: #fff no-repeat -38px -22px;
+  }
 }
 
 div.autocomplete-deluxe-container input.autocomplete-deluxe-form-single {
   width: 90%;
   border: none;
-  background: no-repeat -38px -22px, -webkit-gradient(linear, left top, left bottom, color-stop(1%, #eee), color-stop(15%, #fff));
-  background: no-repeat -38px -22px, -webkit-linear-gradient(top, #eee 1%, #fff 15%);
-  background: no-repeat -38px -22px, -o-linear-gradient(top, #eee 1%, #fff 15%);
   background: no-repeat -38px -22px, linear-gradient(to bottom, #eee 1%, #fff 15%);
 }
 
@@ -68,33 +63,26 @@ div.autocomplete-deluxe-container input.autocomplete-deluxe-form-single {
 span.autocomplete-deluxe-value-delete {
   display: inline-block;
   width: 18px;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
+  // Prevent text selection.
   user-select: none;
   background: url("x.gif") no-repeat center;
 }
 
 .autocomplete-deluxe-single-open {
   border: 1px solid #aaa;
-  -moz-border-radius-bottomright: 0;
   border-bottom-right-radius: 0;
-  -moz-border-radius-bottomleft: 0;
   border-bottom-left-radius: 0;
   background-color: #eee;
-  background-image: -webkit-gradient(linear, left top, left bottom, color-stop(20%, #eee), color-stop(80%, #fff));
-  background-image: -webkit-linear-gradient(top, #eee 20%, #fff 80%);
-  background-image: -o-linear-gradient(top, #eee 20%, #fff 80%);
   background-image: linear-gradient(to bottom, #eee 20%, #fff 80%);
-  -webkit-box-shadow: 0 1px 0 #fff inset;
   box-shadow: 0 1px 0 #fff inset;
+  -moz-border-radius-bottomleft: 0;
+  -moz-border-radius-bottomright: 0;
 }
 
 div.autocomplete-deluxe-multiple {
   position: relative;
   display: inline-block;
   overflow: hidden;
-  -webkit-box-sizing: border-box;
   box-sizing: border-box;
   width: 100%;
   height: auto !important;
@@ -103,9 +91,6 @@ div.autocomplete-deluxe-multiple {
   cursor: text;
   border: 1px solid #aaa;
   background: #fff no-repeat -38px -22px;
-  background: no-repeat -38px -22px, -webkit-gradient(linear, left top, left bottom, color-stop(1%, #eee), color-stop(15%, #fff));
-  background: no-repeat -38px -22px, -webkit-linear-gradient(top, #eee 1%, #fff 15%);
-  background: no-repeat -38px -22px, -o-linear-gradient(top, #eee 1%, #fff 15%);
   background: no-repeat -38px -22px, linear-gradient(to bottom, #eee 1%, #fff 15%);
   background-color: #fff;
   font-size: 13px;
@@ -145,7 +130,6 @@ div.autocomplete-deluxe-throbber {
   background-color: #e4e4e4;
   background-image: -moz-linear-gradient(center top, #f4f4f4 20%, #f0f0f0 50%, #e8e8e8 52%, #eee 100%);
   background-clip: padding-box;
-  -webkit-box-shadow: 0 0 2px #fff inset, 0 1px 0 rgba(0, 0, 0, 0.05);
   box-shadow: 0 0 2px #fff inset, 0 1px 0 rgba(0, 0, 0, 0.05);
   line-height: 13px;
 }
@@ -160,7 +144,6 @@ div.autocomplete-deluxe-throbber {
   background: url("../images/x.gif");
   font-size: 1px;
 }
-
 .autocomplete-deluxe-item-focus {
   background: none repeat scroll 0 0 #d4d4d4;
 }

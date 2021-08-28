@@ -49,13 +49,14 @@ class AutocompleteDeluxeElement extends FormElement {
     // Do not attach js library if the element is disabled.
     $element_disabled = $element['#disabled'] ?? FALSE;
     if (!$element_disabled) {
-    $element['#attached']['library'][] = 'autocomplete_deluxe/assets';
+      $element['#attached']['library'][] = 'autocomplete_deluxe/assets';
 
       $active_theme = \Drupal::theme()->getActiveTheme();
       if ($active_theme->getName() === 'claro') {
         // Workaround for problems with jquery css in claro theme.
         $element['#attached']['library'][] = 'autocomplete_deluxe/assets.claro';
-      } elseif ($active_theme->getName() == 'seven') {
+      }
+      elseif ($active_theme->getName() == 'seven') {
         // Workaround for problems with jquery css in seven theme.
         $element['#attached']['library'][] = 'autocomplete_deluxe/assets.seven';
       }

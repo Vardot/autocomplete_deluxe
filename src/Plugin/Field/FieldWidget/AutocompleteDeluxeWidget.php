@@ -212,7 +212,6 @@ class AutocompleteDeluxeWidget extends WidgetBase implements ContainerFactoryPlu
     $allow_message = $settings['not_found_message_allow'] ?? FALSE;
     $not_found_message = $settings['not_found_message'] ?? "";
 
-
     $element += [
       '#type' => 'autocomplete_deluxe',
       '#title' => $this->fieldDefinition->getLabel(),
