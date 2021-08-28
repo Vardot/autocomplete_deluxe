@@ -52,11 +52,13 @@ class AutocompleteDeluxeElement extends FormElement {
       $element['#attached']['library'][] = 'autocomplete_deluxe/assets';
 
       $active_theme = \Drupal::theme()->getActiveTheme();
-      if ($active_theme->getName() === 'claro') {
+      $base_themes = (array) $active_theme->getBaseThemeExtensions();
+
+      if ($active_theme->getName() === 'claro'|| array_key_exists('claro', $base_themes)) {
         // Workaround for problems with jquery css in claro theme.
         $element['#attached']['library'][] = 'autocomplete_deluxe/assets.claro';
       }
-      elseif ($active_theme->getName() == 'seven') {
+      elseif ($active_theme->getName() == 'seven'|| array_key_exists('seven', $base_themes)) {
         // Workaround for problems with jquery css in seven theme.
         $element['#attached']['library'][] = 'autocomplete_deluxe/assets.seven';
       }
