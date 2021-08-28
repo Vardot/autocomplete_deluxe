@@ -46,16 +46,19 @@ class AutocompleteDeluxeElement extends FormElement {
    * Autocomplete Deluxe element process callback.
    */
   public static function processElement($element) {
+    // Do not attach js library if the element is disabled.
+    $element_disabled = $element['#disabled'] ?? FALSE;
+    if (!$element_disabled) {
     $element['#attached']['library'][] = 'autocomplete_deluxe/assets';
 
-    $active_theme = \Drupal::theme()->getActiveTheme();
-    if ($active_theme->getName() === 'claro') {
-      // Workaround for problems with jquery css in claro theme.
-      $element['#attached']['library'][] = 'autocomplete_deluxe/assets.claro';
-    }
-    elseif ($active_theme->getName() == 'seven') {
-      // Workaround for problems with jquery css in seven theme.
-      $element['#attached']['library'][] = 'autocomplete_deluxe/assets.seven';
+      $active_theme = \Drupal::theme()->getActiveTheme();
+      if ($active_theme->getName() === 'claro') {
+        // Workaround for problems with jquery css in claro theme.
+        $element['#attached']['library'][] = 'autocomplete_deluxe/assets.claro';
+      } elseif ($active_theme->getName() == 'seven') {
+        // Workaround for problems with jquery css in seven theme.
+        $element['#attached']['library'][] = 'autocomplete_deluxe/assets.seven';
+      }
     }
 
     $html_id = Html::getUniqueId('autocomplete-deluxe-input');
@@ -80,6 +83,7 @@ class AutocompleteDeluxeElement extends FormElement {
     );
 
     $element['textfield'] = [
+      '#disabled' => $element_disabled,
       '#type' => 'textfield',
       '#size' => isset($element['#size']) ? $element['#size'] : '',
       '#attributes' => [
@@ -87,10 +91,14 @@ class AutocompleteDeluxeElement extends FormElement {
         'id' => $html_id,
       ],
       '#default_value' => '',
-      '#prefix' => '<div class="autocomplete-deluxe-container">',
-      '#suffix' => '</div>',
       '#description' => isset($element['#description']) ? $element['#description'] : '',
     ];
+
+    // Add autcomplete deluxe container only if element is enabled.
+    if (!$element_disabled) {
+      $element['textfield']['#prefix'] = '<div class="autocomplete-deluxe-container">';
+      $element['textfield']['#suffix'] = '</div>';
+    }
 
     $js_settings[$html_id] = [
       'input_id' => $html_id,
@@ -146,7 +154,10 @@ class AutocompleteDeluxeElement extends FormElement {
       return $element;
     }
 
-    $element['#attached']['drupalSettings']['autocomplete_deluxe'] = $js_settings;
+    // Do not attach js settings if element is disabled.
+    if (!$element_disabled) {
+      $element['#attached']['drupalSettings']['autocomplete_deluxe'] = $js_settings;
+    }
     $element['#tree'] = TRUE;
 
     return $element;
