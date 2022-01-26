@@ -7,6 +7,9 @@
   background-color: #e9ecf1;
   font-weight: 500;
 }
+[dir="rtl"] .autocomplete-deluxe-item {
+  padding: 7px 10px 7px 30px;
+}
 
 .autocomplete-deluxe-item-delete {
   top: 5.3em;
@@ -30,10 +33,9 @@
   }
 }
 
-.node-form {
-  div.autocomplete-deluxe-container:not(.autocomplete-deluxe-multiple) {
-    padding: 0;
-  }
+
+div.autocomplete-deluxe-container:not(.autocomplete-deluxe-multiple) {
+  padding: 0;
 }
 
 div.autocomplete-deluxe-container {
@@ -47,87 +49,86 @@ div.autocomplete-deluxe-container {
 }
 
 @media screen and (max-width: 81.25rem) {
-  .node-form div.autocomplete-deluxe-container {
+  div.autocomplete-deluxe-container {
     width: 100%;
   }
 }
 
-.node-form {
-  div.autocomplete-deluxe-container {
-    &:not(.autocomplete-deluxe-multiple) {
-      input.autocomplete-deluxe-form {
-        width: 100%;
-        min-height: 3rem;
-        padding: 0.68rem 1.875rem 0.68rem 0.93rem;
-        background: white;
-      }
 
-      .autocomplete-deluxe-throbber {
-        top: 0.93rem;
-      }
-    }
-
-    .autocomplete-deluxe-item {
-      margin: 0 0.31rem 0.18rem 0;
-    }
-
+div.autocomplete-deluxe-container {
+  &:not(.autocomplete-deluxe-multiple) {
     input.autocomplete-deluxe-form {
-      min-height: 1.25rem;
-      padding-top: 0;
-      padding-bottom: 0;
-    }
-
-    div.autocomplete-deluxe-throbber {
-      position: absolute;
-      top: 0.875rem;
-      right: 0.625rem;
-      width: 1.875rem;
-      height: 100%;
-    }
-
-    div.autocomplete-deluxe-throbber.autocomplete-deluxe-open {
-      background: url("../images/search-autocompleting.svg") no-repeat;
-    }
-
-    div.autocomplete-deluxe-throbber.autocomplete-deluxe-closed {
-      background: url("../images/search-autocomplete.svg") no-repeat;
-    }
-  }
-
-  .claro-autocomplete {
-    width: 65%;
-
-    .claro-autocomplete__message {
-      display: none;
-    }
-
-    input {
       width: 100%;
-      padding-right: 1.875rem;
+      min-height: 3rem;
+      padding: 0.68rem 1.875rem 0.68rem 0.93rem;
+      background: white;
+    }
+
+    .autocomplete-deluxe-throbber {
+      top: 0.93rem;
     }
   }
 
-  .accordion .claro-autocomplete {
+  .autocomplete-deluxe-item {
+    margin: 0 0.31rem 0.18rem 0;
+  }
+
+  input.autocomplete-deluxe-form {
+    min-height: 1.25rem;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+
+  div.autocomplete-deluxe-throbber {
+    position: absolute;
+    top: 0.875rem;
+    right: 0.625rem;
+    width: 1.875rem;
+    height: 100%;
+  }
+
+  div.autocomplete-deluxe-throbber.autocomplete-deluxe-open {
+    background: url("../images/search-autocompleting.svg") no-repeat;
+  }
+
+  div.autocomplete-deluxe-throbber.autocomplete-deluxe-closed {
+    background: url("../images/search-autocomplete.svg") no-repeat;
+  }
+}
+
+.claro-autocomplete {
+  width: 65%;
+
+  .claro-autocomplete__message {
+    display: none;
+  }
+
+  input {
     width: 100%;
+    padding-right: 1.875rem;
+  }
+}
+
+.accordion .claro-autocomplete {
+  width: 100%;
+}
+
+.js {
+  input.form-autocomplete {
+    background: url("../images/search-autocomplete.svg") no-repeat 100% 50%;
   }
 
-  .js {
-    input.form-autocomplete {
-      background: url("../images/search-autocomplete.svg") no-repeat 100% 50%;
-    }
-
-    input.form-autocomplete.ui-autocomplete-loading {
-      background: url("../images/search-autocompleting.svg") no-repeat 100% 50%;
-    }
-
-    .is-autocompleting + .claro-autocomplete__message {
-      display: none;
-    }
+  input.form-autocomplete.ui-autocomplete-loading {
+    background: url("../images/search-autocompleting.svg") no-repeat 100% 50%;
   }
 
-  @media screen and (max-width: 81.25rem) {
-    .claro-autocomplete {
-      width: 100%;
-    }
+  .is-autocompleting + .claro-autocomplete__message {
+    display: none;
+  }
+}
+
+@media screen and (max-width: 81.25rem) {
+  .claro-autocomplete {
+    width: 100%;
   }
 }
