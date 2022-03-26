@@ -254,6 +254,16 @@
       lastXhr = $.getJSON(url, request, function(data, status, xhr) {
         cache[term] = data;
         if (xhr === lastXhr) {
+          // Filter already selected items from the response data.
+          if (typeof self.valueForm !== 'undefined') {
+            var currentValues = self.valueForm.val().split('"');
+            const dataArray = Object.entries(data);
+            const dataFiltered = dataArray.filter(([key, value]) => {
+              return ! currentValues.includes(value);
+            });
+            data = Object.fromEntries(dataFiltered);
+          }
+
           response(generateValues(data, term));
         }
       });
