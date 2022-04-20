@@ -54,7 +54,13 @@ class AutocompleteDeluxeElement extends FormElement {
       $active_theme = \Drupal::theme()->getActiveTheme();
       $base_themes = (array) $active_theme->getBaseThemeExtensions();
 
-      if ($active_theme->getName() === 'claro'|| array_key_exists('claro', $base_themes)) {
+      if ($active_theme->getName() === 'gin'|| array_key_exists('gin', $base_themes)) {
+        // Workaround for problems with jquery css in claro theme.
+        $element['#attached']['library'][] = 'autocomplete_deluxe/assets.claro';
+        // Overrides to support Gin's CSS3 variables for Darkmode, Accent etc.
+        $element['#attached']['library'][] = 'autocomplete_deluxe/assets.gin';
+      }
+      elseif ($active_theme->getName() === 'claro'|| array_key_exists('claro', $base_themes)) {
         // Workaround for problems with jquery css in claro theme.
         $element['#attached']['library'][] = 'autocomplete_deluxe/assets.claro';
       }
