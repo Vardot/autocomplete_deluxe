@@ -29,3 +29,11 @@ assets.claro:
       assets/css/autocomplete_deluxe.claro.css: {}
   dependencies:
     - autocomplete_deluxe/assets
+
+assets.gin:
+  version: VERSION
+  css:
+    theme:
+      assets/css/autocomplete_deluxe.gin.css: {}
+  dependencies:
+    - autocomplete_deluxe/assets
