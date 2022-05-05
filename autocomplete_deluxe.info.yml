@@ -2,4 +2,4 @@ name: "Autocomplete Deluxe"
 type: module
 description: "Enhanced autocomplete using Jquery UI autocomplete."
 package: User interface
-core_version_requirement: ^8 || ^9
+core_version_requirement: ^8 || ^9 || ^10
