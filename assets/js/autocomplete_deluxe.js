@@ -238,10 +238,6 @@
 
     this.source = function(request, response) {
       let { term } = request;
-      if (term in cache) {
-        response(generateValues(cache[term], term));
-        return;
-      }
 
       // Some server collapse two slashes if the term is empty, so insert at
       // least a whitespace. This whitespace will later on be trimmed in the
