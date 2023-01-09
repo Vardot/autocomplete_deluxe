@@ -1,74 +1,65 @@
-CONTENTS OF THIS FILE
----------------------
-
-* Introduction
-* Requirements
-* Installation
-* Configuration
-* FAQ
-* Maintainers
-
-
-INTRODUCTION
-------------
+# Autocomplete Deluxe
 
 The Autocomplete Deluxe module is an enhanced autocomplete element that uses the
 JQuery UI autocomplete. It will also implement a widget for taxonomy. This
 module does not require any 3rd party jQuery libraries.
 
- * For a full description of the module visit
-   https://www.drupal.org/project/autocomplete_deluxe
+For a full description of the module, visit the
+[project page](https://www.drupal.org/project/autocomplete_deluxe).
 
- * To submit bug reports and feature suggestions, or to track changes visit
-   https://www.drupal.org/project/issues/autocomplete_deluxe
-
-
-REQUIREMENTS
-------------
-
-This module requires no modules outside of Drupal 8.x core.
+Submit bug reports and feature suggestions, or track changes in the
+[issue queue](https://www.drupal.org/project/issues/autocomplete_deluxe).
 
 
-INSTALLATION
-------------
+## Table of contents
 
-To install the Autocomplete Deluxe module for Drupal 8, run the following
-command: composer require drupal/autocomplete_deluxe
-For further information, see:
-https://www.drupal.org/docs/develop/using-composer/using-composer-to-manage-drupal-site-dependencies
+- Requirements
+- Installation
+- Configuration
+- FAQ
+- Maintainers
 
 
-CONFIGURATION
--------------
+## Requirements
+
+This module requires no modules outside of Drupal core.
+
+
+## Installation
+
+Install as you would normally install a contributed Drupal module. For further
+information, see
+[Installing Drupal Modules](https://www.drupal.org/docs/extending-drupal/installing-drupal-modules).
+
+
+## Configuration
 
 To set up a field named Tags which uses an Autocomplete Deluxe widget to set
 values for that field from the Tags taxonomy, do the following:
 
- * Navigate to Administration > Modules and enable the Autocomplete Deluxe
+ - Navigate to Administration > Modules and enable the Autocomplete Deluxe
    module.
- * Navigate to Administration  > Structure > Content types and select manage
+ - Navigate to Administration  > Structure > Content types and select manage
    fields of the content type you wish to edit.
- * Add a new field of "Term reference" named "Tags". Select the Widget Type
-   "Autocomplete Deluxe" in the drop down menu. Save.
- * Select the Tags vocabulary.  Save field settings.
- * Customize or keep the default Autocomplete Deluxe settings for the field.
+ - Add a new field of "Term reference" named "Tags". Select the Widget Type
+   `"Autocomplete Deluxe"` in the drop down menu. Save.
+ - Select the Tags vocabulary.  Save field settings.
+ - Customize or keep the default Autocomplete Deluxe settings for the field.
    Save settings.
 
 Now when new content is added the Tags widget allows editors to enter
 existing tags as well as create new ones.
 
 
-FAQ
----
+## Faq
 
-Q: Can I use the Autocomplete Deluxe widget as a Views exposed filter?
+**Q: Can I use the Autocomplete Deluxe widget as a Views exposed filter?**
 
-A: Why yes, yes you can!  First, add the field as a traditional exposed
+**A:** TWhy yes, yes you can!  First, add the field as a traditional exposed
    Autocomplete filter in your view.  Then, create a custom module (see
-   https://www.drupal.org/docs/7/creating-custom-modules if you have
+   `https://www.drupal.org/docs/7/creating-custom-modules` if you have
    never written a module before), where your .module file contains
    something like the following:
-
 ```
    function MY_MODULE_form_alter(&$form, Drupal\Core\Form\FormStateInterface
      $form_state, $form_id) {
@@ -126,21 +117,11 @@ A: Why yes, yes you can!  First, add the field as a traditional exposed
 ```
 
 
-MAINTAINERS
------------
+## Maintainers
 
-Current maintainers:
-
- * Edward Chan (edwardchiapet) - https://www.drupal.org/u/edwardchiapet
- * Lee Nakamura (LNakamura) - https://www.drupal.org/u/lnakamura
- * Mohammed J. Razem - https://www.drupal.org/u/mohammed-j-razem
- * Rajab Natshah - https://www.drupal.org/u/rajabnatshah
-
-Active support and ongoing development by Mediacurrent -
-http://www.mediacurrent.com/
-
-Maintenance for D8 and D9 versions by Vardot -
-https://www.vardot.com/
-
-For additional information, see the project page on Drupal.org
-<https://www.drupal.org/project/autocomplete_deluxe>
+- Edward Chan - [edwardchiapet](https://www.drupal.org/u/edwardchiapet)
+- Klaus Purer - [klausi](https://www.drupal.org/u/klausi)
+- Mohammed Razem - [Mohammed J. Razem](https://www.drupal.org/u/mohammed-j-razem)
+- Mike Priscella - [mpriscella](https://www.drupal.org/u/mpriscella)
+- Rajab Natshah - [Rajab Natshah](https://www.drupal.org/u/rajab-natshah)
+- Sebastian Gilits - [sepgil](https://www.drupal.org/u/sepgil)
