@@ -244,7 +244,7 @@ class AutocompleteDeluxeWidget extends WidgetBase implements ContainerFactoryPlu
       $entities[$item->id()] = $item;
     }
 
-    $selection_settings = isset($element['#selection_settings']) ? $element['#selection_settings'] : [];
+    $selection_settings = $element['#selection_settings'] ?? [];
     $data = serialize($selection_settings) . $element['#target_type'] . $element['#selection_handler'];
     $selection_settings_key = Crypt::hmacBase64($data, Settings::getHashSalt());
 
@@ -368,7 +368,7 @@ class AutocompleteDeluxeWidget extends WidgetBase implements ContainerFactoryPlu
    */
   protected function getSelectionHandlerSetting($setting_name) {
     $settings = $this->getFieldSetting('handler_settings');
-    return isset($settings[$setting_name]) ? $settings[$setting_name] : NULL;
+    return $settings[$setting_name] ?? NULL;
   }
 
   /**

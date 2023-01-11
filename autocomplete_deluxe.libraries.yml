@@ -9,7 +9,7 @@ assets:
     - core/drupal
     - core/drupalSettings
     - core/jquery
-    - core/jquery.once
+    - core/once
     - core/jquery.ui.autocomplete
     - core/jquery.ui.button
     - core/sortable

@@ -36,7 +36,10 @@ class AutocompleteDeluxeElement extends FormElement {
     // its value is properly checked for access.
     $info['#process_default_value'] = TRUE;
 
-    $info['#element_validate'] = [['\Drupal\Core\Entity\Element\EntityAutocomplete', 'validateEntityAutocomplete']];
+    $info['#element_validate'] = [['\Drupal\Core\Entity\Element\EntityAutocomplete',
+      'validateEntityAutocomplete',
+    ],
+    ];
     $info['#process'][] = [$class, 'processElement'];
 
     return $info;
@@ -75,7 +78,7 @@ class AutocompleteDeluxeElement extends FormElement {
     $element['#after_build'][] = [get_called_class(), 'afterBuild'];
 
     // Set default options for multiple values.
-    $element['#multiple'] = isset($element['#multiple']) ? $element['#multiple'] : FALSE;
+    $element['#multiple'] = $element['#multiple'] ?? FALSE;
 
     // Add label_display and label variables to template.
     $element['label'] = ['#theme' => 'form_element_label'];
@@ -94,13 +97,13 @@ class AutocompleteDeluxeElement extends FormElement {
     $element['textfield'] = [
       '#disabled' => $element_disabled,
       '#type' => 'textfield',
-      '#size' => isset($element['#size']) ? $element['#size'] : '',
+      '#size' => $element['#size'] ?? '',
       '#attributes' => [
         'class' => ['autocomplete-deluxe-form'],
         'id' => $html_id,
       ],
       '#default_value' => '',
-      '#description' => isset($element['#description']) ? $element['#description'] : '',
+      '#description' => $element['#description'] ?? '',
     ];
 
     // Add autcomplete deluxe container only if element is enabled.
@@ -113,14 +116,14 @@ class AutocompleteDeluxeElement extends FormElement {
       'input_id' => $html_id,
       'multiple' => $element['#multiple'],
       'required' => $element['#required'],
-      'limit' => isset($element['#limit']) ? $element['#limit'] : 10,
-      'min_length' => isset($element['#min_length']) ? $element['#min_length'] : 0,
-      'use_synonyms' => isset($element['#use_synonyms']) ? $element['#use_synonyms'] : 0,
-      'delimiter' => isset($element['#delimiter']) ? $element['#delimiter'] : '',
-      'not_found_message_allow' => isset($element['#not_found_message_allow']) ? $element['#not_found_message_allow'] : FALSE,
-      'not_found_message' => isset($element['#not_found_message']) ? $element['#not_found_message'] : "The term '@term' will be added.",
-      'new_terms' => isset($element['#new_terms']) ? $element['#new_terms'] : FALSE,
-      'no_empty_message' => isset($element['#no_empty_message']) ? $element['#no_empty_message'] : 'No terms could be found. Please type in order to add a new term.',
+      'limit' => $element['#limit'] ?? 10,
+      'min_length' => $element['#min_length'] ?? 0,
+      'use_synonyms' => $element['#use_synonyms'] ?? 0,
+      'delimiter' => $element['#delimiter'] ?? '',
+      'not_found_message_allow' => $element['#not_found_message_allow'] ?? FALSE,
+      'not_found_message' => $element['#not_found_message'] ?? "The term '@term' will be added.",
+      'new_terms' => $element['#new_terms'] ?? FALSE,
+      'no_empty_message' => $element['#no_empty_message'] ?? 'No terms could be found. Please type in order to add a new term.',
     ];
 
     if (isset($element['#autocomplete_deluxe_path'])) {
@@ -144,12 +147,12 @@ class AutocompleteDeluxeElement extends FormElement {
           '#default_value' => $default_value,
           '#prefix' => '<div class="autocomplete-deluxe-value-container">',
           '#suffix' => '</div>',
-          '#description' => isset($element['#description']) ? $element['#description'] : '',
+          '#description' => $element['#description'] ?? '',
         ];
         $element['textfield']['#attributes']['style'] = ['display: none'];
       }
       else {
-        $element['textfield']['#default_value'] = isset($element['#default_value']) ? $element['#default_value'] : '';
+        $element['textfield']['#default_value'] = $element['#default_value'] ?? '';
       }
 
       $js_settings[$html_id] += [
