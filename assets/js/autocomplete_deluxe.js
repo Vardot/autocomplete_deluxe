@@ -3,11 +3,11 @@
  * Converts textfield to an Autocomplete Deluxe widget.
  */
 
-(function (Drupal, $, drupalSettings, Sortable, once) {
+(($, Drupal, once, drupalSettings, Sortable) => {
   Drupal.autocomplete_deluxe = Drupal.autocomplete_deluxe || {};
 
   Drupal.behaviors.autocomplete_deluxe = {
-    attach: function attach(context) {
+    attach(context) {
       const autocompleteSettings = drupalSettings.autocomplete_deluxe;
 
       const $elements = $(
@@ -629,4 +629,4 @@
       }
     });
   };
-})(jQuery, drupalSettings, Sortable);
+})(jQuery, Drupal, once, drupalSettings, Sortable);
