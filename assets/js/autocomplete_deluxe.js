@@ -19,7 +19,7 @@
       );
 
       $elements.each(function () {
-        if (autocompleteSettings[$(this).attr("id")].multiple === TRUE) {
+        if (autocompleteSettings[$(this).attr("id")].multiple === true) {
           new Drupal.autocomplete_deluxe.MultipleWidget(
             this,
             autocompleteSettings[$(this).attr("id")]
@@ -147,7 +147,7 @@
    * @param term
    *   A term that should be accepted or not.
    * @return {Boolean}
-   *   True if the term should be accepted.
+   *   true if the term should be accepted.
    */
   Drupal.autocomplete_deluxe.Widget.prototype.acceptTerm = function(term) {
     return true;
