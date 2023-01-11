@@ -10,8 +10,8 @@ assets:
     - core/drupalSettings
     - core/jquery
     - core/once
-    - core/jquery.ui.autocomplete
-    - core/jquery.ui.button
+    - core/drupal.autocomplete
+    - core/drupal.dialog
     - core/sortable
 
 assets.seven:
