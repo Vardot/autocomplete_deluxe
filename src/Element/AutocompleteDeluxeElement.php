@@ -101,6 +101,7 @@ class AutocompleteDeluxeElement extends FormElement {
       '#attributes' => [
         'class' => ['autocomplete-deluxe-form'],
         'id' => $html_id,
+        'aria-label' => $element['#title'] ?? '',
       ],
       '#default_value' => '',
       '#description' => $element['#description'] ?? '',
