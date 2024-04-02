@@ -164,7 +164,7 @@
     this.uri = settings.uri;
     this.multiple = settings.multiple;
     this.required = settings.required;
-    this.limit = settings.limit;
+    this.match_limit = settings.match_limit;
     this.synonyms =
       typeof settings.use_synonyms === "undefined"
         ? false

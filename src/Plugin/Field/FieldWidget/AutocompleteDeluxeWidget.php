@@ -108,7 +108,7 @@ class AutocompleteDeluxeWidget extends WidgetBase implements ContainerFactoryPlu
       'autocomplete_route_name' => 'autocomplete_deluxe.autocomplete',
       'size' => 60,
       'selection_handler' => 'default',
-      'limit' => 10,
+      'match_limit' => 10,
       'min_length' => 0,
       'delimiter' => '',
       'not_found_message_allow' => FALSE,
@@ -129,11 +129,11 @@ class AutocompleteDeluxeWidget extends WidgetBase implements ContainerFactoryPlu
       '#default_value' => $this->getSetting('match_operator'),
       '#options' => $this->getMatchOperatorOptions(),
     ];
-    $element['limit'] = [
+    $element['match_limit'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Limit of the output.'),
       '#description' => $this->t('If set to zero no limit will be used'),
-      '#default_value' => $this->getSetting('limit'),
+      '#default_value' => $this->getSetting('match_limit'),
       '#element_validate' => [[get_class($this), 'validateInteger']],
     ];
     $element['min_length'] = [
@@ -185,7 +185,7 @@ class AutocompleteDeluxeWidget extends WidgetBase implements ContainerFactoryPlu
     $summary = [];
 
     $summary[] = $this->t('Match operator: @match_operator', ['@match_operator' => $this->getSetting('match_operator')]);
-    $summary[] = $this->t('Limit: @limit', ['@limit' => $this->getSetting('limit')]);
+    $summary[] = $this->t('Limit: @match_limit', ['@match_limit' => $this->getSetting('match_limit')]);
     $summary[] = $this->t('Min length: @min_length', ['@min_length' => $this->getSetting('min_length')]);
     $summary[] = $this->t('Delimiter: @delimiter', ['@delimiter' => $this->getSetting('delimiter')]);
     $summary[] = $this->t('Allow Not Found message: @not_found_message_allow', ['@not_found_message_allow' => $this->getSetting('not_found_message_allow') ? 'Yes' : 'No']);
@@ -211,6 +211,7 @@ class AutocompleteDeluxeWidget extends WidgetBase implements ContainerFactoryPlu
 
     $allow_message = $settings['not_found_message_allow'] ?? FALSE;
     $not_found_message = $settings['not_found_message'] ?? "";
+    $selection_settings['match_limit'] = isset($settings['match_limit']) ? $settings['match_limit'] : 10;
 
     $element += [
       '#type' => 'autocomplete_deluxe',
@@ -219,7 +220,7 @@ class AutocompleteDeluxeWidget extends WidgetBase implements ContainerFactoryPlu
       '#selection_handler' => $this->getFieldSetting('handler'),
       '#selection_settings' => $selection_settings,
       '#size' => 60,
-      '#limit' => $settings['limit'] ?? 10,
+      '#match_limit' => $settings['match_limit'] ?? 10,
       '#min_length' => $settings['min_length'] ?? 0,
       '#delimiter' => $settings['delimiter'] ?? '',
       '#not_found_message_allow' => $allow_message,
