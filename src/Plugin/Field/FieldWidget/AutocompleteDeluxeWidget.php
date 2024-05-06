@@ -275,7 +275,7 @@ class AutocompleteDeluxeWidget extends WidgetBase implements ContainerFactoryPlu
   public static function implodeEntities(array $entities, $bundle = NULL) {
     $typed_entities = [];
     foreach ($entities as $entity) {
-      $label = $entity->label();
+      $label = "{$entity->label()} ({$entity->id()})";
 
       // Extract entities belonging to the bundle in question.
       if (!isset($bundle) || $entity->bundle() == $bundle) {

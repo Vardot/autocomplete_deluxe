@@ -489,10 +489,14 @@
       if (value !== "") {
         // If a terms is encoded in double quotes, then the label should have
         // no double quotes.
-        const label =
+        let label =
           value.match(/["][\w|\s|\D|]*["]/gi) !== null
             ? value.substr(1, value.length - 2)
             : value;
+        const entityId = value.match(/.+\s\(([^\)]+)\)/);
+        if (entityId && entityId.length > 1) {
+          label = label.replace(" (" + entityId[1] + ")", "");
+        }
         let itemInit = {
           label: Drupal.checkPlain(label),
           value: value
