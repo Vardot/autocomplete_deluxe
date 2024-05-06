@@ -29,9 +29,6 @@ field.widget.settings.autocomplete_deluxe:
     not_found_message:
       type: label
       label: '"Not Found" Message'
-    new_terms:
-      type: boolean
-      label: "Allow New Terms"
     no_empty_message:
       type: label
       label: "No Empty Message"
