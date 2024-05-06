@@ -101,15 +101,15 @@ input.autocomplete-deluxe-form.autocomplete-deluxe-multiple {
 div.autocomplete-deluxe-throbber {
   float: right;
   width: 16px;
-  height: 50%;
+  height: 16px;
 }
 
 .autocomplete-deluxe-closed {
-  background: url("../images/throbber.gif") no-repeat 100% 6px;
+  background: url("../images/throbber.gif") no-repeat 100% 2px;
 }
 
 .autocomplete-deluxe-open {
-  background: url("../images/throbber.gif") no-repeat 100% -14px;
+  background: url("../images/throbber.gif") no-repeat 100% -18px;
 }
 
 .autocomplete-deluxe-item {
