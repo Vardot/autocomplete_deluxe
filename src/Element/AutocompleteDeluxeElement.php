@@ -3,6 +3,9 @@
 namespace Drupal\autocomplete_deluxe\Element;
 
 use Drupal\Component\Utility\Html;
+use Drupal\Core\Entity\Element\EntityAutocomplete;
+use Drupal\Core\Entity\EntityReferenceSelection\SelectionInterface;
+use Drupal\Core\Entity\EntityReferenceSelection\SelectionWithAutocreateInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\Element\CompositeFormElementTrait;
 use Drupal\Core\Render\Element\FormElement;
@@ -36,9 +39,11 @@ class AutocompleteDeluxeElement extends FormElement {
     // its value is properly checked for access.
     $info['#process_default_value'] = TRUE;
 
-    $info['#element_validate'] = [['\Drupal\Core\Entity\Element\EntityAutocomplete',
-      'validateEntityAutocomplete',
-    ],
+    $info['#element_validate'] = [
+      [
+        __CLASS__,
+        'validateEntityAutocomplete',
+      ],
     ];
     $info['#process'][] = [$class, 'processElement'];
 
@@ -202,8 +207,8 @@ class AutocompleteDeluxeElement extends FormElement {
     if (isset($element['value_field'])) {
       $element['#value'] = trim($element['#value']);
       // Replace all cases of double double quotes and one or more spaces with a
-      // comma. This will allow us to keep entries in double quotes.
-      $element['#value'] = preg_replace('/"" +""/', ',', $element['#value']);
+      // delimiter. This will allow us to keep entries in double quotes.
+      $element['#value'] = preg_replace('/"" +""/', $element['#delimiter'] ?? ',', $element['#value']);
       // Remove the double quotes at the beginning and the end from the first
       // and the last term.
       $element['#value'] = substr($element['#value'], 2, strlen($element['#value']) - 4);
@@ -214,6 +219,191 @@ class AutocompleteDeluxeElement extends FormElement {
     $form_state->setValueForElement($element, $element['#value']);
 
     return $element;
+  }
+
+  /**
+   * Autocomplete validate handler.
+   *
+   * @see \Drupal\Core\Entity\Element\EntityAutocomplete::validateEntityAutocomplete()
+   *   We need to reuse this completely and remove
+   *   \Drupal\Component\Utility\Tags usage as we have custom delimiter,
+   */
+  public static function validateEntityAutocomplete(array &$element, FormStateInterface $form_state, array &$complete_form) {
+    $value = NULL;
+
+    if (!empty($element['#value'])) {
+      $options = $element['#selection_settings'] + [
+        'target_type' => $element['#target_type'],
+        'handler' => $element['#selection_handler'],
+      ];
+      /** @var \Drupal\Core\Entity\EntityReferenceSelection\SelectionInterface $handler */
+      $handler = \Drupal::service('plugin.manager.entity_reference_selection')->getInstance($options);
+      $autocreate = (bool) $element['#autocreate'] && $handler instanceof SelectionWithAutocreateInterface;
+
+      // GET forms might pass the validated data around on the next request, in
+      // which case it will already be in the expected format.
+      if (is_array($element['#value'])) {
+        $value = $element['#value'];
+      }
+      else {
+        $input_values = $element['#tags']
+          ? self::explodeByDelimiter($element['#value'], $element['#delimiter'] ?? ',')
+          : [$element['#value']];
+
+        foreach ($input_values as $input) {
+          $match = EntityAutocomplete::extractEntityIdFromAutocompleteInput($input);
+          if ($match === NULL) {
+            // Try to get a match from the input string when the user didn't use
+            // the autocomplete but filled in a value manually.
+            $match = self::matchEntityByTitle($handler, $input, $element, $form_state, !$autocreate);
+          }
+
+          if ($match !== NULL) {
+            $value[] = [
+              'target_id' => $match,
+            ];
+          }
+          elseif ($autocreate) {
+            /** @var \Drupal\Core\Entity\EntityReferenceSelection\SelectionWithAutocreateInterface $handler */
+            // Auto-create item. See an example of how this is handled in
+            // \Drupal\Core\Field\Plugin\Field\FieldType\EntityReferenceItem::presave().
+            $value[] = [
+              'entity' => $handler->createNewEntity($element['#target_type'], $element['#autocreate']['bundle'], $input, $element['#autocreate']['uid']),
+            ];
+          }
+        }
+      }
+
+      // Check that the referenced entities are valid, if needed.
+      if ($element['#validate_reference'] && !empty($value)) {
+        // Validate existing entities.
+        $ids = array_reduce($value, function ($return, $item) {
+          if (isset($item['target_id'])) {
+            $return[] = $item['target_id'];
+          }
+          return $return;
+        });
+
+        if ($ids) {
+          $valid_ids = $handler->validateReferenceableEntities($ids);
+          if ($invalid_ids = array_diff($ids, $valid_ids)) {
+            foreach ($invalid_ids as $invalid_id) {
+              $form_state->setError($element, t('The referenced entity (%type: %id) does not exist.', [
+                '%type' => $element['#target_type'],
+                '%id' => $invalid_id,
+              ]));
+            }
+          }
+        }
+
+        // Validate newly created entities.
+        $new_entities = array_reduce($value, function ($return, $item) {
+          if (isset($item['entity'])) {
+            $return[] = $item['entity'];
+          }
+          return $return;
+        });
+
+        if ($new_entities) {
+          if ($autocreate) {
+            $valid_new_entities = $handler->validateReferenceableNewEntities($new_entities);
+            $invalid_new_entities = array_diff_key($new_entities, $valid_new_entities);
+          }
+          else {
+            // If the selection handler does not support referencing newly
+            // created entities, all of them should be invalidated.
+            $invalid_new_entities = $new_entities;
+          }
+
+          foreach ($invalid_new_entities as $entity) {
+            /** @var \Drupal\Core\Entity\EntityInterface $entity */
+            $form_state->setError($element, t('This entity (%type: %label) cannot be referenced.', [
+              '%type' => $element['#target_type'],
+              '%label' => $entity->label(),
+            ]));
+          }
+        }
+      }
+
+      // Use only the last value if the form element does not support multiple
+      // matches (tags).
+      if (!$element['#tags'] && !empty($value)) {
+        $last_value = $value[count($value) - 1];
+        $value = $last_value['target_id'] ?? $last_value;
+      }
+    }
+
+    $form_state->setValueForElement($element, $value);
+  }
+
+  /**
+   * Copy of the method that allows custom delimiter.
+   *
+   * @param string $tags
+   *   A string to explode.
+   * @param string $delimiter
+   *   A delimiter to explode by.
+   *
+   * @see \Drupal\Component\Utility\Tags::explode()
+   */
+  public static function explodeByDelimiter(string $tags, string $delimiter) {
+    $regexp = '%(?:^|' . preg_quote($delimiter) . '\ *)("(?>[^"]*)(?>""[^"]* )*"|(?: [^"' . preg_quote($delimiter) . ']*))%x';
+    preg_match_all($regexp, $tags, $matches);
+    $typed_tags = array_unique($matches[1]);
+
+    $tags = [];
+    foreach ($typed_tags as $tag) {
+      // If a user has escaped a term (to demonstrate that it is a group,
+      // or includes a comma or quote character), we remove the escape
+      // formatting so to save the term into the database as the user intends.
+      $tag = trim(str_replace('""', '"', preg_replace('/^"(.*)"$/', '\1', $tag)));
+      if ($tag != "") {
+        $tags[] = $tag;
+      }
+    }
+
+    return $tags;
+  }
+
+  /**
+   * Copy of protected method we need to use in validation handler.
+   *
+   * @see \Drupal\Core\Entity\Element\EntityAutocomplete::matchEntityByTitle()
+   */
+  protected static function matchEntityByTitle(SelectionInterface $handler, $input, array &$element, FormStateInterface $form_state, $strict) {
+    $entities_by_bundle = $handler->getReferenceableEntities($input, '=', 6);
+    $entities = array_reduce($entities_by_bundle, function ($flattened, $bundle_entities) {
+      return $flattened + $bundle_entities;
+    }, []);
+    $params = [
+      '%value' => $input,
+      '@value' => $input,
+      '@entity_type_plural' => \Drupal::entityTypeManager()->getDefinition($element['#target_type'])->getPluralLabel(),
+    ];
+    if (empty($entities)) {
+      if ($strict) {
+        // Error if there are no entities available for a required field.
+        $form_state->setError($element, t('There are no @entity_type_plural matching "%value".', $params));
+      }
+    }
+    elseif (count($entities) > 5) {
+      $params['@id'] = key($entities);
+      // Error if there are more than 5 matching entities.
+      $form_state->setError($element, t('Many @entity_type_plural are called %value. Specify the one you want by appending the id in parentheses, like "@value (@id)".', $params));
+    }
+    elseif (count($entities) > 1) {
+      // More helpful error if there are only a few matching entities.
+      $multiples = [];
+      foreach ($entities as $id => $name) {
+        $multiples[] = $name . ' (' . $id . ')';
+      }
+      $params['@id'] = $id;
+      $form_state->setError($element, t('Multiple @entity_type_plural match this reference; "%multiple". Specify the one you want by appending the id in parentheses, like "@value (@id)".', ['%multiple' => strip_tags(implode('", "', $multiples))] + $params));
+    }
+    else {
+      // Take the one and only matching entity.
+      return key($entities);
+    }
   }
 
 }
