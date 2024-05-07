@@ -101,7 +101,6 @@ existing tags as well as create new ones.
          '#type' => 'autocomplete_deluxe',
          '#autocomplete_deluxe_path' => $url,
          '#selection_settings' => $selection_settings,
-         '#multiple' => TRUE,
          '#target_type' => $target_type,
          '#selection_handler' => $selection_handler,
          '#limit' => 10,

@@ -19,7 +19,10 @@
       );
 
       $elements.each(function () {
-        if (autocompleteSettings[$(this).attr("id")].multiple === true) {
+        if (
+          autocompleteSettings[$(this).attr("id")].always_multiple ||
+          autocompleteSettings[$(this).attr("id")].cardinality != 1
+        ) {
           new Drupal.autocomplete_deluxe.MultipleWidget(
             this,
             autocompleteSettings[$(this).attr("id")]
@@ -162,7 +165,8 @@
     this.jqObject = $("#" + this.id);
 
     this.uri = settings.uri;
-    this.multiple = settings.multiple;
+    this.cardinality = settings.cardinality;
+    this.always_multiple = settings.always_multiple;
     this.required = settings.required;
     this.match_limit = settings.match_limit;
     this.synonyms =
@@ -185,6 +189,14 @@
             "No terms could be found. Please type in order to add a new term."
           )
         : settings.no_empty_message;
+    this.cardinality_message =
+      this.cardinality > 0
+        ? Drupal.formatPlural(
+            this.cardinality,
+            "This field cannot hold more than one value.",
+            "This field cannot hold more than @count values."
+          )
+        : "";
 
     this.wrapper = '""';
 
@@ -206,12 +218,25 @@
 
     const generateValues = function(data, term) {
       const result = new Array();
-      for (const terms in data) {
-        if (self.acceptTerm(terms)) {
-          result.push({
-            label: data[terms],
-            value: terms
-          });
+
+      // Check for field cardinality and see if we have reached the limit.
+      if (
+        self.cardinality > 0 &&
+        Object.keys(self.items).length >= self.cardinality
+      ) {
+        result.push({
+          label: self.cardinality_message,
+          noTerms: true
+        });
+      }
+      else {
+        for (const terms in data) {
+          if (self.acceptTerm(terms)) {
+            result.push({
+              label: data[terms],
+              value: terms
+            });
+          }
         }
       }
 
