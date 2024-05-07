@@ -100,7 +100,6 @@ class AutocompleteDeluxeElement extends FormElement {
       '#type' => 'textfield',
       '#size' => $element['#size'] ?? '',
       '#attributes' => [
-        'class' => ['autocomplete-deluxe-form'],
         'id' => $html_id,
         'aria-label' => $element['#title'] ?? '',
       ],
@@ -108,10 +107,11 @@ class AutocompleteDeluxeElement extends FormElement {
       '#description' => $element['#description'] ?? '',
     ];
 
-    // Add autcomplete deluxe container only if element is enabled.
+    // Add autocomplete deluxe container and class only if element is enabled.
     if (!$element_disabled) {
       $element['textfield']['#prefix'] = '<div class="autocomplete-deluxe-container">';
       $element['textfield']['#suffix'] = '</div>';
+      $element['textfield']['#attributes']['class'][] = 'autocomplete-deluxe-form';
     }
 
     $js_settings[$html_id] = [
