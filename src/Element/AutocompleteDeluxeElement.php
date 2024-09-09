@@ -83,8 +83,7 @@ class AutocompleteDeluxeElement extends FormElement {
     $element['#after_build'][] = [get_called_class(), 'afterBuild'];
 
     // Set default options for multiple values.
-    $element['#always_multiple'] = $element['#always_multiple'] ?? FALSE;
-    $element['#cardinality'] = $element['#cardinality'] ?? -1;
+    $element['#multiple'] = $element['#multiple'] ?? FALSE;
 
     // Add label_display and label variables to template.
     $element['label'] = ['#theme' => 'form_element_label'];
@@ -121,8 +120,7 @@ class AutocompleteDeluxeElement extends FormElement {
 
     $js_settings[$html_id] = [
       'input_id' => $html_id,
-      'always_multiple' => $element['#always_multiple'],
-      'cardinality' => $element['#cardinality'],
+      'multiple' => $element['#multiple'],
       'required' => $element['#required'],
       'limit' => $element['#limit'] ?? 10,
       'min_length' => $element['#min_length'] ?? 0,
@@ -146,7 +144,7 @@ class AutocompleteDeluxeElement extends FormElement {
         $default_value = '';
       }
 
-      if ($element['#always_multiple'] || $element['#cardinality'] != 1) {
+      if ($element['#multiple']) {
         $element['value_field'] = [
           '#type' => 'textfield',
           '#attributes' => [
