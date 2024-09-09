@@ -8,14 +8,14 @@ use Drupal\Core\Entity\EntityReferenceSelection\SelectionInterface;
 use Drupal\Core\Entity\EntityReferenceSelection\SelectionWithAutocreateInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\Element\CompositeFormElementTrait;
-use Drupal\Core\Render\Element\FormElement;
+use Drupal\Core\Render\Element\FormElementBase;
 
 /**
  * Provides an Autocomplete Deluxe Form API element.
  *
  * @FormElement("autocomplete_deluxe")
  */
-class AutocompleteDeluxeElement extends FormElement {
+class AutocompleteDeluxeElement extends FormElementBase {
 
   use CompositeFormElementTrait;
 
