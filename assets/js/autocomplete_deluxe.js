@@ -480,7 +480,7 @@
 
     // Add the default values to the box.
     let defaultValues = value_input.val();
-    defaultValues = $.trim(defaultValues);
+    defaultValues = defaultValues.trim();
     defaultValues = defaultValues.substr(2, defaultValues.length - 4);
     defaultValues = defaultValues.split(/"" +""/);
 
