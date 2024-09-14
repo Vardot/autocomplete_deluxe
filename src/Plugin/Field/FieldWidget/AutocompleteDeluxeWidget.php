@@ -16,6 +16,7 @@ use Drupal\Core\Url;
 use Drupal\user\EntityOwnerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\Field\FieldStorageDefinitionInterface;
 
 /**
  * Plugin implementation of the 'options_buttons' widget.
