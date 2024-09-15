@@ -19,16 +19,10 @@
       );
 
       $elements.each(function () {
-        if (autocompleteSettings[$(this).attr("id")].multiple === true) {
-          new Drupal.autocomplete_deluxe.MultipleWidget(
-            this,
-            autocompleteSettings[$(this).attr("id")]
-          );
-        } else {
-          new Drupal.autocomplete_deluxe.SingleWidget(
-            autocompleteSettings[$(this).attr("id")]
-          );
-        }
+        new Drupal.autocomplete_deluxe.MultipleWidget(
+          this,
+          autocompleteSettings[$(this).attr("id")]
+        );
       });
     },
   };
@@ -162,7 +156,7 @@
     this.jqObject = $("#" + this.id);
 
     this.uri = settings.uri;
-    this.multiple = settings.multiple;
+    this.cardinality = settings.cardinality;
     this.required = settings.required;
     this.match_limit = settings.match_limit;
     this.synonyms =
@@ -185,6 +179,14 @@
             "No terms could be found. Please type in order to add a new term."
           )
         : settings.no_empty_message;
+    this.cardinality_message =
+      this.cardinality > 0
+        ? Drupal.formatPlural(
+            this.cardinality,
+            "This field cannot hold more than one value.",
+            "This field cannot hold more than @count values."
+          )
+        : "";
 
     this.wrapper = '""';
 
@@ -206,12 +208,25 @@
 
     const generateValues = function(data, term) {
       const result = new Array();
-      for (const terms in data) {
-        if (self.acceptTerm(terms)) {
-          result.push({
-            label: data[terms],
-            value: terms
-          });
+
+      // Check for field cardinality and see if we have reached the limit.
+      if (
+        self.cardinality > 0 &&
+        Object.keys(self.items).length >= self.cardinality
+      ) {
+        result.push({
+          label: self.cardinality_message,
+          noTerms: true
+        });
+      }
+      else {
+        for (const terms in data) {
+          if (self.acceptTerm(terms)) {
+            result.push({
+              label: data[terms],
+              value: terms
+            });
+          }
         }
       }
 
@@ -349,30 +364,6 @@
   };
 
   /**
-   * Generates a single selecting widget.
-   */
-  Drupal.autocomplete_deluxe.SingleWidget = function(settings) {
-    this.init(settings);
-    this.setup();
-    this.jqObject.addClass("autocomplete-deluxe-form-single");
-  };
-
-  Drupal.autocomplete_deluxe.SingleWidget.prototype = new Drupal.autocomplete_deluxe.Widget();
-
-  Drupal.autocomplete_deluxe.SingleWidget.prototype.setup = function() {
-    const { jqObject } = this;
-    const parent = jqObject.parent();
-
-    parent.mousedown(function() {
-      if (parent.hasClass("autocomplete-deluxe-single-open")) {
-        jqObject.autocomplete("close");
-      } else {
-        jqObject.autocomplete("search", "");
-      }
-    });
-  };
-
-  /**
    * Creates a multiple selecting widget.
    */
   Drupal.autocomplete_deluxe.MultipleWidget = function(input, settings) {
@@ -505,8 +496,10 @@
           self,
           itemInit
         );
-        item.element.insertBefore(jqObject);
-        items[item.value] = item;
+        if (typeof item.element !== 'undefined') {
+          item.element.insertBefore(jqObject);
+          items[item.value] = item;
+        }
       }
     }
 
@@ -519,12 +512,14 @@
         self,
         ui_item
       );
-      item.element.insertBefore(jqObject);
-      items[ui_item.value] = item;
-      const new_value = " " + self.wrapper + ui_item.value + self.wrapper;
-      const values = value_input.val();
-      value_input.val(values + new_value);
-      jqObject.val("");
+      if (typeof item.element !== 'undefined') {
+        item.element.insertBefore(jqObject);
+        items[ui_item.value] = item;
+        const new_value = " " + self.wrapper + ui_item.value + self.wrapper;
+        const values = value_input.val();
+        value_input.val(values + new_value);
+        jqObject.val("");
+      }
     };
 
     parent.mouseup(function() {

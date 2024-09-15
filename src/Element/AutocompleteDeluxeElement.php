@@ -77,9 +77,6 @@ class AutocompleteDeluxeElement extends FormElementBase {
 
     $element['#after_build'][] = [get_called_class(), 'afterBuild'];
 
-    // Set default options for multiple values.
-    $element['#multiple'] = $element['#multiple'] ?? FALSE;
-
     // Add label_display and label variables to template.
     $element['label'] = ['#theme' => 'form_element_label'];
     $element['label'] += array_intersect_key(
@@ -115,7 +112,7 @@ class AutocompleteDeluxeElement extends FormElementBase {
 
     $js_settings[$html_id] = [
       'input_id' => $html_id,
-      'multiple' => $element['#multiple'],
+      'cardinality' => $element['#cardinality'],
       'required' => $element['#required'],
       'limit' => $element['#limit'] ?? 10,
       'min_length' => $element['#min_length'] ?? 0,
@@ -139,22 +136,17 @@ class AutocompleteDeluxeElement extends FormElementBase {
         $default_value = '';
       }
 
-      if ($element['#multiple']) {
-        $element['value_field'] = [
-          '#type' => 'textfield',
-          '#attributes' => [
-            'class' => ['autocomplete-deluxe-value-field'],
-          ],
-          '#default_value' => $default_value,
-          '#prefix' => '<div class="autocomplete-deluxe-value-container">',
-          '#suffix' => '</div>',
-          '#description' => $element['#description'] ?? '',
-        ];
-        $element['textfield']['#attributes']['style'] = ['display: none'];
-      }
-      else {
-        $element['textfield']['#default_value'] = $element['#default_value'] ?? '';
-      }
+      $element['value_field'] = [
+        '#type' => 'textfield',
+        '#attributes' => [
+          'class' => ['autocomplete-deluxe-value-field'],
+        ],
+        '#default_value' => $default_value,
+        '#prefix' => '<div class="autocomplete-deluxe-value-container">',
+        '#suffix' => '</div>',
+        '#description' => $element['#description'] ?? '',
+      ];
+      $element['textfield']['#attributes']['style'] = ['display: none'];
 
       $js_settings[$html_id] += [
         'type' => 'ajax',

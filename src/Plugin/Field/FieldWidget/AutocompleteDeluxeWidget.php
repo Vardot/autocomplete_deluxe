@@ -16,7 +16,6 @@ use Drupal\Core\Url;
 use Drupal\user\EntityOwnerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\Session\AccountInterface;
-use Drupal\Core\Field\FieldStorageDefinitionInterface;
 
 /**
  * Plugin implementation of the 'options_buttons' widget.
@@ -227,9 +226,8 @@ class AutocompleteDeluxeWidget extends WidgetBase implements ContainerFactoryPlu
       '#not_found_message' => $this->t('@not_found_message', ['@not_found_message' => $not_found_message]),
       '#new_terms' => $settings['new_terms'] ?? FALSE,
       '#no_empty_message' => isset($settings['no_empty_message']) ? $this->t('@no_empty_message', ['@no_empty_message' => $settings['no_empty_message']]) : '',
+      '#cardinality' => $cardinality,
     ];
-
-    $multiple = $cardinality > 1 || $cardinality == FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED;
 
     // If new terms are allowed to be created, set the bundle and the uid of the
     // term.
@@ -261,7 +259,6 @@ class AutocompleteDeluxeWidget extends WidgetBase implements ContainerFactoryPlu
     ];
 
     $element += [
-      '#multiple' => $multiple,
       '#autocomplete_deluxe_path' => Url::fromRoute('autocomplete_deluxe.autocomplete', $route_parameters, ['absolute' => TRUE])->getInternalPath(),
       '#default_value' => self::implodeEntities($entities),
     ];
