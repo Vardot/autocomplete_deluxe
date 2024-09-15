@@ -200,6 +200,10 @@ class AutocompleteDeluxeElement extends FormElementBase {
       // Make comma delimited.
       $element['#value'] = preg_replace('/" +"/', '","', $element['#value']);
 
+      if (substr($element['#value'], 0, 3) == '","') {
+        $element['#value'] = substr($element['#value'], 2); 
+      }
+
       // Remove the double quotes at the beginning and the end from the first
       // and the last term.
       $element['#value'] = '"' . trim($element['#value'], '"') . '"';
