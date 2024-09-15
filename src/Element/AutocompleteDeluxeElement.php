@@ -199,12 +199,18 @@ class AutocompleteDeluxeElement extends FormElementBase {
 
     if (isset($element['value_field'])) {
       $element['#value'] = trim($element['#value']);
-      // Replace all cases of double double quotes and one or more spaces with a
-      // comma. This will allow us to keep entries in double quotes.
-      $element['#value'] = preg_replace('/"" +""/', ',', $element['#value']);
+
+      // Replace all cases of (2 or) 3 quotes with 1 double quote.
+      $element['#value'] = preg_replace('/^"{2,3}|"{2,3}$/', '"', $element['#value']);
+      $element['#value'] = preg_replace('/"{2,3} +"/', '" "', $element['#value']);
+      $element['#value'] = preg_replace('/" +"{2,3}/', '" "', $element['#value']);
+
+      // Make comma delimited.
+      $element['#value'] = preg_replace('/" +"/', '","', $element['#value']);
+
       // Remove the double quotes at the beginning and the end from the first
       // and the last term.
-      $element['#value'] = substr($element['#value'], 2, strlen($element['#value']) - 4);
+      $element['#value'] = '"' . trim($element['#value'], '"') . '"';
 
       unset($element['value_field']['#maxlength']);
     }
