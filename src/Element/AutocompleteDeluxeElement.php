@@ -5,14 +5,14 @@ namespace Drupal\autocomplete_deluxe\Element;
 use Drupal\Component\Utility\Html;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\Element\CompositeFormElementTrait;
-use Drupal\Core\Render\Element\FormElementBase;
+use Drupal\Core\Render\Element\FormElement;
 
 /**
  * Provides an Autocomplete Deluxe Form API element.
  *
  * @FormElement("autocomplete_deluxe")
  */
-class AutocompleteDeluxeElement extends FormElementBase {
+class AutocompleteDeluxeElement extends FormElement {
 
   use CompositeFormElementTrait;
 
