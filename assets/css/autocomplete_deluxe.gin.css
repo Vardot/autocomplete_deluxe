@@ -15,7 +15,7 @@ div.autocomplete-deluxe-multiple {
 .autocomplete-deluxe-item {
   color: var(--gin-color-primary-hover);
   padding: 6px 24px 6px 12px;
-  background-color: var(--gin-color-primary-light-hover;
+  background-color: var(--gin-color-primary-light-hover);
   border-radius: var(--gin-border-m);
   border: 0 none;
   box-shadow: none;
