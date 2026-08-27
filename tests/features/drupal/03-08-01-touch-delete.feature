@@ -32,4 +32,4 @@ Feature: The Autocomplete Deluxe widget removes a tag on a touch device
 
   Scenario: The delete control is big enough for a finger
     When I add the autocomplete deluxe tag "Alpha"
-    Then the autocomplete deluxe delete control should offer a tap target of at least 24 pixels on a coarse pointer
+    Then the autocomplete deluxe delete control should offer a tap target of at least 44 pixels on a coarse pointer

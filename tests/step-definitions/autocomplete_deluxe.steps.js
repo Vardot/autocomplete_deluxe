@@ -562,21 +562,24 @@ When(
 /**
  * Assert the delete control offers a target a finger can hit.
  *
- * The icon is deliberately small, so the widget grows the tap area with a
- * pseudo element on a coarse pointer. The rule is read from the stylesheet
- * rather than measured, because a desktop browser reports a fine pointer and
- * would never apply it.
+ * The icon is deliberately small, so on a coarse pointer the widget grows the
+ * tap area with a pseudo element sized from the admin theme's spacing scale.
+ * A desktop browser reports a fine pointer and would never apply the rule, so
+ * the declared value is resolved against the page rather than measured.
  *
  * Example: Then the autocomplete deluxe delete control should offer a tap
- *          target of at least 24 pixels on a coarse pointer
+ *          target of at least 44 pixels on a coarse pointer
  */
 Then(
   /^the autocomplete deluxe delete control should offer a tap target of at least (\d+) pixels on a coarse pointer$/,
   async function (min) {
     await attempt(async () => {
       const found = await this.page.evaluate(() => {
-        const sheets = Array.from(document.styleSheets);
-        for (const sheet of sheets) {
+        // Read what the coarse-pointer block declares: the tap-target custom
+        // property if the rule uses one, otherwise a plain width.
+        let token = null;
+        let width = null;
+        for (const sheet of Array.from(document.styleSheets)) {
           let rules;
           try {
             rules = sheet.cssRules;
@@ -591,17 +594,41 @@ Then(
             }
             for (const inner of Array.from(rule.cssRules || [])) {
               if (
-                /autocomplete-deluxe-item-delete/.test(inner.selectorText || '')
+                !/autocomplete-deluxe-item-delete/.test(
+                  inner.selectorText || '',
+                )
               ) {
-                return {
-                  width: parseFloat(inner.style.width),
-                  height: parseFloat(inner.style.height),
-                };
+                continue;
+              }
+              const t = inner.style.getPropertyValue(
+                '--autocomplete-deluxe-tap-target',
+              );
+              if (t && !token) {
+                token = t.trim();
+              }
+              if (inner.style.width && !width) {
+                width = inner.style.width.trim();
               }
             }
           }
         }
-        return null;
+        const declared = token || width;
+        if (!declared) {
+          return null;
+        }
+        // Resolve it against the element the rule applies to, so a var() chain
+        // picks up whichever token the active admin theme provides.
+        const host =
+          document.querySelector('.autocomplete-deluxe-item-delete') ||
+          document.body;
+        const probe = document.createElement('div');
+        probe.style.position = 'absolute';
+        probe.style.visibility = 'hidden';
+        probe.style.width = declared;
+        host.appendChild(probe);
+        const resolved = parseFloat(getComputedStyle(probe).width);
+        probe.remove();
+        return { declared, resolved };
       });
       const wanted = parseInt(min, 10);
       if (!found) {
@@ -609,9 +636,9 @@ Then(
           'No coarse-pointer rule grows the delete control tap area',
         );
       }
-      if (!(found.width >= wanted) || !(found.height >= wanted)) {
+      if (!(found.resolved >= wanted)) {
         throw new Error(
-          `Coarse-pointer tap target is ${found.width}x${found.height}, wanted at least ${wanted}x${wanted}`,
+          `Coarse-pointer tap target resolves to ${found.resolved}px from "${found.declared}", wanted at least ${wanted}px`,
         );
       }
     }, 'Could not read the coarse-pointer rule for the delete control');

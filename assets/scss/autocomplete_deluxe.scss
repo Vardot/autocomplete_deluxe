@@ -125,13 +125,25 @@ div.autocomplete-deluxe-throbber {
 }
 /* A finger needs a bigger target than the icon, so the tap area grows on
    touch devices without changing how the icon looks. */
+/* A finger needs a bigger target than the icon, so the tap area grows on a
+   touch device without changing how the icon looks.
+
+   The size comes from the admin theme's own spacing scale, so the widget grows
+   with the theme rather than against it: Default Admin exposes
+   --admin-space-2xl, while Claro and Gin expose --space-xl. Both are 3rem.
+   The 44px fallback is the target size WCAG 2.5.5 asks for, for a theme that
+   offers neither. */
 @media (pointer: coarse) {
+  .autocomplete-deluxe-item-delete {
+    --autocomplete-deluxe-tap-target: var(--admin-space-2xl, var(--space-xl, 44px));
+  }
+
   .autocomplete-deluxe-item-delete::after {
     position: absolute;
     top: 50%;
     left: 50%;
-    width: 24px;
-    height: 24px;
+    width: var(--autocomplete-deluxe-tap-target);
+    height: var(--autocomplete-deluxe-tap-target);
     content: "";
     transform: translate(-50%, -50%);
   }
