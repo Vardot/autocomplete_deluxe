@@ -437,7 +437,10 @@
       this.element,
     );
 
-    close.mousedown(function () {
+    // Touchstart as well as mousedown, since a touch browser does not always
+    // send a mouse event for a tap on the delete control.
+    close.on('mousedown touchstart', function (event) {
+      event.preventDefault();
       self.remove(item);
       const valueInput = self.widget.jqObject
         .parents('.autocomplete-deluxe-container')

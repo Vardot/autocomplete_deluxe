@@ -532,6 +532,93 @@ When(
 );
 
 /**
+ * Remove a tag with a touch tap rather than a mouse click.
+ *
+ * A touch browser does not always send a mouse event for a tap, so the widget
+ * has to listen for touchstart as well. Dispatching the event by name exercises
+ * that listener in any browser: with a mousedown-only handler nothing happens
+ * and the tag stays, which is the failure this covers.
+ *
+ * Example: When I tap the delete control of the autocomplete deluxe tag "Alpha"
+ */
+When(
+  /^(?:I |we )?tap the delete control of the autocomplete deluxe tag "([^"]*)"$/,
+  async function (label) {
+    await attempt(async () => {
+      const chip = this.page.locator(ACD_CHIP, { hasText: label }).first();
+      await chip.waitFor({ state: 'visible', timeout: 8000 });
+      await chip
+        .locator('.autocomplete-deluxe-item-delete')
+        .evaluate((el) =>
+          el.dispatchEvent(
+            new Event('touchstart', { bubbles: true, cancelable: true }),
+          ),
+        );
+      await chip.waitFor({ state: 'detached', timeout: 8000 });
+    }, `Tapping the delete control of "${label}" did not remove it`);
+  },
+);
+
+/**
+ * Assert the delete control offers a target a finger can hit.
+ *
+ * The icon is deliberately small, so the widget grows the tap area with a
+ * pseudo element on a coarse pointer. The rule is read from the stylesheet
+ * rather than measured, because a desktop browser reports a fine pointer and
+ * would never apply it.
+ *
+ * Example: Then the autocomplete deluxe delete control should offer a tap
+ *          target of at least 24 pixels on a coarse pointer
+ */
+Then(
+  /^the autocomplete deluxe delete control should offer a tap target of at least (\d+) pixels on a coarse pointer$/,
+  async function (min) {
+    await attempt(async () => {
+      const found = await this.page.evaluate(() => {
+        const sheets = Array.from(document.styleSheets);
+        for (const sheet of sheets) {
+          let rules;
+          try {
+            rules = sheet.cssRules;
+          } catch (e) {
+            continue;
+          }
+          for (const rule of Array.from(rules || [])) {
+            const media =
+              rule.conditionText || (rule.media && rule.media.mediaText);
+            if (!media || !/pointer:\s*coarse/.test(media)) {
+              continue;
+            }
+            for (const inner of Array.from(rule.cssRules || [])) {
+              if (
+                /autocomplete-deluxe-item-delete/.test(inner.selectorText || '')
+              ) {
+                return {
+                  width: parseFloat(inner.style.width),
+                  height: parseFloat(inner.style.height),
+                };
+              }
+            }
+          }
+        }
+        return null;
+      });
+      const wanted = parseInt(min, 10);
+      if (!found) {
+        throw new Error(
+          'No coarse-pointer rule grows the delete control tap area',
+        );
+      }
+      if (!(found.width >= wanted) || !(found.height >= wanted)) {
+        throw new Error(
+          `Coarse-pointer tap target is ${found.width}x${found.height}, wanted at least ${wanted}x${wanted}`,
+        );
+      }
+    }, 'Could not read the coarse-pointer rule for the delete control');
+  },
+);
+
+/**
  * Commit the current Autocomplete Deluxe input with Enter. With new_terms /
  * not_found_message disabled, an unmatched value must NOT produce a chip - this
  * step lets a scenario exercise that boundary deterministically.

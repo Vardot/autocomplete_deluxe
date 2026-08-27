@@ -123,6 +123,20 @@ div.autocomplete-deluxe-throbber {
   background: url("../images/x.gif");
   font-size: 1px;
 }
+/* A finger needs a bigger target than the icon, so the tap area grows on
+   touch devices without changing how the icon looks. */
+@media (pointer: coarse) {
+  .autocomplete-deluxe-item-delete::after {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 24px;
+    height: 24px;
+    content: "";
+    transform: translate(-50%, -50%);
+  }
+}
+
 .autocomplete-deluxe-item-focus {
   background: none repeat scroll 0 0 #d4d4d4;
 }
