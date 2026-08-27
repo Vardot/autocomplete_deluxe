@@ -35,3 +35,6 @@ field.widget.settings.autocomplete_deluxe:
     no_empty_message:
       type: label
       label: "No Empty Message"
+    show_term_hierarchy:
+      type: boolean
+      label: "Show the Parent Hierarchy"

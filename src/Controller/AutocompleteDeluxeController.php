@@ -73,6 +73,29 @@ class AutocompleteDeluxeController extends EntityAutocompleteController {
       $items = $starts + $contains;
     }
 
+    // Show each term with its parents, so the same name under different
+    // parents can be told apart. The label alone changes; the value that is
+    // stored stays what it was.
+    //
+    // This runs after the ordering above, deliberately: the prefix would put
+    // the parent's name at the front of the label, and a term whose own name
+    // starts with the typed string would then no longer be seen to start with
+    // it. Ordering stays on the term's own name; the prefix is display only.
+    if (!empty($selection_settings['autocomplete_deluxe_hierarchy']) && $target_type === 'taxonomy_term') {
+      $storage = $this->entityTypeManager()->getStorage('taxonomy_term');
+      foreach ($items as $value => $label) {
+        if (preg_match('/\((\d+)\)$/', (string) $value, $found)) {
+          $parents = $storage->loadAllParents($found[1]);
+          // The chain comes child first and includes the term itself.
+          array_shift($parents);
+          if ($parents) {
+            $names = array_reverse(array_map(static fn ($term) => $term->label(), $parents));
+            $items[$value] = implode(' » ', $names) . ' » ' . $label;
+          }
+        }
+      }
+    }
+
     $matches = $items;
 
     return new JsonResponse($matches);

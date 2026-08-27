@@ -114,6 +114,7 @@ class AutocompleteDeluxeWidget extends WidgetBase implements ContainerFactoryPlu
       'not_found_message' => "The term '@term' will be added",
       'new_terms' => FALSE,
       'no_empty_message' => 'No terms could be found. Please type in order to add a new term.',
+      'show_term_hierarchy' => FALSE,
     ] + parent::defaultSettings();
   }
 
@@ -167,6 +168,12 @@ class AutocompleteDeluxeWidget extends WidgetBase implements ContainerFactoryPlu
       '#description' => $this->t('Should it be allowed, that user enter new terms?'),
       '#default_value' => $this->getSetting('new_terms'),
     ];
+    $element['show_term_hierarchy'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Show the parent hierarchy'),
+      '#description' => $this->t('Show each suggested term with its parents, which tells the same name under different parents apart. Taxonomy only.'),
+      '#default_value' => $this->getSetting('show_term_hierarchy'),
+    ];
     $element['no_empty_message'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Empty value message.'),
@@ -190,6 +197,7 @@ class AutocompleteDeluxeWidget extends WidgetBase implements ContainerFactoryPlu
     $summary[] = $this->t('Allow Not Found message: @not_found_message_allow', ['@not_found_message_allow' => $this->getSetting('not_found_message_allow') ? 'Yes' : 'No']);
     $summary[] = $this->t('Not Found message: @not_found_message', ['@not_found_message' => $this->getSetting('not_found_message')]);
     $summary[] = $this->t('Allow new terms: @new_terms', ['@new_terms' => $this->getSetting('new_terms') ? 'Yes' : 'No']);
+    $summary[] = $this->t('Show the parent hierarchy: @show_term_hierarchy', ['@show_term_hierarchy' => $this->getSetting('show_term_hierarchy') ? 'Yes' : 'No']);
     $summary[] = $this->t('Empty value message: @no_empty_message', ['@no_empty_message' => $this->getSetting('no_empty_message')]);
 
     return $summary;
@@ -211,6 +219,12 @@ class AutocompleteDeluxeWidget extends WidgetBase implements ContainerFactoryPlu
     $allow_message = $settings['not_found_message_allow'] ?? FALSE;
     $not_found_message = $settings['not_found_message'] ?? "";
     $selection_settings['match_limit'] = isset($settings['match_limit']) ? $settings['match_limit'] : 10;
+
+    // Rides inside the hashed settings, so the flag reaches the controller
+    // and stays one key per field in the store.
+    if (!empty($settings['show_term_hierarchy'])) {
+      $selection_settings['autocomplete_deluxe_hierarchy'] = TRUE;
+    }
 
     $element += [
       '#type' => 'autocomplete_deluxe',
