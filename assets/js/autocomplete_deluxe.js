@@ -230,6 +230,14 @@
         }
       }
 
+      // Whether one of the suggestions is the typed term itself, so that an
+      // existing term is picked rather than offered again as a new one.
+      const typed = term.trim().toLowerCase();
+      const exists = Object.keys(data).some(function (key) {
+        const label = String(data[key]).replace(/\s\([^()]*\)$/, '');
+        return label.trim().toLowerCase() === typed;
+      });
+
       // If there are no results and new terms OR not found message can be
       // displayed, push the result, so the menu can be shown.
       if (
@@ -250,6 +258,17 @@
             noTerms: true
           });
         }
+      }
+      else if (self.new_terms && !exists && typed !== "") {
+        // Other terms contain what was typed, but none of them is it, so the
+        // new term is offered beside them instead of being unreachable.
+        result.push({
+          label: Drupal.formatString(self.not_found_message, {
+            '@term': term,
+          }),
+          value: term,
+          newTerm: true,
+        });
       }
       return result;
     };
