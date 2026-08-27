@@ -112,8 +112,10 @@ class AutocompleteDeluxeElement extends FormElementBase {
 
     $js_settings[$html_id] = [
       'input_id' => $html_id,
-      'cardinality' => $element['#cardinality'],
-      'required' => $element['#required'],
+      // The field widget always sets these; a custom form using the element
+      // directly may not, so fall back to no limit and not required.
+      'cardinality' => $element['#cardinality'] ?? 0,
+      'required' => $element['#required'] ?? FALSE,
       'limit' => $element['#limit'] ?? 10,
       'min_length' => $element['#min_length'] ?? 0,
       'use_synonyms' => $element['#use_synonyms'] ?? 0,
