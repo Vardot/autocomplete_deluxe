@@ -55,6 +55,24 @@ class AutocompleteDeluxeController extends EntityAutocompleteController {
       $items[$item['value']] = $item['label'];
     }
 
+    // The matcher returns its results alphabetically, so a term that merely
+    // contains what was typed can outrank the one that starts with it. Bring
+    // the terms that start with the typed string to the front, keeping the
+    // matcher's own order inside each group.
+    if ($typed_string !== '') {
+      $starts = [];
+      $contains = [];
+      foreach ($items as $value => $label) {
+        if (stripos((string) $label, $typed_string) === 0) {
+          $starts[$value] = $label;
+        }
+        else {
+          $contains[$value] = $label;
+        }
+      }
+      $items = $starts + $contains;
+    }
+
     $matches = $items;
 
     return new JsonResponse($matches);
