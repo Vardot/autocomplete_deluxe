@@ -1,9 +1,4 @@
-@autocomplete_deluxe @keyboard @needs-3447536
-# Tagged @needs-3447536 because these scenarios cover the Enter guard added in
-# https://www.drupal.org/node/3447536. Until that fix lands on the target branch
-# the key press still reaches the form's submit handler, so the pipeline
-# excludes this tag. Once it lands, drop the tag here and its exclusion from
-# .gitlab-ci.yml.
+@autocomplete_deluxe @keyboard
 Feature: The Autocomplete Deluxe widget keeps Enter inside the field
   As a content author
   I want Enter on an unmatched term to stay in the widget

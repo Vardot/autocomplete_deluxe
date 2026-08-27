@@ -605,7 +605,9 @@
         // settings, do not continue to process and add that value.
         if (!allowNewTerms) {
           this.value = '';
-          return;
+          // Returning false stops the key press here, so it never reaches the
+          // form and saves the node behind the author's back.
+          return false;
         }
 
         value = value.substr(0, value.length);
