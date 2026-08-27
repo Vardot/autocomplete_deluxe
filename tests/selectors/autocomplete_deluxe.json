@@ -1,0 +1,24 @@
+{
+  "css": {
+    "autocomplete deluxe widget": "div.autocomplete-deluxe-container, div.autocomplete-deluxe-multiple",
+    "autocomplete deluxe input": "input.autocomplete-deluxe-form",
+    "autocomplete deluxe suggestion list": "ul.ui-autocomplete:visible",
+    "autocomplete deluxe suggestion item": "ul.ui-autocomplete:visible li.ui-menu-item",
+    "autocomplete deluxe item": ".autocomplete-deluxe-item",
+    "autocomplete deluxe item delete": ".autocomplete-deluxe-item .autocomplete-deluxe-item-delete",
+    "autocomplete deluxe throbber": ".autocomplete-deluxe-throbber",
+    "autocomplete deluxe value field": "input.autocomplete-deluxe-value-field",
+    "acd tags form item": ".field--name-field-acd-tags",
+    "acd tags label": "label[for=\"edit-field-acd-tags-target-id\"]",
+    "node title field": "#edit-title-0-value",
+    "node save button": "#gin-sticky-edit-submit, #edit-submit",
+    "autocomplete deluxe gin stylesheet": "link[href*=\"autocomplete_deluxe.gin.css\"]",
+    "autocomplete deluxe base stylesheet": "link[href*=\"autocomplete_deluxe.css\"]",
+    "autocomplete deluxe claro stylesheet": "link[href*=\"autocomplete_deluxe.claro.css\"]",
+    "ad tags form item": "div.form-item--field-ad-tags, .field--name-field-ad-tags",
+    "drupal admin error messages": ".messages--error",
+    "drupal admin status messages": ".messages--status",
+    "drupal page heading": "h1"
+  },
+  "xpath": {}
+}

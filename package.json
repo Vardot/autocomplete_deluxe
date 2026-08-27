@@ -23,14 +23,30 @@
     "lint:css": "npx stylelint --config=.stylelintrc.json .",
     "theme:init": "gulp",
     "theme:build": "gulp compile",
-    "theme:watch": "gulp watch"
+    "theme:watch": "gulp watch",
+    "test": "cucumber-js --config cucumber.js",
+    "test:chromium": "BROWSER=chromium cucumber-js --config cucumber.js",
+    "test:firefox": "BROWSER=firefox cucumber-js --config cucumber.js",
+    "test:webkit": "BROWSER=webkit cucumber-js --config cucumber.js",
+    "generate-reports": "generate-reports"
   },
-  "dependencies": {  },
-  "devDependencies": { 
-    "autoprefixer": "~9",
+  "dependencies": {
+    "@cucumber/cucumber": "10.0.1",
+    "@cucumber/pretty-formatter": "1.0.0",
+    "playwright": "1.60.0",
+    "tsx": "4.22.1",
+    "webship-js": "~2.0.0"
+  },
+  "resolutions": {
+    "@cucumber/cucumber": "10.0.1",
+    "@cucumber/pretty-formatter": "1.0.0",
+    "playwright": "1.60.0"
+  },
+  "devDependencies": {
     "@babel/core": "~7",
     "@babel/preset-env": "~7",
     "@babel/register": "^7.7.7",
+    "autoprefixer": "~9",
     "browser-sync": "~2",
     "chalk": "~2",
     "chokidar": "~3",
@@ -45,11 +61,8 @@
     "eslint-plugin-jquery": "^1.5.1",
     "eslint-plugin-prettier": "^4.0.0",
     "eslint-plugin-yml": "^0.14.0",
-    "farbtastic": "https://github.com/mattfarina/farbtastic/archive/1.3u.tar.gz",
     "glob": "~7",
     "glob-watcher": "~5",
-    "joyride": "https://github.com/zurb/joyride/archive/refs/heads/v2.1.tar.gz",
-    "sass": "~1",
     "gulp": "~4",
     "gulp-autoprefixer": "~8",
     "gulp-clean-css": "~4",
@@ -76,6 +89,7 @@
     "postcss-url": "^8.0.0",
     "prettier": "^2.1.2",
     "raw-loader": "^4.0.2",
+    "sass": "~1",
     "shepherd.js": "^9.0.0",
     "sortablejs": "^1.13.0",
     "stylelint": "^14.0.1",
@@ -88,46 +102,46 @@
     "underscore": "^1.13.1",
     "webpack": "^5.76.0",
     "webpack-cli": "^4.4.0"
-   },
-   "//": "'development is the default environment, and legacy is for transpiling the old jQuery codebase",
-   "babel": {
-     "env": {
-       "development": {
-         "presets": [
-           [
-             "@babel/preset-env",
-             {
-               "modules": "commonjs",
-               "targets": {
-                 "node": "current"
-               }
-             }
-           ]
-         ]
-       },
-       "legacy": {
-         "presets": [
-           [
-             "@babel/preset-env",
-             {
-               "modules": false
-             }
-           ]
-         ]
-       }
-     }
-   },
-   "browserslist": [
-     "last 2 Chrome major versions",
-     "last 2 Firefox major versions",
-     "last 2 Safari major versions",
-     "last 2 Edge major versions",
-     "last 2 Opera versions",
-     "last 2 iOS major versions",
-     "last 1 Explorer major version",
-     "last 1 ChromeAndroid version",
-     "last 1 UCAndroid version",
-     "last 1 Samsung version",
-     "Firefox ESR"
-   ]
- }
+  },
+  "//": "'development is the default environment, and legacy is for transpiling the old jQuery codebase",
+  "babel": {
+    "env": {
+      "development": {
+        "presets": [
+          [
+            "@babel/preset-env",
+            {
+              "modules": "commonjs",
+              "targets": {
+                "node": "current"
+              }
+            }
+          ]
+        ]
+      },
+      "legacy": {
+        "presets": [
+          [
+            "@babel/preset-env",
+            {
+              "modules": false
+            }
+          ]
+        ]
+      }
+    }
+  },
+  "browserslist": [
+    "last 2 Chrome major versions",
+    "last 2 Firefox major versions",
+    "last 2 Safari major versions",
+    "last 2 Edge major versions",
+    "last 2 Opera versions",
+    "last 2 iOS major versions",
+    "last 1 Explorer major version",
+    "last 1 ChromeAndroid version",
+    "last 1 UCAndroid version",
+    "last 1 Samsung version",
+    "Firefox ESR"
+  ]
+}

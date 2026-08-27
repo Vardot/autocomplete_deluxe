@@ -1,0 +1,23 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_acd_tags
+    - node.type.acd_test
+    - taxonomy.vocabulary.acd_tags
+id: node.acd_test.field_acd_tags
+field_name: field_acd_tags
+entity_type: node
+bundle: acd_test
+label: 'ACD Tags'
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:taxonomy_term'
+  handler_settings:
+    target_bundles:
+      acd_tags: acd_tags
+field_type: entity_reference

@@ -1,0 +1,8 @@
+langcode: en
+status: true
+dependencies: {  }
+name: 'ACD Tags'
+vid: acd_tags
+description: 'Test-only vocabulary for the Autocomplete Deluxe widget.'
+weight: 0
+new_revision: false

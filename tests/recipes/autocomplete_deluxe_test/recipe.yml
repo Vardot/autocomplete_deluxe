@@ -1,0 +1,16 @@
+name: 'Autocomplete Deluxe test'
+description: >
+  Hidden, test-only recipe. Provisions a dedicated "ACD Test" content type with
+  a multi-value taxonomy entity-reference field rendered by the Autocomplete
+  Deluxe widget, so the browser, functional and kernel tests have a widget to
+  drive that is independent of the install profile (the Standard profile ships
+  an Article type on Drupal 10/11 but not on Drupal 12). Not shipped as a
+  user-facing recipe - it lives under tests/ and is applied only by the tests
+  that need it.
+type: 'Testing'
+install:
+  - node
+  - taxonomy
+  - field
+  - path
+  - autocomplete_deluxe
