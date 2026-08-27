@@ -1,30 +1,31 @@
-const gulp = require("gulp"),
-  sass = require("gulp-sass")(require('sass')),
-  postcss = require("gulp-postcss"),
-  csscomb = require("gulp-csscomb"),
-  autoprefixer = require("autoprefixer"),
-  browserSync = require("browser-sync").create();
+/* eslint-disable */
+const gulp = require('gulp');
+const sass = require('gulp-sass')(require('sass'));
+const postcss = require('gulp-postcss');
+const csscomb = require('gulp-csscomb');
+const autoprefixer = require('autoprefixer');
+const browserSync = require('browser-sync').create();
 
 const paths = {
   scss: {
-    src: "assets/scss/**/*.scss",
-    dest: "assets/css",
-    watch: "assets/scss/**/*.scss"
-  }
+    src: 'assets/scss/**/*.scss',
+    dest: 'assets/css',
+    watch: 'assets/scss/**/*.scss',
+  },
 };
 
 // Compile sass into CSS & auto-inject into browsers
 function compile() {
   const sassOptions = {
-    outputStyle: "expanded",
-    indentType: "space",
+    outputStyle: 'expanded',
+    indentType: 'space',
     indentWidth: 2,
-    linefeed: "lf"
+    linefeed: 'lf',
   };
 
   return gulp
     .src([paths.scss.src])
-    .pipe(sass(sassOptions).on("error", sass.logError))
+    .pipe(sass(sassOptions).on('error', sass.logError))
     .pipe(postcss([autoprefixer()]))
     .pipe(csscomb())
     .pipe(gulp.dest(paths.scss.dest))

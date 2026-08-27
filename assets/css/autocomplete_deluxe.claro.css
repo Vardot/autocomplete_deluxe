@@ -5,7 +5,7 @@
   font-weight: 500;
 }
 
-[dir=rtl] .autocomplete-deluxe-item {
+[dir="rtl"] .autocomplete-deluxe-item {
   padding: 7px 10px 7px 30px;
 }
 

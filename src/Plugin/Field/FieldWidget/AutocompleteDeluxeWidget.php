@@ -125,7 +125,7 @@ class AutocompleteDeluxeWidget extends WidgetBase implements ContainerFactoryPlu
     $element['match_operator'] = [
       '#type' => 'select',
       '#title' => $this->t('Match operator'),
-      '#description' => $this->t('Specify the matcting operator.'),
+      '#description' => $this->t('Specify the matching operator.'),
       '#default_value' => $this->getSetting('match_operator'),
       '#options' => $this->getMatchOperatorOptions(),
     ];

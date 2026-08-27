@@ -1,0 +1,115 @@
+################################################################################
+# Slim pipeline for `gitlab-ci-local` (https://github.com/firecow/gitlab-ci-local).
+#
+# The real `.gitlab-ci.yml` `include:`s the Drupal CI templates. Those cannot be
+# run on a workstation: `$_GITLAB_TEMPLATES_REPO` is not a public path, and the
+# templates' `rules:` use regular expressions that gitlab-ci-local still cannot
+# evaluate (firecow/gitlab-ci-local issue 1893). This file therefore does not
+# include them - it reproduces, self-contained, the two validate-stage checks
+# that are worth having before a push, so the working tree can be gated locally.
+#
+# WHAT THIS FILE RUNS
+#   phpcs   the project's own .phpcs.xml ruleset, on the whole tree
+#   cspell  the same word list the real pipeline passes as _CSPELL_WORDS
+#
+# WHAT IS DELIBERATELY LEFT OUT, AND WHY
+#   composer / composer-lint  build the Drupal site from the templates' own
+#                             images and Composer endpoints
+#   phpstan, phpunit          need the built Drupal root the composer job
+#                             produces as an artifact
+#   eslint, stylelint         the template jobs run Drupal core's own pinned
+#                             copies out of the built core/node_modules
+#   upgrade status            needs a full installed site plus the Drupal
+#                             deprecation tooling
+#   previous/next major and minor, max PHP
+#                             the core-version matrix only exists as template
+#                             `rules:`, which is exactly what breaks locally
+#   webship e2e               needs the Drupal CI PHP-Apache image with a MySQL
+#                             service, and the functional suite is not on this
+#                             branch yet
+# All of those still gate the merge remotely; they are simply not reproducible
+# here. Never treat a green run of this file as a green pipeline.
+#
+# Usage:
+#   gitlab-ci-local --file .gitlab-ci-local.yml           # both jobs
+#   gitlab-ci-local --file .gitlab-ci-local.yml phpcs
+#   gitlab-ci-local --file .gitlab-ci-local.yml cspell
+################################################################################
+
+stages:
+  - validate
+
+variables:
+  COMPOSER_MEMORY_LIMIT: "-1"
+  COMPOSER_ALLOW_SUPERUSER: "1"
+
+# = Drupal coding standards =
+# .phpcs.xml lists individual Drupal sniffs rather than referencing the whole
+# standard, so drupal/coder has to be installed and registered before the
+# ruleset will resolve.
+phpcs:
+  stage: validate
+  image: php:8.3-cli
+  before_script:
+    - apt-get update -qq
+    - apt-get install -y -qq git unzip libzip-dev > /dev/null
+    - docker-php-ext-install zip > /dev/null
+    - curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+    - composer global config --no-plugins allow-plugins.dealerdirect/phpcodesniffer-composer-installer true
+    - composer global require --no-interaction drupal/coder:^8.3
+    - export PATH="$PATH:$(composer global config bin-dir --absolute --quiet)"
+    - phpcs --config-set installed_paths "$(composer global config home --quiet)/vendor/drupal/coder/coder_sniffer"
+    - phpcs -i
+  script:
+    - export PATH="$PATH:$(composer global config bin-dir --absolute --quiet)"
+    - phpcs --standard=.phpcs.xml --report=full .
+  allow_failure: false
+
+# = Spelling =
+# The word list is kept identical to the _CSPELL_WORDS value in .gitlab-ci.yml.
+# The remote job additionally loads Drupal core's own dictionaries out of the
+# built core, which is not available here, so this run is the stricter of the
+# two: a word it accepts is always accepted remotely as well.
+#
+# The config is generated into /tmp rather than committed, so this file stays
+# the only thing the local runner adds to the project.
+cspell:
+  stage: validate
+  image: node:20
+  before_script:
+    - npm install -g cspell@8 > /dev/null
+    - cspell --version
+    - |
+      cat > /tmp/cspell-local.json <<'JSON'
+      {
+        "language": "en-US",
+        "allowCompoundWords": false,
+        "minWordLength": 4,
+        "dictionaries": [
+          "companies", "fonts", "html", "php", "softwareTerms", "misc",
+          "typescript", "node", "css", "bash", "filetypes", "npm",
+          "lorem-ipsum", "sql", "fullstack"
+        ],
+        "ignorePaths": [
+          "web", "vendor", "node_modules", ".git", "recipes",
+          "*.patch", "*.svg", "**/.*.json", "**/package.json", "**/yarn.lock",
+          "**/composer.json", "**/composer.lock", "**/LICENSE*",
+          "**/MAINTAINERS*", "**/CHANGELOG*", "**/.*ignore",
+          "assets/vendor/**", "assets/js/**", "assets/css/**"
+        ],
+        "words": [
+          "autocomplete", "deluxe", "autocompletesearch", "autocompleteresponse",
+          "autocompleteselect", "autocompletechange", "csscomb", "edwardchiapet",
+          "klausi", "Razem", "Priscella", "mpriscella", "Natshah", "Gilits",
+          "sepgil", "drupal", "drush", "webship", "playwright", "chromium",
+          "cucumber", "webmaster", "taxonomy", "preprocess", "nodesource",
+          "corepack", "simpletest", "phpcs", "phpstan", "phpunit", "cspell",
+          "stylelint", "eslint", "coder", "firecow", "lando", "ddev",
+          "textfields"
+        ]
+      }
+      JSON
+  script:
+    - cspell lint --no-progress --show-suggestions --show-context
+        --config /tmp/cspell-local.json .
+  allow_failure: false

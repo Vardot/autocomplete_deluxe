@@ -1,0 +1,169 @@
+################
+# GitLabCI template for Drupal projects.
+#
+# This template is designed to give any Contrib maintainer everything they need to test, without requiring modification.
+# It is also designed to keep up to date with Core Development automatically through the use of include files that can be centrally maintained.
+# As long as you include the project, ref and three files below, any future updates added by the Drupal Association will be used in your
+# pipelines automatically. However, you can modify this template if you have additional needs for your project.
+# The full documentation is on https://project.pages.drupalcode.org/gitlab_templates/
+################
+# For information on alternative values for 'ref' see https://project.pages.drupalcode.org/gitlab_templates/info/templates-version/
+# To test a Drupal 7 project, change the first include filename from .main.yml to .main-d7.yml
+# The templates ref is PINNED to a fixed tag rather than left on the moving
+# `$_GITLAB_TEMPLATES_REF` (internally `default-ref`). On a moving ref an
+# upstream templates change can turn this pipeline red with no commit of ours.
+# Bump this deliberately, as its own issue. Current tags:
+# https://git.drupalcode.org/project/gitlab_templates/-/tags
+include:
+  - project: $_GITLAB_TEMPLATES_REPO
+    ref: '1.15.7'
+    file:
+      - '/includes/include.drupalci.main.yml'
+      - '/includes/include.drupalci.variables.yml'
+      - '/includes/include.drupalci.workflows.yml'
+#
+################
+# Pipeline configuration variables are defined with default values and descriptions in the file
+# https://git.drupalcode.org/project/gitlab_templates/-/blob/main/includes/include.drupalci.variables.yml
+# Uncomment the lines below if you want to override any of the variables. The following is just an example.
+################
+variables:
+  OPT_IN_TEST_PREVIOUS_MAJOR: 1
+  OPT_IN_TEST_PREVIOUS_MINOR: 1
+  OPT_IN_TEST_NEXT_MINOR: 1
+  OPT_IN_TEST_NEXT_MAJOR: 1
+  OPT_IN_TEST_MAX_PHP: 1
+  RUN_JOB_UPGRADE_STATUS: 1
+  # Add to ignore the variables, libraries names, maintainers
+  _CSPELL_WORDS: 'autocompletesearch,autocompleteresponse,autocompleteselect,autocompletechange,csscomb,edwardchiapet,klausi,Razem,Priscella,mpriscella,Natshah,Gilits,sepgil'
+  # Required whenever `ref:` above is anything other than the default
+  # $_GITLAB_TEMPLATES_REF: the jobs that pull helper scripts and assets over
+  # curl (cspell fetches prepare-cspell.php and the default .cspell.json) read
+  # this variable instead. It must always equal the pinned `ref:` value.
+  _CURL_TEMPLATES_REF: '1.15.7'
+  # No lint or test job is advisory. The templates ship most validate jobs as
+  # allow_failure by default, which lets a red lint merge; this turns every one
+  # of them into a gate, including the per-core-version phpstan variants that a
+  # per-job override would not reach.
+  _ALL_VALIDATE_ALLOW_FAILURE: '0'
+
+################################################################################
+# Every lint job blocks the merge. The variable above already does this; these
+# per-job overrides make it explicit and readable, and match the sibling
+# Webship modules (anchor_link, admin_audit_trail).
+################################################################################
+composer-lint:
+  allow_failure: false
+cspell:
+  allow_failure: false
+eslint:
+  allow_failure: false
+phpcs:
+  allow_failure: false
+phpstan:
+  allow_failure: false
+stylelint:
+  allow_failure: false
+
+################################################################################
+# Functional browser tests (webship-js: Playwright + Cucumber).
+#
+# Guarded by `rules: exists:` so this job is only added to the pipeline once the
+# suite is actually in the branch. Until the functional-testing branch lands,
+# no `tests/features/drupal/*.feature` file exists here and the job is simply
+# not created - the rest of the pipeline is unaffected.
+#
+# The suite drives the site entirely through the browser. The first feature
+# logs in as the Webmaster and provisions the per-role testing users, so the
+# before_script only has to build the site, enable the modules, apply the
+# hidden test recipe and install Node + Playwright.
+################################################################################
+webship e2e:
+  extends: .testing-job-base
+  stage: test
+  needs: [composer]
+  rules:
+    - exists:
+        - tests/features/drupal/*.feature
+  # Override the parent's services - only the database is needed. Playwright
+  # bundles its own browser, so Selenium and chromedriver are not.
+  services:
+    - name: $_CONFIG_DOCKERHUB_ROOT/$_TARGET_DB_TYPE-$_TARGET_DB_VERSION:$_TARGET_DB_IMAGE_TAG
+      alias: database
+  variables:
+    DRUPAL_ADMIN_USERNAME: "webmaster"
+    DRUPAL_ADMIN_PASSWORD: "dD.123123ddd"
+    DRUPAL_TEST_BASE_URL: "http://localhost"
+    LAUNCH_URL: "http://localhost"
+    BROWSER: "chromium"
+    # The suite writes its own JSON report through the cucumber formatter; the
+    # library's automatic report hook cannot await its own output and is off.
+    WEBSHIP_REPORT_DISABLE: "1"
+    # Yarn 4 defaults to immutable installs and would refuse to refresh the
+    # lock file in CI.
+    YARN_ENABLE_IMMUTABLE_INSTALLS: "false"
+    FORCE_COLOR: "1"
+  before_script:
+    # --- Serve the built site over Apache, on the CI database ---------------
+    - mkdir -pv $CI_PROJECT_DIR/$_WEB_ROOT/sites/default/files
+    - mkdir -pv $CI_PROJECT_DIR/$_WEB_ROOT/sites/simpletest
+    - chmod -R 777 $CI_PROJECT_DIR/$_WEB_ROOT/sites/default/files
+    - chmod -R 777 $CI_PROJECT_DIR/$_WEB_ROOT/sites/simpletest
+    - rm -rf /var/www/html && ln -s $CI_PROJECT_DIR/$_WEB_ROOT /var/www/html
+    - chown -R www-data:www-data $CI_PROJECT_DIR
+    - service apache2 start
+    - export SIMPLETEST_DB=mysql://$MYSQL_USER:$MYSQL_PASSWORD@database/$MYSQL_DATABASE
+    # --- Install Drupal (Standard profile) ----------------------------------
+    - $CI_PROJECT_DIR/vendor/bin/drush --root=$CI_PROJECT_DIR/$_WEB_ROOT site:install standard
+        --db-url=$SIMPLETEST_DB --account-name=webmaster --account-pass=dD.123123ddd
+        --site-name="Autocomplete Deluxe Test" -y
+    # site:install makes "webmaster" the super user; granting the administrator
+    # role as well keeps the account identical to the one the local and DDEV
+    # runs use, so the suite sees the same permissions everywhere.
+    - $CI_PROJECT_DIR/vendor/bin/drush --root=$CI_PROJECT_DIR/$_WEB_ROOT
+        user:role:add administrator webmaster
+    - $CI_PROJECT_DIR/vendor/bin/drush --root=$CI_PROJECT_DIR/$_WEB_ROOT en -y
+        autocomplete_deluxe field_ui taxonomy help
+    # --- Apply the hidden test-only recipe ----------------------------------
+    # It provisions the "ACD Test" content type and the taxonomy reference field
+    # rendered by the Autocomplete Deluxe widget. Applied through the core
+    # Recipe API by a small script, because `drush recipe` exists on Drush 13
+    # but was removed in Drush 14, while the API is stable on both.
+    - cp $CI_PROJECT_DIR/tests/apply-test-recipe.php $CI_PROJECT_DIR/$_WEB_ROOT/apply-test-recipe.php
+    - $CI_PROJECT_DIR/vendor/bin/drush --root=$CI_PROJECT_DIR/$_WEB_ROOT php:script
+        $CI_PROJECT_DIR/$_WEB_ROOT/apply-test-recipe.php
+        -- $CI_PROJECT_DIR/tests/recipes/autocomplete_deluxe_test
+    # Serve every library as its own <link> so the stylesheet-presence
+    # scenarios can assert on them individually.
+    - $CI_PROJECT_DIR/vendor/bin/drush --root=$CI_PROJECT_DIR/$_WEB_ROOT config:set system.performance css.preprocess 0 -y
+    - $CI_PROJECT_DIR/vendor/bin/drush --root=$CI_PROJECT_DIR/$_WEB_ROOT config:set system.performance js.preprocess 0 -y
+    - $CI_PROJECT_DIR/vendor/bin/drush --root=$CI_PROJECT_DIR/$_WEB_ROOT cache:rebuild
+    - rm -f $CI_PROJECT_DIR/$_WEB_ROOT/apply-test-recipe.php
+    # --- Node + Playwright test runner --------------------------------------
+    - curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+    - apt-get install -y nodejs
+    - node --version && npm --version
+    - 'test -f .yarnrc.yml || echo "nodeLinker: node-modules" > .yarnrc.yml'
+    # Back up cucumber.js - the library postinstall can overwrite it on Yarn 4.
+    - cp cucumber.js .cucumber.js.bak
+    - corepack enable
+    - yarn install
+    - cp .cucumber.js.bak cucumber.js && rm .cucumber.js.bak
+    - ./node_modules/.bin/playwright install --with-deps chromium
+  script:
+    # The Standard profile leaves Claro as the admin theme, so the Gin-only
+    # scenarios do not apply here and are excluded by tag.
+    #
+    # Two tags cover fixes that are not on this branch yet. Drop each exclusion
+    # once its fix lands:
+    #   @needs-2903340  the duplicate guard, https://www.drupal.org/node/2903340
+    #   @needs-3447536  the Enter guard,     https://www.drupal.org/node/3447536
+    - npx cucumber-js --config cucumber.js --tags "not @gin and not @needs-2903340 and not @needs-3447536"
+  artifacts:
+    when: always
+    expire_in: 7 days
+    paths:
+      - tests/reports/
+      - tests/screenshots/
+      - tests/videos/
+  allow_failure: false
