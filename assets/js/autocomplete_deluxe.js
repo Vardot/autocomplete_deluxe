@@ -192,8 +192,12 @@
 
     if (typeof settings.delimiter === "undefined") {
       this.delimiter = true;
+      this.delimiterKey = '';
     } else {
       this.delimiter = settings.delimiter.charCodeAt(0);
+      // Keydown reports the key, not the character code, so keep the
+      // character itself next to the code the rest of the code still uses.
+      this.delimiterKey = settings.delimiter.charAt(0);
     }
 
     this.items = {};
@@ -575,12 +579,15 @@
 
     let clear = false;
 
-    jqObject.keypress(function(event) {
+    // Keydown, and not keypress, so that Backspace is reported at all.
+    jqObject.keydown(function (event) {
       let value = jqObject.val();
       // If a comma was entered and there is none or more then one comma, or the
       // enter key was entered, then enter the new term.
       if (
-        (event.which === self.delimiter && value.split('"').length - 1 !== 1) ||
+        (self.delimiterKey !== '' &&
+          event.key === self.delimiterKey &&
+          value.split('"').length - 1 !== 1) ||
         (event.which === 13 && jqObject.val() !== "")
       ) {
         const allow_new_terms =
