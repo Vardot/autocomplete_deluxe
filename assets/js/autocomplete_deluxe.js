@@ -19,10 +19,13 @@
       );
 
       $elements.each(function () {
-        new Drupal.autocomplete_deluxe.MultipleWidget(
+        const widget = new Drupal.autocomplete_deluxe.MultipleWidget(
           this,
           autocompleteSettings[$(this).attr('id')],
         );
+        // Keep the widget on the input, so other code can reach it, as in
+        // jQuery("#the-input").data("autocompleteDeluxe").addValue(item).
+        $(this).data('autocompleteDeluxe', widget);
       });
     },
   };

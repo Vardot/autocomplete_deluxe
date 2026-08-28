@@ -646,6 +646,41 @@ Then(
 );
 
 /**
+ * Add a value through the widget handle other code is meant to use.
+ *
+ * The point of the handle is that a module can drive the widget from its own
+ * JavaScript, so the step goes through exactly the documented route:
+ * jQuery("#the-input").data("autocompleteDeluxe").addValue(item).
+ *
+ * Example: When I add "Alpha (1)" through the autocomplete deluxe widget handle
+ */
+When(
+  /^(?:I |we )?add "([^"]*)" through the autocomplete deluxe widget handle$/,
+  async function (value) {
+    await attempt(async () => {
+      const outcome = await this.page.evaluate((value) => {
+        const input = document.querySelector('#autocomplete-deluxe-input');
+        if (!input || !window.jQuery) {
+          return 'no input or no jQuery';
+        }
+        const widget = window.jQuery(input).data('autocompleteDeluxe');
+        if (!widget) {
+          return 'no handle on the input';
+        }
+        if (typeof widget.addValue !== 'function') {
+          return 'the handle carries no addValue';
+        }
+        widget.addValue({ label: value, value });
+        return 'added';
+      }, value);
+      if (outcome !== 'added') {
+        throw new Error(outcome);
+      }
+    }, `Could not add "${value}" through the widget handle`);
+  },
+);
+
+/**
  * Commit the current Autocomplete Deluxe input with Enter. With new_terms /
  * not_found_message disabled, an unmatched value must NOT produce a chip - this
  * step lets a scenario exercise that boundary deterministically.
