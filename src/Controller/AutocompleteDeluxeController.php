@@ -2,6 +2,7 @@
 
 namespace Drupal\autocomplete_deluxe\Controller;
 
+use Drupal\Component\Plugin\Exception\PluginNotFoundException;
 use Drupal\Component\Utility\Crypt;
 use Drupal\Component\Utility\Tags;
 use Drupal\Core\Site\Settings;
@@ -46,6 +47,24 @@ class AutocompleteDeluxeController extends EntityAutocompleteController {
       // Disallow access when the selection settings key is not found in the
       // key/value store.
       throw new AccessDeniedHttpException();
+    }
+
+    // The entity being edited, so a selection plugin can act on it, for
+    // example to leave the entity itself out of its own suggestions. The
+    // parameters ride outside the hashed settings, so the entity is only
+    // taken when it loads and the user may view it.
+    $entity_type = $request->query->get('entity_type');
+    $entity_id = $request->query->get('entity_id');
+    if ($entity_type && $entity_id) {
+      try {
+        $entity = $this->entityTypeManager()->getStorage($entity_type)->load($entity_id);
+      }
+      catch (PluginNotFoundException $e) {
+        $entity = NULL;
+      }
+      if ($entity && $entity->access('view')) {
+        $selection_settings['entity'] = $entity;
+      }
     }
 
     $matches = $this->matcher->getMatches($target_type, $selection_handler, $selection_settings, $typed_string);

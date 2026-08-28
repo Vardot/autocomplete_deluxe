@@ -185,6 +185,10 @@
         : settings.not_found_message_allow;
     this.new_terms =
       typeof settings.new_terms === 'undefined' ? false : settings.new_terms;
+    this.query_parameters =
+      typeof settings.query_parameters === 'undefined'
+        ? false
+        : settings.query_parameters;
     this.no_empty_message =
       typeof settings.no_empty_message === 'undefined'
         ? Drupal.t(
@@ -307,6 +311,11 @@
         term = ' ';
       }
       request.synonyms = self.synonyms;
+      if (self.query_parameters) {
+        Object.keys(self.query_parameters).forEach(function (key) {
+          request[key] = self.query_parameters[key];
+        });
+      }
       const url = Drupal.url(`${settings.uri}?q=${term}`);
       lastXhr = $.getJSON(url, request, function (data, status, xhr) {
         cache[term] = data;

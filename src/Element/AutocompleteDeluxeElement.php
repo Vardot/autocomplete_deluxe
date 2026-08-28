@@ -195,6 +195,10 @@ class AutocompleteDeluxeElement extends FormElementBase {
       ];
       $element['textfield']['#attributes']['style'] = ['display: none'];
 
+      if (isset($element['#autocomplete_query_parameters'])) {
+        $js_settings[$html_id]['query_parameters'] = $element['#autocomplete_query_parameters'];
+      }
+
       $js_settings[$html_id] += [
         'type' => 'ajax',
         'uri' => $element['#autocomplete_deluxe_path'],

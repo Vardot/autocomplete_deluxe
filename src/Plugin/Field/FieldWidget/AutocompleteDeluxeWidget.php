@@ -230,7 +230,9 @@ class AutocompleteDeluxeWidget extends WidgetBase implements ContainerFactoryPlu
       '#title' => $this->fieldDefinition->getLabel(),
       '#target_type' => $target_type,
       '#selection_handler' => $this->getFieldSetting('handler'),
-      '#selection_settings' => $selection_settings,
+      '#selection_settings' => $selection_settings + [
+        'entity' => $entity,
+      ],
       '#size' => 60,
       '#match_limit' => $settings['match_limit'] ?? 10,
       '#min_length' => $settings['min_length'] ?? 0,
@@ -256,7 +258,8 @@ class AutocompleteDeluxeWidget extends WidgetBase implements ContainerFactoryPlu
       $entities[$item->id()] = $item;
     }
 
-    $selection_settings = $element['#selection_settings'] ?? [];
+    // The hash and the stored settings deliberately leave the entity out, so
+    // one field keeps one key in the store whatever entity is being edited.
     $data = serialize($selection_settings) . $element['#target_type'] . $element['#selection_handler'];
     $selection_settings_key = Crypt::hmacBase64($data, Settings::getHashSalt());
 
@@ -270,6 +273,11 @@ class AutocompleteDeluxeWidget extends WidgetBase implements ContainerFactoryPlu
       'selection_handler' => $element['#selection_handler'],
       'selection_settings_key' => $selection_settings_key,
     ];
+
+    if (!$entity->isNew()) {
+      $element['#autocomplete_query_parameters']['entity_type'] = $entity->getEntityTypeId();
+      $element['#autocomplete_query_parameters']['entity_id'] = $entity->id();
+    }
 
     $element += [
       '#autocomplete_deluxe_path' => Url::fromRoute('autocomplete_deluxe.autocomplete', $route_parameters, ['absolute' => TRUE])->getInternalPath(),
