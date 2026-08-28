@@ -6,6 +6,7 @@ use Drupal\Component\Utility\Html;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\Element\CompositeFormElementTrait;
 use Drupal\Core\Render\Element\FormElementBase;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 
 /**
  * Provides an Autocomplete Deluxe Form API element.
@@ -36,9 +37,9 @@ class AutocompleteDeluxeElement extends FormElementBase {
     // its value is properly checked for access.
     $info['#process_default_value'] = TRUE;
 
-    $info['#element_validate'] = [['\Drupal\Core\Entity\Element\EntityAutocomplete',
-      'validateEntityAutocomplete',
-    ],
+    $info['#element_validate'] = [
+      [$class, 'validateRequired'],
+      ['\Drupal\Core\Entity\Element\EntityAutocomplete', 'validateEntityAutocomplete'],
     ];
     $info['#process'][] = [$class, 'processElement'];
 
@@ -77,6 +78,28 @@ class AutocompleteDeluxeElement extends FormElementBase {
       return ['autocomplete_deluxe/assets.seven'];
     }
     return [];
+  }
+
+  /**
+   * Says which field is missing, rather than leaving it to the constraint.
+   *
+   * The element carries no input of its own that the form API can check, so an
+   * empty required field failed later, on the entity, where the message reads
+   * "This value should not be null."
+   */
+  public static function validateRequired(array &$element, FormStateInterface $form_state, array &$complete_form) {
+    if (empty($element['#required'])) {
+      return;
+    }
+
+    // Every value is wrapped in double quotes, so an empty field is an empty
+    // string or a pair of quotes.
+    $value = trim((string) ($element['#value'] ?? ''));
+    if ($value === '' || $value === '""') {
+      $form_state->setError($element, new TranslatableMarkup('@name field is required.', [
+        '@name' => $element['#title'] ?? '',
+      ]));
+    }
   }
 
   /**
