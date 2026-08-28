@@ -4,6 +4,7 @@ namespace Drupal\autocomplete_deluxe\Plugin\Field\FieldWidget;
 
 use Drupal\Component\Utility\Crypt;
 use Drupal\Core\Extension\ModuleHandlerInterface;
+use Drupal\Core\Field\Attribute\FieldWidget;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\WidgetBase;
@@ -12,23 +13,21 @@ use Drupal\Core\KeyValueStore\KeyValueFactoryInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Site\Settings;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
 use Drupal\user\EntityOwnerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\Session\AccountInterface;
 
 /**
- * Plugin implementation of the 'options_buttons' widget.
- *
- * @FieldWidget(
- *   id = "autocomplete_deluxe",
- *   label = @Translation("Autocomplete Deluxe"),
- *   field_types = {
- *     "entity_reference"
- *   },
- *   multiple_values = TRUE
- * )
+ * Plugin implementation of the 'autocomplete_deluxe' widget.
  */
+#[FieldWidget(
+  id: 'autocomplete_deluxe',
+  label: new TranslatableMarkup('Autocomplete Deluxe'),
+  field_types: ['entity_reference'],
+  multiple_values: TRUE,
+)]
 class AutocompleteDeluxeWidget extends WidgetBase implements ContainerFactoryPluginInterface {
 
   use StringTranslationTrait;

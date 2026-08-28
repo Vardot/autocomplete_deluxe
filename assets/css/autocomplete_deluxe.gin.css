@@ -1,10 +1,32 @@
+/**
+ * @file
+ * Gin theme overrides for the Autocomplete Deluxe widget.
+ *
+ * Supports the Gin contrib theme (Drupal 10/11) and the Gin-based
+ * "Default Admin" (default_admin) theme that ships with Drupal core (12+).
+ *
+ * Every custom property below carries a fallback value so the widget keeps
+ * working when the core admin theme renames or drops the legacy `--gin-*`
+ * variables during its CSS refactor.
+ */
+
+@keyframes autocomplete-deluxe-throbber {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
 div.autocomplete-deluxe-multiple {
   box-sizing: border-box;
-  transition: var(--gin-transition);
-  color: var(--gin-color-text);
-  border: 1px solid var(--gin-border-color-form-element);
-  border-radius: var(--gin-border-m);
-  background: var(--gin-bg-input);
+  transition: var(--gin-transition, 0.2s);
+  color: var(--gin-color-text, #37394a);
+  border: 1px solid var(--gin-border-color-form-element, #919297);
+  border-radius: var(--gin-border-m, 6px);
+  background: var(--gin-bg-input, #fff);
 }
 
 .autocomplete-deluxe-container input.autocomplete-deluxe-form {
@@ -12,32 +34,53 @@ div.autocomplete-deluxe-multiple {
   background: none;
 }
 
+div.autocomplete-deluxe-container div.autocomplete-deluxe-throbber.autocomplete-deluxe-open {
+  display: block;
+  background-image: none;
+}
+
+div.autocomplete-deluxe-container div.autocomplete-deluxe-throbber.autocomplete-deluxe-open::after {
+  position: absolute;
+  inset-block-start: 2px;
+  inset-inline-end: 12px;
+  display: block;
+  width: 14px;
+  height: 14px;
+  content: "";
+  animation: autocomplete-deluxe-throbber 1s linear infinite;
+  text-align: end;
+  border: 2px solid var(--gin-bg-input, #fff);
+  border-block-start: 2px solid var(--gin-color-primary, #0550e6);
+  border-radius: 50%;
+}
+
 .autocomplete-deluxe-item {
-  padding: 6px 24px 6px 12px;
-  color: var(--gin-color-primary-hover);
+  padding-block: 6px;
+  padding-inline: 12px var(--space-l, 24px);
+  color: var(--gin-color-primary-hover, #0036b1);
   border: 0 none;
-  border-radius: var(--gin-border-m);
-  background-color: var(--gin-color-primary-light-hover);
+  border-radius: var(--gin-border-l, 8px);
+  background-color: var(--gin-color-primary-light-hover, #e6effc);
   box-shadow: none;
 }
 
 .autocomplete-deluxe-item:hover,
 .autocomplete-deluxe-item:active {
-  color: var(--gin-color-button-text);
-  background-color: var(--gin-color-primary);
+  color: var(--gin-color-button-text, #fff);
+  background-color: var(--gin-color-primary, #0550e6);
 }
 
 .autocomplete-deluxe-item .autocomplete-deluxe-item-delete {
-  top: 6px;
-  right: 6px;
+  inset-block-start: 6px;
+  inset-inline-end: 6px;
+  background: var(--gin-color-primary, #0550e6);
   mask-image: url("../images/close.svg");
-  mask-size: 10px 10px;
   mask-repeat: no-repeat;
   mask-position: center;
-  background: var(--gin-color-primary);
+  mask-size: 10px 10px;
 }
 
 .autocomplete-deluxe-item:hover .autocomplete-deluxe-item-delete,
 .autocomplete-deluxe-item .autocomplete-deluxe-item-delete:hover {
-  background: var(--gin-color-button-text);
+  background: var(--gin-color-button-text, #fff);
 }

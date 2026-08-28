@@ -46,6 +46,40 @@ class AutocompleteDeluxeElement extends FormElementBase {
   }
 
   /**
+   * Resolves the admin-theme styling libraries for the active theme.
+   *
+   * Kept as a pure, side-effect-free helper so the theme detection can be
+   * unit tested without bootstrapping the theme system.
+   *
+   * @param string $theme_name
+   *   The active theme machine name.
+   * @param string[] $base_theme_names
+   *   The active theme's base theme machine names.
+   *
+   * @return string[]
+   *   The styling libraries to attach, in attach order.
+   */
+  public static function themeStylingLibraries($theme_name, array $base_theme_names = []) {
+    // Gin ships as the contrib theme on Drupal 10 and 11 and as the Gin-based
+    // Default Admin theme in core from Drupal 12, and both share the markup and
+    // the CSS variables these overrides rely on.
+    $is_gin = in_array($theme_name, ['gin', 'default_admin'], TRUE)
+      || in_array('gin', $base_theme_names, TRUE)
+      || in_array('default_admin', $base_theme_names, TRUE);
+
+    if ($is_gin) {
+      return ['autocomplete_deluxe/assets.claro', 'autocomplete_deluxe/assets.gin'];
+    }
+    if ($theme_name === 'claro' || in_array('claro', $base_theme_names, TRUE)) {
+      return ['autocomplete_deluxe/assets.claro'];
+    }
+    if ($theme_name === 'seven' || in_array('seven', $base_theme_names, TRUE)) {
+      return ['autocomplete_deluxe/assets.seven'];
+    }
+    return [];
+  }
+
+  /**
    * Autocomplete Deluxe element process callback.
    */
   public static function processElement($element) {
@@ -55,21 +89,9 @@ class AutocompleteDeluxeElement extends FormElementBase {
       $element['#attached']['library'][] = 'autocomplete_deluxe/assets';
 
       $active_theme = \Drupal::theme()->getActiveTheme();
-      $base_themes = (array) $active_theme->getBaseThemeExtensions();
-
-      if ($active_theme->getName() === 'gin'|| array_key_exists('gin', $base_themes)) {
-        // Workaround for problems with jquery css in claro theme.
-        $element['#attached']['library'][] = 'autocomplete_deluxe/assets.claro';
-        // Overrides to support Gin's CSS3 variables for Dark mode, Accent etc.
-        $element['#attached']['library'][] = 'autocomplete_deluxe/assets.gin';
-      }
-      elseif ($active_theme->getName() === 'claro'|| array_key_exists('claro', $base_themes)) {
-        // Workaround for problems with jquery css in claro theme.
-        $element['#attached']['library'][] = 'autocomplete_deluxe/assets.claro';
-      }
-      elseif ($active_theme->getName() == 'seven'|| array_key_exists('seven', $base_themes)) {
-        // Workaround for problems with jquery css in seven theme.
-        $element['#attached']['library'][] = 'autocomplete_deluxe/assets.seven';
+      $base_theme_names = array_keys((array) $active_theme->getBaseThemeExtensions());
+      foreach (self::themeStylingLibraries($active_theme->getName(), $base_theme_names) as $library) {
+        $element['#attached']['library'][] = $library;
       }
     }
 

@@ -5,29 +5,24 @@
  * The Autocomplete Deluxe module improves autocomplete fields using JQuery UI.
  */
 
+use Drupal\autocomplete_deluxe\Hook\AutocompleteDeluxeHooks;
+use Drupal\Core\Hook\Attribute\LegacyHook;
 use Drupal\Core\Routing\RouteMatchInterface;
 
 /**
  * Implements hook_help().
  *
- * @inheritdoc
+ * Procedural wrapper for Drupal 10 / 11.0, which have no object-oriented hook
+ * support. From Drupal 11.1 the #[Hook('help')] method on
+ * \Drupal\autocomplete_deluxe\Hook\AutocompleteDeluxeHooks is discovered
+ * directly and this wrapper is skipped via #[LegacyHook]. The implementation
+ * lives only in the hook class.
  */
+#[LegacyHook]
 function autocomplete_deluxe_help($route_name, RouteMatchInterface $route_match) {
-  switch ($route_name) {
-    case 'help.page.autocomplete_deluxe':
-      $text = file_get_contents(dirname(__FILE__) . "/README.md");
-      if (!\Drupal::moduleHandler()->moduleExists('markdown')) {
-        $output = '<pre>' . $text . '</pre>';
-      }
-      else {
-        // Use the Markdown filter to render the README.
-        $filter_manager = \Drupal::service('plugin.manager.filter');
-        $settings = \Drupal::configFactory()->get('markdown.settings')->getRawData();
-        $config = ['settings' => $settings];
-        $filter = $filter_manager->createInstance('markdown', $config);
-        $output = $filter->process($text, 'en');
-      }
-
-      return $output;
-  }
+  $hooks = new AutocompleteDeluxeHooks(
+    \Drupal::service('module_handler'),
+    \Drupal::service('config.factory'),
+  );
+  return $hooks->help($route_name, $route_match);
 }
