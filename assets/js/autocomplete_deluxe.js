@@ -261,9 +261,12 @@
       ) {
         if (term !== ' ') {
           result.push({
-            label: Drupal.formatString(self.not_found_message, {
-              '@term': term,
-            }),
+            // The row is what adds the value, so it is offered either way, and
+            // it only carries the message when the setting asks for it.
+            label:
+              self.not_found_message_allow || !self.new_terms
+                ? Drupal.formatString(self.not_found_message, { '@term': term })
+                : term,
             value: term,
             newTerm: true,
           });
