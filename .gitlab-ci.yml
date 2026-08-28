@@ -153,11 +153,7 @@ webship e2e:
   script:
     # The Standard profile leaves Claro as the admin theme, so the Gin-only
     # scenarios do not apply here and are excluded by tag.
-    #
-    # This tag covers a fix that is not on this branch yet. Drop the exclusion
-    # once it lands:
-    #   @needs-2903340  the duplicate guard, https://www.drupal.org/node/2903340
-    - npx cucumber-js --config cucumber.js --tags "not @gin and not @needs-2903340"
+    - npx cucumber-js --config cucumber.js --tags "not @gin"
   artifacts:
     when: always
     expire_in: 7 days

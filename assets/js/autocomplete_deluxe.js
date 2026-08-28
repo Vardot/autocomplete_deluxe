@@ -412,6 +412,25 @@
     return !(term in this.items);
   };
 
+  /**
+   * Whether an item with that label is in the list already.
+   *
+   * The keys carry the entity id, as in "Label (7)", while a typed value does
+   * not, so the trailing id is taken off before they are compared.
+   */
+  Drupal.autocomplete_deluxe.MultipleWidget.prototype.hasItemLabel = function (
+    label,
+  ) {
+    const needle = String(label).trim().toLowerCase();
+    return Object.keys(this.items).some(function (key) {
+      const text = String(key)
+        .replace(/\s\([^()]*\)$/, '')
+        .trim()
+        .toLowerCase();
+      return text === needle;
+    });
+  };
+
   Drupal.autocomplete_deluxe.MultipleWidget.Item = function (widget, item) {
     if (item.newTerm === true) {
       item.label = item.value;
@@ -614,7 +633,13 @@
         }
 
         value = value.substr(0, value.length);
-        if (typeof self.items[value] === 'undefined' && value !== '') {
+        // The same term is not added twice, whether it was picked from the
+        // list before or typed again.
+        if (
+          typeof self.items[value] === 'undefined' &&
+          !self.hasItemLabel(value) &&
+          value !== ''
+        ) {
           const uiItem = {
             label: value,
             value,

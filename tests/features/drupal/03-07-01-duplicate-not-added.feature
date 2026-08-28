@@ -1,8 +1,4 @@
-@autocomplete_deluxe @data-integrity @needs-2903340
-# Tagged @needs-2903340 because these scenarios cover the duplicate guard added
-# in https://www.drupal.org/node/2903340. Until that fix lands on the target
-# branch the guard is not there to exercise, so the pipeline excludes this tag.
-# Once it lands, drop the tag here and its exclusion from .gitlab-ci.yml.
+@autocomplete_deluxe @data-integrity
 Feature: The Autocomplete Deluxe widget refuses duplicate values
   As a content author
   I want a term I already picked to stay a single tag
