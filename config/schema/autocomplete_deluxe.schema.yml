@@ -14,6 +14,9 @@ field.widget.settings.autocomplete_deluxe:
     selection_handler:
       type: string
       label: "Selection Handler"
+    selection_handler_override:
+      type: string
+      label: "Selection Handler Override"
     match_limit:
       type: integer
       label: "Limit"

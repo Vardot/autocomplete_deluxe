@@ -3,6 +3,7 @@
 namespace Drupal\autocomplete_deluxe\Plugin\Field\FieldWidget;
 
 use Drupal\Component\Utility\Crypt;
+use Drupal\Core\Entity\EntityReferenceSelection\SelectionPluginManagerInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Field\Attribute\FieldWidget;
 use Drupal\Core\Field\FieldDefinitionInterface;
@@ -56,6 +57,13 @@ class AutocompleteDeluxeWidget extends WidgetBase implements ContainerFactoryPlu
   protected $keyValue;
 
   /**
+   * The selection plugin manager.
+   *
+   * @var \Drupal\Core\Entity\EntityReferenceSelection\SelectionPluginManagerInterface
+   */
+  protected $selectionManager;
+
+  /**
    * {@inheritdoc}
    *
    * @param string $plugin_id
@@ -74,13 +82,16 @@ class AutocompleteDeluxeWidget extends WidgetBase implements ContainerFactoryPlu
    *   Current account.
    * @param \Drupal\Core\KeyValueStore\KeyValueFactoryInterface $key_value
    *   Key value storage.
+   * @param \Drupal\Core\Entity\EntityReferenceSelection\SelectionPluginManagerInterface $selection_manager
+   *   The selection plugin manager.
    */
-  public function __construct($plugin_id, $plugin_definition, FieldDefinitionInterface $field_definition, array $settings, array $third_party_settings, ModuleHandlerInterface $module_handler, AccountInterface $account, KeyValueFactoryInterface $key_value) {
+  public function __construct($plugin_id, $plugin_definition, FieldDefinitionInterface $field_definition, array $settings, array $third_party_settings, ModuleHandlerInterface $module_handler, AccountInterface $account, KeyValueFactoryInterface $key_value, SelectionPluginManagerInterface $selection_manager) {
     parent::__construct($plugin_id, $plugin_definition, $field_definition, $settings, $third_party_settings);
 
     $this->moduleHandler = $module_handler;
     $this->account = $account;
     $this->keyValue = $key_value;
+    $this->selectionManager = $selection_manager;
   }
 
   /**
@@ -95,7 +106,8 @@ class AutocompleteDeluxeWidget extends WidgetBase implements ContainerFactoryPlu
       $configuration['third_party_settings'],
       $container->get('module_handler'),
       $container->get('current_user'),
-      $container->get('keyvalue')
+      $container->get('keyvalue'),
+      $container->get('plugin.manager.entity_reference_selection')
     );
   }
 
@@ -108,6 +120,7 @@ class AutocompleteDeluxeWidget extends WidgetBase implements ContainerFactoryPlu
       'autocomplete_route_name' => 'autocomplete_deluxe.autocomplete',
       'size' => 60,
       'selection_handler' => 'default',
+      'selection_handler_override' => '',
       'match_limit' => 10,
       'min_length' => 0,
       'delimiter' => '',
@@ -169,6 +182,19 @@ class AutocompleteDeluxeWidget extends WidgetBase implements ContainerFactoryPlu
       '#description' => $this->t('Should a user be allowed to enter a value that does not exist yet? The referenced entity type decides what is created, so this is a new term for a vocabulary and a new entity for any other type.'),
       '#default_value' => $this->getSetting('new_terms'),
     ];
+
+    $target_type = $this->fieldDefinition->getFieldStorageDefinition()->getSetting('target_type');
+    $handler_options = ['' => $this->t('- Field default -')];
+    foreach (array_keys($this->selectionManager->getSelectionGroups($target_type)) as $group) {
+      $handler_options[$group] = $group;
+    }
+    $element['selection_handler_override'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Selection handler'),
+      '#description' => $this->t('Suggest through this handler instead of the one of the field. The handler settings of the field are kept, so the handler has to make sense with them.'),
+      '#options' => $handler_options,
+      '#default_value' => $this->getSetting('selection_handler_override'),
+    ];
     $element['show_term_hierarchy'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Show the parent hierarchy'),
@@ -198,6 +224,9 @@ class AutocompleteDeluxeWidget extends WidgetBase implements ContainerFactoryPlu
     $summary[] = $this->t('Allow not found message: @not_found_message_allow', ['@not_found_message_allow' => $this->getSetting('not_found_message_allow') ? 'Yes' : 'No']);
     $summary[] = $this->t('Not found message: @not_found_message', ['@not_found_message' => $this->getSetting('not_found_message')]);
     $summary[] = $this->t('Allow new values: @new_terms', ['@new_terms' => $this->getSetting('new_terms') ? 'Yes' : 'No']);
+    if ($this->getSetting('selection_handler_override') !== '') {
+      $summary[] = $this->t('Selection handler: @selection_handler', ['@selection_handler' => $this->getSetting('selection_handler_override')]);
+    }
     $summary[] = $this->t('Show the parent hierarchy: @show_term_hierarchy', ['@show_term_hierarchy' => $this->getSetting('show_term_hierarchy') ? 'Yes' : 'No']);
     $summary[] = $this->t('Empty value message: @no_empty_message', ['@no_empty_message' => $this->getSetting('no_empty_message')]);
 
@@ -241,7 +270,9 @@ class AutocompleteDeluxeWidget extends WidgetBase implements ContainerFactoryPlu
       '#type' => 'autocomplete_deluxe',
       '#title' => $this->fieldDefinition->getLabel(),
       '#target_type' => $target_type,
-      '#selection_handler' => $this->getFieldSetting('handler'),
+      '#selection_handler' => !empty($settings['selection_handler_override']) ? $settings['selection_handler_override'] : $this->getFieldSetting('handler'),
+      // The entity being edited stays in the settings whichever handler runs,
+      // so an overriding plugin can filter on it too.
       '#selection_settings' => $selection_settings + [
         'entity' => $entity,
       ],
