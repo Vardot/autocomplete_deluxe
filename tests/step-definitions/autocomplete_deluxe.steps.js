@@ -681,6 +681,73 @@ When(
 );
 
 /**
+ * Assert the suggestion list keeps a usable scrollbar.
+ *
+ * The list has to stay scrollable AND show that it scrolls: hiding the bar left
+ * no sign that there was more to see, and no target for a mouse without a
+ * wheel. Read from the rules rather than measured, because the bar only paints
+ * once the list overflows.
+ *
+ * Example: Then the autocomplete deluxe suggestion list should keep its scrollbar
+ */
+Then(
+  /^the autocomplete deluxe suggestion list should keep its scrollbar$/,
+  async function () {
+    await attempt(async () => {
+      const found = await this.page.evaluate(() => {
+        const hits = { hidden: false, thin: false, sized: false };
+        for (const sheet of Array.from(document.styleSheets)) {
+          let rules;
+          try {
+            rules = sheet.cssRules;
+          } catch (e) {
+            continue;
+          }
+          for (const rule of Array.from(rules || [])) {
+            const sel = rule.selectorText || '';
+            if (!/ui-autocomplete/.test(sel)) {
+              continue;
+            }
+            const st = rule.style;
+            if (!st) {
+              continue;
+            }
+            const w = st.getPropertyValue('scrollbar-width');
+            if (w === 'none') {
+              hits.hidden = true;
+            }
+            if (w === 'thin') {
+              hits.thin = true;
+            }
+            if (
+              /::-webkit-scrollbar$/.test(sel) &&
+              st.getPropertyValue('display') === 'none'
+            ) {
+              hits.hidden = true;
+            }
+            if (
+              /::-webkit-scrollbar/.test(sel) &&
+              st.getPropertyValue('width')
+            ) {
+              hits.sized = true;
+            }
+          }
+        }
+        return hits;
+      });
+      if (found.hidden) {
+        throw new Error('The suggestion list still hides its scrollbar');
+      }
+      if (!found.thin && !found.sized) {
+        throw new Error(
+          'No rule gives the suggestion list a visible scrollbar',
+        );
+      }
+    }, 'Could not read the suggestion list scrollbar rules');
+  },
+);
+
+/**
  * Commit the current Autocomplete Deluxe input with Enter. With new_terms /
  * not_found_message disabled, an unmatched value must NOT produce a chip - this
  * step lets a scenario exercise that boundary deterministically.

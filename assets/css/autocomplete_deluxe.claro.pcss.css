@@ -21,12 +21,18 @@
   box-shadow: none;
 }
 
+/* A long list scrolls, so the scrollbar stays visible and thin. Hiding it left
+   no sign that there was more to see, and no target for a mouse without a
+   wheel. */
 .ui-autocomplete {
-  scrollbar-width: none;
-  -ms-overflow-style: none;
+  scrollbar-width: thin;
 }
 .ui-autocomplete::-webkit-scrollbar {
-  display: none;
+  width: 8px;
+}
+.ui-autocomplete::-webkit-scrollbar-thumb {
+  border-radius: 4px;
+  background: var(--autocomplete-deluxe-scrollbar-thumb, #b8b8b8);
 }
 
 div.autocomplete-deluxe-container:not(.autocomplete-deluxe-multiple) {
