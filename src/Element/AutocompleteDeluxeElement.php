@@ -166,7 +166,7 @@ class AutocompleteDeluxeElement extends FormElementBase {
       'use_synonyms' => $element['#use_synonyms'] ?? 0,
       'delimiter' => $element['#delimiter'] ?? '',
       'not_found_message_allow' => $element['#not_found_message_allow'] ?? FALSE,
-      'not_found_message' => $element['#not_found_message'] ?? "The term '@term' will be added.",
+      'not_found_message' => $element['#not_found_message'] ?? "'@term' will be added.",
       'new_terms' => $element['#new_terms'] ?? FALSE,
       'no_empty_message' => $element['#no_empty_message'] ?? 'No terms could be found. Please type in order to add a new term.',
     ];

@@ -112,7 +112,7 @@ class AutocompleteDeluxeWidget extends WidgetBase implements ContainerFactoryPlu
       'min_length' => 0,
       'delimiter' => '',
       'not_found_message_allow' => FALSE,
-      'not_found_message' => "The term '@term' will be added",
+      'not_found_message' => "'@term' will be added",
       'new_terms' => FALSE,
       'no_empty_message' => 'No terms could be found. Please type in order to add a new term.',
       'show_term_hierarchy' => FALSE,
@@ -147,26 +147,26 @@ class AutocompleteDeluxeWidget extends WidgetBase implements ContainerFactoryPlu
     $element['delimiter'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Delimiter.'),
-      '#description' => $this->t('A character which should be used beside the enter key, to separate terms.'),
+      '#description' => $this->t('A character which should be used beside the enter key, to separate the values.'),
       '#default_value' => $this->getSetting('delimiter'),
       '#size' => 1,
     ];
     $element['not_found_message_allow'] = [
       '#type' => 'checkbox',
-      '#title' => $this->t('Show Term not found message'),
-      '#description' => $this->t('If this is enabled, a message will be displayed when the term is not found.'),
+      '#title' => $this->t('Show the not found message'),
+      '#description' => $this->t('If this is enabled, a message will be displayed when nothing was found for what was typed.'),
       '#default_value' => $this->getSetting('not_found_message_allow'),
     ];
     $element['not_found_message'] = [
       '#type' => 'textfield',
-      '#title' => $this->t('Term not found message.'),
-      '#description' => $this->t('A message text which will be displayed, if the entered term was not found.'),
+      '#title' => $this->t('Not found message.'),
+      '#description' => $this->t('A message text which will be displayed, if nothing was found for what was entered. @term is replaced with what was typed.'),
       '#default_value' => $this->getSetting('not_found_message'),
     ];
     $element['new_terms'] = [
       '#type' => 'checkbox',
-      '#title' => $this->t('Allow new terms'),
-      '#description' => $this->t('Should it be allowed, that user enter new terms?'),
+      '#title' => $this->t('Allow new values'),
+      '#description' => $this->t('Should a user be allowed to enter a value that does not exist yet? The referenced entity type decides what is created, so this is a new term for a vocabulary and a new entity for any other type.'),
       '#default_value' => $this->getSetting('new_terms'),
     ];
     $element['show_term_hierarchy'] = [
@@ -195,9 +195,9 @@ class AutocompleteDeluxeWidget extends WidgetBase implements ContainerFactoryPlu
     $summary[] = $this->t('Limit: @match_limit', ['@match_limit' => $this->getSetting('match_limit')]);
     $summary[] = $this->t('Min length: @min_length', ['@min_length' => $this->getSetting('min_length')]);
     $summary[] = $this->t('Delimiter: @delimiter', ['@delimiter' => $this->getSetting('delimiter')]);
-    $summary[] = $this->t('Allow Not Found message: @not_found_message_allow', ['@not_found_message_allow' => $this->getSetting('not_found_message_allow') ? 'Yes' : 'No']);
-    $summary[] = $this->t('Not Found message: @not_found_message', ['@not_found_message' => $this->getSetting('not_found_message')]);
-    $summary[] = $this->t('Allow new terms: @new_terms', ['@new_terms' => $this->getSetting('new_terms') ? 'Yes' : 'No']);
+    $summary[] = $this->t('Allow not found message: @not_found_message_allow', ['@not_found_message_allow' => $this->getSetting('not_found_message_allow') ? 'Yes' : 'No']);
+    $summary[] = $this->t('Not found message: @not_found_message', ['@not_found_message' => $this->getSetting('not_found_message')]);
+    $summary[] = $this->t('Allow new values: @new_terms', ['@new_terms' => $this->getSetting('new_terms') ? 'Yes' : 'No']);
     $summary[] = $this->t('Show the parent hierarchy: @show_term_hierarchy', ['@show_term_hierarchy' => $this->getSetting('show_term_hierarchy') ? 'Yes' : 'No']);
     $summary[] = $this->t('Empty value message: @no_empty_message', ['@no_empty_message' => $this->getSetting('no_empty_message')]);
 
