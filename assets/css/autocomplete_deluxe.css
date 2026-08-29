@@ -10,6 +10,7 @@ ul.ui-autocomplete {
   color: black;
 }
 .ui-autocomplete .ui-menu-item a:hover {
+  -webkit-text-decoration: none;
   text-decoration: none;
   color: white;
   background: #0072b9;

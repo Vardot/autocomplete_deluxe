@@ -74,9 +74,13 @@ div.autocomplete-deluxe-container div.autocomplete-deluxe-throbber.autocomplete-
   inset-block-start: 6px;
   inset-inline-end: 6px;
   background: var(--gin-color-primary, #0550e6);
+  -webkit-mask-image: url("../images/close.svg");
   mask-image: url("../images/close.svg");
+  -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
+  -webkit-mask-position: center;
   mask-position: center;
+  -webkit-mask-size: 10px 10px;
   mask-size: 10px 10px;
 }
 
