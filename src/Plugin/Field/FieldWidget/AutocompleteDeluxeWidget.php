@@ -127,6 +127,7 @@ class AutocompleteDeluxeWidget extends WidgetBase implements ContainerFactoryPlu
       'not_found_message_allow' => FALSE,
       'not_found_message' => "'@term' will be added",
       'new_terms' => FALSE,
+      'show_entity_id' => FALSE,
       'no_empty_message' => 'No terms could be found. Please type in order to add a new term.',
       'show_term_hierarchy' => FALSE,
     ] + parent::defaultSettings();
@@ -195,6 +196,12 @@ class AutocompleteDeluxeWidget extends WidgetBase implements ContainerFactoryPlu
       '#options' => $handler_options,
       '#default_value' => $this->getSetting('selection_handler_override'),
     ];
+    $element['show_entity_id'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Show the entity ID'),
+      '#description' => $this->t('Keep the entity ID beside the label, which tells two entities with the same name apart.'),
+      '#default_value' => $this->getSetting('show_entity_id'),
+    ];
     $element['show_term_hierarchy'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Show the parent hierarchy'),
@@ -227,6 +234,7 @@ class AutocompleteDeluxeWidget extends WidgetBase implements ContainerFactoryPlu
     if ($this->getSetting('selection_handler_override') !== '') {
       $summary[] = $this->t('Selection handler: @selection_handler', ['@selection_handler' => $this->getSetting('selection_handler_override')]);
     }
+    $summary[] = $this->t('Show the entity ID: @show_entity_id', ['@show_entity_id' => $this->getSetting('show_entity_id') ? 'Yes' : 'No']);
     $summary[] = $this->t('Show the parent hierarchy: @show_term_hierarchy', ['@show_term_hierarchy' => $this->getSetting('show_term_hierarchy') ? 'Yes' : 'No']);
     $summary[] = $this->t('Empty value message: @no_empty_message', ['@no_empty_message' => $this->getSetting('no_empty_message')]);
 
@@ -283,6 +291,7 @@ class AutocompleteDeluxeWidget extends WidgetBase implements ContainerFactoryPlu
       '#not_found_message_allow' => $allow_message,
       '#not_found_message' => $this->t('@not_found_message', ['@not_found_message' => $not_found_message]),
       '#new_terms' => $settings['new_terms'] ?? FALSE,
+      '#show_entity_id' => $settings['show_entity_id'] ?? FALSE,
       '#no_empty_message' => isset($settings['no_empty_message']) ? $this->t('@no_empty_message', ['@no_empty_message' => $settings['no_empty_message']]) : '',
       '#cardinality' => $cardinality,
     ];

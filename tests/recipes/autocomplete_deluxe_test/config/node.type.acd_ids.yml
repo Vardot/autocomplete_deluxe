@@ -1,0 +1,10 @@
+langcode: en
+status: true
+dependencies: {  }
+name: 'ACD Ids'
+type: acd_ids
+description: 'Test-only content type whose widget keeps the entity ID beside the label.'
+help: null
+new_revision: true
+preview_mode: 1
+display_submitted: true

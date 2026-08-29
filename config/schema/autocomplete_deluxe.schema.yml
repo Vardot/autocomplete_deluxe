@@ -35,6 +35,9 @@ field.widget.settings.autocomplete_deluxe:
     new_terms:
       type: boolean
       label: "Allow New Terms"
+    show_entity_id:
+      type: boolean
+      label: "Show the Entity ID"
     no_empty_message:
       type: label
       label: "No Empty Message"

@@ -189,6 +189,10 @@
       typeof settings.query_parameters === 'undefined'
         ? false
         : settings.query_parameters;
+    this.show_entity_id =
+      typeof settings.show_entity_id === 'undefined'
+        ? false
+        : settings.show_entity_id;
     this.no_empty_message =
       typeof settings.no_empty_message === 'undefined'
         ? Drupal.t(
@@ -242,7 +246,9 @@
         Object.keys(data).forEach(function (terms) {
           if (self.acceptTerm(terms)) {
             result.push({
-              label: data[terms],
+              // The value carries the entity id and the label does not, so the
+              // value is what is shown when the id was asked for.
+              label: self.show_entity_id ? terms : data[terms],
               value: terms,
             });
           }
@@ -557,7 +563,7 @@
             ? value.substr(1, value.length - 2)
             : value;
         const entityId = value.match(/.+\s\(([^)]+)\)/);
-        if (entityId && entityId.length > 1) {
+        if (entityId && entityId.length > 1 && !self.show_entity_id) {
           label = label.replace(` (${entityId[1]})`, '');
         }
         const itemInit = {
