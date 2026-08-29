@@ -324,6 +324,12 @@ class AutocompleteDeluxeWidget extends WidgetBase implements ContainerFactoryPlu
    * {@inheritdoc}
    */
   public function massageFormValues(array $values, array $form, FormStateInterface $form_state) {
+    // A module can wrap the widget in one more level, as Field States UI
+    // does under the element key, so the values are taken from wherever the
+    // target_id landed.
+    if (!isset($values['target_id']) && isset($values['element']['target_id'])) {
+      return $values['element']['target_id'];
+    }
     return $values['target_id'];
   }
 
