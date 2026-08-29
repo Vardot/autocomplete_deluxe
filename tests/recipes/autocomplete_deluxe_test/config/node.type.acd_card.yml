@@ -1,0 +1,10 @@
+langcode: en
+status: true
+dependencies: {  }
+name: 'ACD Cardinality'
+type: acd_card
+description: 'Test-only content type whose field carries a per-field value limit.'
+help: null
+new_revision: true
+preview_mode: 1
+display_submitted: true

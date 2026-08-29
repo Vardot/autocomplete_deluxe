@@ -17,6 +17,7 @@ use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
 use Drupal\user\EntityOwnerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Drupal\Core\Config\Entity\ThirdPartySettingsInterface;
 use Drupal\Core\Session\AccountInterface;
 
 /**
@@ -209,6 +210,16 @@ class AutocompleteDeluxeWidget extends WidgetBase implements ContainerFactoryPlu
     $entity = $items->getEntity();
     $instance = $this->fieldDefinition;
     $cardinality = $instance->getFieldStorageDefinition()->getCardinality();
+
+    // A module can narrow the number of values for a single field rather than
+    // for the whole storage, which is what Field Config Cardinality does, so
+    // the widget follows that value when it is set.
+    if ($instance instanceof ThirdPartySettingsInterface) {
+      $field_cardinality = $instance->getThirdPartySetting('field_config_cardinality', 'cardinality_config');
+      if ($field_cardinality !== NULL && $field_cardinality !== '') {
+        $cardinality = (int) $field_cardinality;
+      }
+    }
     $target_type = $instance->getFieldStorageDefinition()->getSetting('target_type');
     $settings = $this->getSettings();
     $referenced_entities = $items->referencedEntities();
