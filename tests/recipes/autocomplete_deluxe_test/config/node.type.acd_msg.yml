@@ -1,0 +1,10 @@
+langcode: en
+status: true
+dependencies: {  }
+name: 'ACD Message'
+type: acd_msg
+description: 'Test-only content type whose widget shows the not-found message while new terms are off.'
+help: null
+new_revision: true
+preview_mode: 1
+display_submitted: true

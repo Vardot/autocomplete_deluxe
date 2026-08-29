@@ -264,16 +264,19 @@
         (self.new_terms || self.not_found_message_allow)
       ) {
         if (term !== ' ') {
-          result.push({
-            // The row is what adds the value, so it is offered either way, and
-            // it only carries the message when the setting asks for it.
-            label:
-              self.not_found_message_allow || !self.new_terms
+          if (self.new_terms) {
+            result.push({
+              label: self.not_found_message_allow
                 ? Drupal.formatString(self.not_found_message, { '@term': term })
                 : term,
-            value: term,
-            newTerm: true,
-          });
+              value: term,
+              newTerm: true,
+            });
+          } else {
+            // New terms are not allowed, so the row must not promise that this
+            // one will be added, and it must not be selectable either.
+            result.push({ label: Drupal.t('No results found'), noTerms: true });
+          }
         } else {
           result.push({
             label: self.no_empty_message,
