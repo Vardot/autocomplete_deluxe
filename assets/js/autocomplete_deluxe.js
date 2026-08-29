@@ -691,6 +691,71 @@
       }
     });
 
+    // A pasted list is split on the delimiter, so several values can be added
+    // in one go instead of landing in the field as one long string. Each piece
+    // is looked up first, so an entity that exists is referenced rather than
+    // created again.
+    const bareLabel = function (label) {
+      return String(label)
+        .replace(/\s\([^()]*\)$/, '')
+        .trim()
+        .toLowerCase();
+    };
+
+    const hasPastedLabel = function (label) {
+      const needle = bareLabel(label);
+      return Object.keys(self.items).some(function (key) {
+        return bareLabel(key) === needle;
+      });
+    };
+
+    jqObject.on('paste', function (event) {
+      const clipboard =
+        (event.originalEvent || event).clipboardData || window.clipboardData;
+      if (!clipboard || self.delimiterKey === '') {
+        return;
+      }
+      const pasted = clipboard.getData('text');
+      if (pasted.indexOf(self.delimiterKey) === -1) {
+        return;
+      }
+      event.preventDefault();
+
+      const addPastedValue = function (term) {
+        if (
+          self.cardinality > 0 &&
+          Object.keys(self.items).length >= self.cardinality
+        ) {
+          return;
+        }
+        const url = Drupal.url(`${self.uri}?q=${encodeURIComponent(term)}`);
+        $.getJSON(url, {}, function (data) {
+          let matched = null;
+          Object.keys(data).forEach(function (value) {
+            if (bareLabel(data[value]) === term.toLowerCase()) {
+              matched = { label: data[value], value };
+            }
+          });
+          if (hasPastedLabel(term)) {
+            return;
+          }
+          if (matched) {
+            self.addValue(matched);
+          } else if (self.new_terms) {
+            self.addValue({ label: term, value: term, newTerm: true });
+          }
+        });
+      };
+
+      pasted.split(self.delimiterKey).forEach(function (piece) {
+        const term = piece.trim();
+        if (term !== '') {
+          addPastedValue(term);
+        }
+      });
+      jqObject.val('');
+    });
+
     jqObject.autoGrowInput({
       comfortZone: 50,
       minWidth: 10,
