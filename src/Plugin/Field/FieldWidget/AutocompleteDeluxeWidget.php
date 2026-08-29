@@ -13,6 +13,7 @@ use Drupal\Core\KeyValueStore\KeyValueFactoryInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Site\Settings;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\Core\TypedData\TranslatableInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
 use Drupal\user\EntityOwnerInterface;
@@ -264,8 +265,16 @@ class AutocompleteDeluxeWidget extends WidgetBase implements ContainerFactoryPlu
       ];
     }
 
+    // Show every tag in the language of the entity being edited. Core hands
+    // the referenced entities back in their own language, see
+    // https://www.drupal.org/project/drupal/issues/2915972.
+    $langcode = $entity->language()->getId();
+
     $entities = [];
     foreach ($referenced_entities as $item) {
+      if ($item instanceof TranslatableInterface && $item->hasTranslation($langcode)) {
+        $item = $item->getTranslation($langcode);
+      }
       $entities[$item->id()] = $item;
     }
 
