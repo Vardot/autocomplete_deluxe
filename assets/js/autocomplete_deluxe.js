@@ -541,7 +541,14 @@
         ? 'autocomplete'
         : 'ui-autocomplete';
 
-    jqObject.data(autocompleteDataKey)._resizeMenu = function () {};
+    // The override is skipped where jQuery UI did not initialize the
+    // autocomplete on the input, as happens when the element is rendered into
+    // a dialog whose markup never reached the behavior. The list then resizes
+    // as jQuery UI sees fit, which is better than throwing.
+    const uiAutocomplete = jqObject.data(autocompleteDataKey);
+    if (uiAutocomplete) {
+      uiAutocomplete._resizeMenu = function () {};
+    }
 
     jqObject.show();
 
