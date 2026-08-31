@@ -1,0 +1,17 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - node.type.acd_free
+    - taxonomy.vocabulary.acd_tags
+  module:
+    - node
+id: acd_tagger
+label: 'ACD Tagger'
+weight: 4
+is_admin: false
+permissions:
+  - 'access content'
+  - 'create acd_free content'
+  - 'edit any acd_free content'
+  - 'view published taxonomy terms'

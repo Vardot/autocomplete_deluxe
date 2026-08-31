@@ -4,6 +4,7 @@ namespace Drupal\autocomplete_deluxe\Plugin\Field\FieldWidget;
 
 use Drupal\Component\Utility\Crypt;
 use Drupal\Core\Entity\EntityReferenceSelection\SelectionPluginManagerInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Field\Attribute\FieldWidget;
 use Drupal\Core\Field\FieldDefinitionInterface;
@@ -64,6 +65,13 @@ class AutocompleteDeluxeWidget extends WidgetBase implements ContainerFactoryPlu
   protected $selectionManager;
 
   /**
+   * The entity type manager.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected $entityTypeManager;
+
+  /**
    * {@inheritdoc}
    *
    * @param string $plugin_id
@@ -84,14 +92,17 @@ class AutocompleteDeluxeWidget extends WidgetBase implements ContainerFactoryPlu
    *   Key value storage.
    * @param \Drupal\Core\Entity\EntityReferenceSelection\SelectionPluginManagerInterface $selection_manager
    *   The selection plugin manager.
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
+   *   The entity type manager.
    */
-  public function __construct($plugin_id, $plugin_definition, FieldDefinitionInterface $field_definition, array $settings, array $third_party_settings, ModuleHandlerInterface $module_handler, AccountInterface $account, KeyValueFactoryInterface $key_value, SelectionPluginManagerInterface $selection_manager) {
+  public function __construct($plugin_id, $plugin_definition, FieldDefinitionInterface $field_definition, array $settings, array $third_party_settings, ModuleHandlerInterface $module_handler, AccountInterface $account, KeyValueFactoryInterface $key_value, SelectionPluginManagerInterface $selection_manager, EntityTypeManagerInterface $entity_type_manager) {
     parent::__construct($plugin_id, $plugin_definition, $field_definition, $settings, $third_party_settings);
 
     $this->moduleHandler = $module_handler;
     $this->account = $account;
     $this->keyValue = $key_value;
     $this->selectionManager = $selection_manager;
+    $this->entityTypeManager = $entity_type_manager;
   }
 
   /**
@@ -107,7 +118,8 @@ class AutocompleteDeluxeWidget extends WidgetBase implements ContainerFactoryPlu
       $container->get('module_handler'),
       $container->get('current_user'),
       $container->get('keyvalue'),
-      $container->get('plugin.manager.entity_reference_selection')
+      $container->get('plugin.manager.entity_reference_selection'),
+      $container->get('entity_type.manager')
     );
   }
 
@@ -274,6 +286,15 @@ class AutocompleteDeluxeWidget extends WidgetBase implements ContainerFactoryPlu
       $selection_settings['autocomplete_deluxe_hierarchy'] = TRUE;
     }
 
+    // New terms are only offered to a user who may create them, so the widget
+    // follows the create permission of the referenced entity type instead of
+    // offering a value the save would refuse.
+    $autocreate_bundle = $this->getAutocreateBundle();
+    $new_terms = ($settings['new_terms'] ?? FALSE) && $autocreate_bundle
+      && $this->entityTypeManager
+        ->getAccessControlHandler($target_type)
+        ->createAccess($autocreate_bundle, $this->account);
+
     $element += [
       '#type' => 'autocomplete_deluxe',
       '#title' => $this->fieldDefinition->getLabel(),
@@ -290,7 +311,7 @@ class AutocompleteDeluxeWidget extends WidgetBase implements ContainerFactoryPlu
       '#delimiter' => $settings['delimiter'] ?? '',
       '#not_found_message_allow' => $allow_message,
       '#not_found_message' => $this->t('@not_found_message', ['@not_found_message' => $not_found_message]),
-      '#new_terms' => $settings['new_terms'] ?? FALSE,
+      '#new_terms' => $new_terms,
       '#show_entity_id' => $settings['show_entity_id'] ?? FALSE,
       '#no_empty_message' => isset($settings['no_empty_message']) ? $this->t('@no_empty_message', ['@no_empty_message' => $settings['no_empty_message']]) : '',
       '#cardinality' => $cardinality,
@@ -298,9 +319,9 @@ class AutocompleteDeluxeWidget extends WidgetBase implements ContainerFactoryPlu
 
     // If new terms are allowed to be created, set the bundle and the uid of the
     // term.
-    if ($this->getSetting('new_terms') && $this->getSelectionHandlerSetting('auto_create') && ($bundle = $this->getAutocreateBundle())) {
+    if ($new_terms && $this->getSelectionHandlerSetting('auto_create')) {
       $element['#autocreate'] = [
-        'bundle' => $bundle,
+        'bundle' => $autocreate_bundle,
         'uid' => ($entity instanceof EntityOwnerInterface) ? $entity->getOwnerId() : $this->account->id(),
       ];
     }

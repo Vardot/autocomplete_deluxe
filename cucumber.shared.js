@@ -20,6 +20,15 @@ module.exports = {
       password: 'dD.123123ddd',
       isAdmin: true,
     },
+    // May write the field but may not create taxonomy terms, so the widget has
+    // to stop offering new values to them.
+    Tagger: {
+      username: 'acd_tagger',
+      email: 'acd_tagger@example.test',
+      password: 'dD.123123ddd',
+      roles: ['acd_tagger'],
+      isAdmin: false,
+    },
   },
   minWaitTime: {
     page: 3000,
