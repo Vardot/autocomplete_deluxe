@@ -142,6 +142,7 @@ class AutocompleteDeluxeWidget extends WidgetBase implements ContainerFactoryPlu
       'show_entity_id' => FALSE,
       'no_empty_message' => 'No terms could be found. Please type in order to add a new term.',
       'show_term_hierarchy' => FALSE,
+      'select_all' => FALSE,
     ] + parent::defaultSettings();
   }
 
@@ -220,6 +221,12 @@ class AutocompleteDeluxeWidget extends WidgetBase implements ContainerFactoryPlu
       '#description' => $this->t('Show each suggested term with its parents, which tells the same name under different parents apart. Taxonomy only.'),
       '#default_value' => $this->getSetting('show_term_hierarchy'),
     ];
+    $element['select_all'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Offer a select all row'),
+      '#description' => $this->t('Put a row above the suggestions that adds every suggestion at once. Only a field that holds an unlimited number of values offers it, since a limited field cannot take them all.'),
+      '#default_value' => $this->getSetting('select_all'),
+    ];
     $element['no_empty_message'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Empty value message.'),
@@ -248,6 +255,7 @@ class AutocompleteDeluxeWidget extends WidgetBase implements ContainerFactoryPlu
     }
     $summary[] = $this->t('Show the entity ID: @show_entity_id', ['@show_entity_id' => $this->getSetting('show_entity_id') ? 'Yes' : 'No']);
     $summary[] = $this->t('Show the parent hierarchy: @show_term_hierarchy', ['@show_term_hierarchy' => $this->getSetting('show_term_hierarchy') ? 'Yes' : 'No']);
+    $summary[] = $this->t('Offer a select all row: @select_all', ['@select_all' => $this->getSetting('select_all') ? 'Yes' : 'No']);
     $summary[] = $this->t('Empty value message: @no_empty_message', ['@no_empty_message' => $this->getSetting('no_empty_message')]);
 
     return $summary;
@@ -313,6 +321,9 @@ class AutocompleteDeluxeWidget extends WidgetBase implements ContainerFactoryPlu
       '#not_found_message' => $this->t('@not_found_message', ['@not_found_message' => $not_found_message]),
       '#new_terms' => $new_terms,
       '#show_entity_id' => $settings['show_entity_id'] ?? FALSE,
+      // A field that takes a limited number of values cannot take every
+      // suggestion, so the row is only offered where the field is unlimited.
+      '#select_all' => !empty($settings['select_all']) && $cardinality <= 0,
       '#no_empty_message' => isset($settings['no_empty_message']) ? $this->t('@no_empty_message', ['@no_empty_message' => $settings['no_empty_message']]) : '',
       '#cardinality' => $cardinality,
     ];

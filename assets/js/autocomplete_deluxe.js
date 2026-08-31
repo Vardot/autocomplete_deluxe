@@ -193,6 +193,12 @@
       typeof settings.show_entity_id === 'undefined'
         ? false
         : settings.show_entity_id;
+    this.select_all =
+      typeof settings.select_all === 'undefined' ? false : settings.select_all;
+    this.select_all_label =
+      typeof settings.select_all_label === 'undefined'
+        ? Drupal.t('Add every suggestion')
+        : settings.select_all_label;
     this.no_empty_message =
       typeof settings.no_empty_message === 'undefined'
         ? Drupal.t(
@@ -300,6 +306,26 @@
           newTerm: true,
         });
       }
+      // The row goes above the suggestions it stands for, and only where there
+      // is more than one of them, since adding a single suggestion is what
+      // picking that suggestion already does. It carries its own values, so
+      // choosing it does not depend on the list still being on screen.
+      if (self.select_all) {
+        const selectable = result.filter(function (row) {
+          return !row.noTerms && !row.newTerm;
+        });
+        if (selectable.length > 1) {
+          result.unshift({
+            label: self.select_all_label,
+            value: '',
+            selectAll: true,
+            selectAllValues: selectable.map(function (row) {
+              return { label: row.label, value: row.value };
+            }),
+          });
+        }
+      }
+
       return result;
     };
 
@@ -402,10 +428,14 @@
         );
       }
 
-      return $('<li></li>')
-        .data(autocompleteDataKey, item)
-        .append(`<a>${t}</a>`)
-        .appendTo(ul);
+      const row = $('<li></li>').data(autocompleteDataKey, item);
+      // The row that stands for every suggestion carries a class of its own,
+      // so a theme can set it apart from the suggestions below it.
+      if (item.selectAll) {
+        row.addClass('autocomplete-deluxe-select-all');
+      }
+
+      return row.append(`<a>${t}</a>`).appendTo(ul);
     };
   };
 
@@ -620,6 +650,19 @@
       if (!allowNewTerms && ui.item.newTerm) {
         this.value = '';
         return;
+      }
+      // The select all row stands for the suggestions it was built from, so it
+      // adds each of them through the same path a single pick takes, and is
+      // never added as a value of its own.
+      if (ui.item.selectAll) {
+        ui.item.selectAllValues.forEach(function (value) {
+          if (self.acceptTerm(value.value)) {
+            self.addValue(value);
+          }
+        });
+        jqObject.val('');
+        jqObject.width(25);
+        return false;
       }
       self.addValue(ui.item);
       jqObject.width(25);

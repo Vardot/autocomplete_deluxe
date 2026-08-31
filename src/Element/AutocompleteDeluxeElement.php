@@ -169,6 +169,8 @@ class AutocompleteDeluxeElement extends FormElementBase {
       'not_found_message' => $element['#not_found_message'] ?? "'@term' will be added.",
       'new_terms' => $element['#new_terms'] ?? FALSE,
       'show_entity_id' => $element['#show_entity_id'] ?? FALSE,
+      'select_all' => $element['#select_all'] ?? FALSE,
+      'select_all_label' => $element['#select_all_label'] ?? (string) t('Add every suggestion'),
       'no_empty_message' => $element['#no_empty_message'] ?? 'No terms could be found. Please type in order to add a new term.',
     ];
 

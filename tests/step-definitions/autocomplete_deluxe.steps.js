@@ -317,6 +317,8 @@ When(
 const ACD_INPUT = 'input.autocomplete-deluxe-form';
 const ACD_VISIBLE_ITEM = 'ul.ui-autocomplete:visible li.ui-menu-item';
 const ACD_CHIP = '.autocomplete-deluxe-item';
+const ACD_SELECT_ALL_ROW =
+  'ul.ui-autocomplete:visible li.autocomplete-deluxe-select-all';
 
 /**
  * Focus the widget input reliably. The Drupal admin toolbar tray can overlap
@@ -957,3 +959,60 @@ When(/^(?:I |we )?open the edit form of the current node$/, async function () {
  *
  * @param {import('playwright').Page} page
  */
+
+/**
+ * Choose the row that stands for every suggestion.
+ *
+ * The generic suggestion step waits for a chip carrying the label it clicked,
+ * and this row never becomes a chip of its own, so it needs a step that waits
+ * for the menu to close instead.
+ *
+ * Example #1: When I select the autocomplete deluxe select all row
+ * Example #2: And we select the autocomplete deluxe select all row
+ * Example #3: When I select the autocomplete deluxe select all row
+ * Example #4: And I select the autocomplete deluxe select all row
+ * Example #5: And we select the autocomplete deluxe select all row
+ */
+When(
+  /^(?:I |we )?select the autocomplete deluxe select all row$/,
+  async function () {
+    await attempt(async () => {
+      const row = this.page.locator(ACD_SELECT_ALL_ROW).first();
+      await row.waitFor({ state: 'visible', timeout: 10000 });
+      await row.click();
+      await this.page
+        .locator(ACD_SELECT_ALL_ROW)
+        .first()
+        .waitFor({ state: 'hidden', timeout: 8000 });
+    }, 'Could not select the autocomplete deluxe select all row');
+  },
+);
+
+/**
+ * Assert whether the live menu carries the select all row.
+ *
+ * Asserting on the visible menu rather than on the text of the page keeps a
+ * menu left over from an earlier query out of the result.
+ *
+ * Example #1: Then the autocomplete deluxe suggestions should offer a select all row
+ * Example #2: Then the autocomplete deluxe suggestions should not offer a select all row
+ * Example #3: And the autocomplete deluxe suggestions should offer a select all row
+ * Example #4: And the autocomplete deluxe suggestions should not offer a select all row
+ * Example #5: Then the autocomplete deluxe suggestions should not offer a select all row
+ */
+Then(
+  /^the autocomplete deluxe suggestions should( not)? offer a select all row$/,
+  async function (negated) {
+    const expected = !negated;
+    await attempt(
+      async () => {
+        const row = this.page.locator(ACD_SELECT_ALL_ROW).first();
+        await row.waitFor({
+          state: expected ? 'visible' : 'hidden',
+          timeout: 8000,
+        });
+      },
+      `Expected the suggestions ${expected ? 'to' : 'not to'} offer a select all row`,
+    );
+  },
+);
