@@ -199,6 +199,18 @@
       typeof settings.select_all_label === 'undefined'
         ? Drupal.t('Add every suggestion')
         : settings.select_all_label;
+    this.link_tags =
+      typeof settings.link_tags === 'undefined' ? false : settings.link_tags;
+    this.link_template =
+      typeof settings.link_template === 'undefined'
+        ? ''
+        : settings.link_template;
+    // The placeholder comes from PHP, which is what routed the path, so the
+    // two can never drift apart.
+    this.link_placeholder =
+      typeof settings.link_placeholder === 'undefined'
+        ? ''
+        : settings.link_placeholder;
     this.no_empty_message =
       typeof settings.no_empty_message === 'undefined'
         ? Drupal.t(
@@ -485,6 +497,42 @@
     });
   };
 
+  /**
+   * The label of a tag, as a link to its entity where that was asked for.
+   *
+   * Only a saved entity carries an ID in its value, so a term that is about to
+   * be created has nothing to point at and keeps its plain label. The link
+   * opens in a new tab, so the form being edited is not left behind.
+   *
+   * @param {Object} widget
+   *   The widget the tag belongs to.
+   * @param {Object} item
+   *   The item the tag was built from.
+   *
+   * @return {string}
+   *   The markup for the label of the tag.
+   */
+  Drupal.autocomplete_deluxe.tagLabel = function (widget, item) {
+    if (!widget.link_tags || !widget.link_template || item.newTerm === true) {
+      return item.label;
+    }
+
+    const found = /\((\d+)\)$/.exec(item.value);
+    if (!found) {
+      return item.label;
+    }
+
+    if (!widget.link_placeholder) {
+      return item.label;
+    }
+
+    const href = widget.link_template.replace(
+      widget.link_placeholder,
+      encodeURIComponent(found[1]),
+    );
+    return `<a href="${href}" class="autocomplete-deluxe-item-link" target="_blank" rel="noopener noreferrer">${item.label}</a>`;
+  };
+
   Drupal.autocomplete_deluxe.MultipleWidget.Item = function (widget, item) {
     if (item.newTerm === true) {
       item.label = item.value;
@@ -494,7 +542,7 @@
 
     this.value = item.value;
     this.element = $(
-      `<span class="autocomplete-deluxe-item">${item.label}</span>`,
+      `<span class="autocomplete-deluxe-item">${Drupal.autocomplete_deluxe.tagLabel(widget, item)}</span>`,
     );
     this.widget = widget;
     this.item = item;

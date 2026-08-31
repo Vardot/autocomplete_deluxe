@@ -171,6 +171,9 @@ class AutocompleteDeluxeElement extends FormElementBase {
       'show_entity_id' => $element['#show_entity_id'] ?? FALSE,
       'select_all' => $element['#select_all'] ?? FALSE,
       'select_all_label' => $element['#select_all_label'] ?? (string) t('Add every suggestion'),
+      'link_tags' => $element['#link_tags'] ?? FALSE,
+      'link_template' => $element['#link_template'] ?? '',
+      'link_placeholder' => $element['#link_placeholder'] ?? '',
       'no_empty_message' => $element['#no_empty_message'] ?? 'No terms could be found. Please type in order to add a new term.',
     ];
 

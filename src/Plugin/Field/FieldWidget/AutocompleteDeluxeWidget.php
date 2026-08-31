@@ -37,6 +37,17 @@ class AutocompleteDeluxeWidget extends WidgetBase implements ContainerFactoryPlu
   use StringTranslationTrait;
 
   /**
+   * Stands in for the entity ID while the link path is routed once.
+   *
+   * Numeric on purpose. Most canonical routes require the ID to match \d+,
+   * among them node and user, so a word here makes the router refuse to build
+   * the path at all and no link is produced. The value is far outside any ID a
+   * site is likely to hold, and the path is only used when it turns up in it
+   * exactly once.
+   */
+  const LINK_ID_PLACEHOLDER = '987654321';
+
+  /**
    * The module handler.
    *
    * @var \Drupal\Core\Extension\ModuleHandlerInterface
@@ -143,6 +154,7 @@ class AutocompleteDeluxeWidget extends WidgetBase implements ContainerFactoryPlu
       'no_empty_message' => 'No terms could be found. Please type in order to add a new term.',
       'show_term_hierarchy' => FALSE,
       'select_all' => FALSE,
+      'link_tags' => FALSE,
     ] + parent::defaultSettings();
   }
 
@@ -227,6 +239,12 @@ class AutocompleteDeluxeWidget extends WidgetBase implements ContainerFactoryPlu
       '#description' => $this->t('Put a row above the suggestions that adds every suggestion at once. Only a field that holds an unlimited number of values offers it, since a limited field cannot take them all.'),
       '#default_value' => $this->getSetting('select_all'),
     ];
+    $element['link_tags'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Link each tag to its entity'),
+      '#description' => $this->t('Show the label of a tag as a link to the entity it refers to. The link opens in a new tab, so the form being edited is not left. A tag that is not saved yet has nothing to link to and stays plain text.'),
+      '#default_value' => $this->getSetting('link_tags'),
+    ];
     $element['no_empty_message'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Empty value message.'),
@@ -256,6 +274,7 @@ class AutocompleteDeluxeWidget extends WidgetBase implements ContainerFactoryPlu
     $summary[] = $this->t('Show the entity ID: @show_entity_id', ['@show_entity_id' => $this->getSetting('show_entity_id') ? 'Yes' : 'No']);
     $summary[] = $this->t('Show the parent hierarchy: @show_term_hierarchy', ['@show_term_hierarchy' => $this->getSetting('show_term_hierarchy') ? 'Yes' : 'No']);
     $summary[] = $this->t('Offer a select all row: @select_all', ['@select_all' => $this->getSetting('select_all') ? 'Yes' : 'No']);
+    $summary[] = $this->t('Link each tag to its entity: @link_tags', ['@link_tags' => $this->getSetting('link_tags') ? 'Yes' : 'No']);
     $summary[] = $this->t('Empty value message: @no_empty_message', ['@no_empty_message' => $this->getSetting('no_empty_message')]);
 
     return $summary;
@@ -324,6 +343,9 @@ class AutocompleteDeluxeWidget extends WidgetBase implements ContainerFactoryPlu
       // A field that takes a limited number of values cannot take every
       // suggestion, so the row is only offered where the field is unlimited.
       '#select_all' => !empty($settings['select_all']) && $cardinality <= 0,
+      '#link_tags' => !empty($settings['link_tags']),
+      '#link_template' => !empty($settings['link_tags']) ? $this->entityLinkTemplate($target_type) : '',
+      '#link_placeholder' => self::LINK_ID_PLACEHOLDER,
       '#no_empty_message' => isset($settings['no_empty_message']) ? $this->t('@no_empty_message', ['@no_empty_message' => $settings['no_empty_message']]) : '',
       '#cardinality' => $cardinality,
     ];
@@ -486,6 +508,42 @@ class AutocompleteDeluxeWidget extends WidgetBase implements ContainerFactoryPlu
   protected function getSelectionHandlerSetting($setting_name) {
     $settings = $this->getFieldSetting('handler_settings');
     return $settings[$setting_name] ?? NULL;
+  }
+
+  /**
+   * Builds the path of a referenced entity with its ID left as a placeholder.
+   *
+   * The tags are built in the browser, from values the autocomplete hands
+   * back, so the path cannot be built per entity here. Routing it once with a
+   * placeholder keeps the base path and the language prefix that Url adds,
+   * and the script only puts the ID in place of the placeholder.
+   *
+   * @param string $target_type
+   *   The entity type the field refers to.
+   *
+   * @return string
+   *   The path carrying the placeholder, or an empty string where the entity
+   *   type has no canonical route to link to.
+   */
+  protected function entityLinkTemplate($target_type) {
+    try {
+      $path = Url::fromRoute("entity.$target_type.canonical", [$target_type => self::LINK_ID_PLACEHOLDER])->toString();
+    }
+    catch (\Exception $e) {
+      // An entity type without a canonical route, or one whose route will not
+      // take the placeholder, has nothing to link to and the tags stay plain
+      // text.
+      return '';
+    }
+
+    // The script swaps the placeholder for the ID, so it has to appear once
+    // and once only. Anything else, and a path could be built that points
+    // somewhere unintended.
+    if (substr_count($path, self::LINK_ID_PLACEHOLDER) !== 1) {
+      return '';
+    }
+
+    return $path;
   }
 
   /**
