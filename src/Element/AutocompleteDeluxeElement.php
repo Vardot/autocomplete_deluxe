@@ -40,6 +40,7 @@ class AutocompleteDeluxeElement extends FormElementBase {
     $info['#element_validate'] = [
       [$class, 'validateRequired'],
       ['\Drupal\Core\Entity\Element\EntityAutocomplete', 'validateEntityAutocomplete'],
+      [$class, 'setAutocreateParent'],
     ];
     $info['#process'][] = [$class, 'processElement'];
 
@@ -99,6 +100,51 @@ class AutocompleteDeluxeElement extends FormElementBase {
       $form_state->setError($element, new TranslatableMarkup('@name field is required.', [
         '@name' => $element['#title'] ?? '',
       ]));
+    }
+  }
+
+  /**
+   * Puts a new term under the parent the widget was given.
+   *
+   * Core builds an auto created term with no parent, which leaves it at the
+   * top of the vocabulary however deep the vocabulary is. This runs after the
+   * validate of core, where the term first exists as an unsaved entity, and
+   * only touches a term that has no parent of its own yet.
+   */
+  public static function setAutocreateParent(array &$element, FormStateInterface $form_state, array &$complete_form) {
+    $parent = $element['#autocreate']['parent'] ?? NULL;
+    if (empty($parent)) {
+      return;
+    }
+
+    $value = $form_state->getValue($element['#parents']);
+    if (!is_array($value)) {
+      return;
+    }
+
+    foreach ($value as $item) {
+      if (!isset($item['entity'])) {
+        continue;
+      }
+      $term = $item['entity'];
+      if (!$term->isNew() || !$term->hasField('parent')) {
+        continue;
+      }
+
+      // A term carries a parent of 0 for the top of the vocabulary, so the
+      // field is not empty even when nothing has really been set. Only a
+      // parent that points at a term counts as one already given.
+      $has_parent = FALSE;
+      foreach ($term->get('parent')->getValue() as $existing) {
+        if (!empty($existing['target_id'])) {
+          $has_parent = TRUE;
+          break;
+        }
+      }
+
+      if (!$has_parent) {
+        $term->set('parent', ['target_id' => $parent]);
+      }
     }
   }
 

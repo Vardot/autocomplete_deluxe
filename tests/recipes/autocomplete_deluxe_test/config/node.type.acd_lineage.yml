@@ -1,0 +1,10 @@
+langcode: en
+status: true
+dependencies: {  }
+name: 'ACD Lineage'
+type: acd_lineage
+description: 'Test-only content type whose widget files a new term under a chosen parent.'
+help: null
+new_revision: true
+preview_mode: 1
+display_submitted: true

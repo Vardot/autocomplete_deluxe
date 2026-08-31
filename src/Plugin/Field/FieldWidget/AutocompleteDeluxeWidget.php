@@ -155,6 +155,7 @@ class AutocompleteDeluxeWidget extends WidgetBase implements ContainerFactoryPlu
       'show_term_hierarchy' => FALSE,
       'select_all' => FALSE,
       'link_tags' => FALSE,
+      'auto_create_parent' => '',
     ] + parent::defaultSettings();
   }
 
@@ -245,6 +246,24 @@ class AutocompleteDeluxeWidget extends WidgetBase implements ContainerFactoryPlu
       '#description' => $this->t('Show the label of a tag as a link to the entity it refers to. The link opens in a new tab, so the form being edited is not left. A tag that is not saved yet has nothing to link to and stays plain text.'),
       '#default_value' => $this->getSetting('link_tags'),
     ];
+    // A parent only means something for a vocabulary, which is the only target
+    // type of the ones a reference field can take that has a hierarchy.
+    if ($target_type === 'taxonomy_term') {
+      $parent = NULL;
+      if ($this->getSetting('auto_create_parent')) {
+        $parent = $this->entityTypeManager->getStorage('taxonomy_term')->load($this->getSetting('auto_create_parent'));
+      }
+      $element['auto_create_parent'] = [
+        '#type' => 'entity_autocomplete',
+        '#target_type' => 'taxonomy_term',
+        '#title' => $this->t('Parent of a new term'),
+        '#description' => $this->t('Put a term that this widget creates under this parent, instead of at the top of the vocabulary. Leave empty to keep new terms at the top.'),
+        '#default_value' => $parent,
+        '#selection_settings' => [
+          'target_bundles' => $this->getSelectionHandlerSetting('target_bundles') ?: [],
+        ],
+      ];
+    }
     $element['no_empty_message'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Empty value message.'),
@@ -275,6 +294,12 @@ class AutocompleteDeluxeWidget extends WidgetBase implements ContainerFactoryPlu
     $summary[] = $this->t('Show the parent hierarchy: @show_term_hierarchy', ['@show_term_hierarchy' => $this->getSetting('show_term_hierarchy') ? 'Yes' : 'No']);
     $summary[] = $this->t('Offer a select all row: @select_all', ['@select_all' => $this->getSetting('select_all') ? 'Yes' : 'No']);
     $summary[] = $this->t('Link each tag to its entity: @link_tags', ['@link_tags' => $this->getSetting('link_tags') ? 'Yes' : 'No']);
+    if ($this->getSetting('auto_create_parent')) {
+      $parent = $this->entityTypeManager->getStorage('taxonomy_term')->load($this->getSetting('auto_create_parent'));
+      if ($parent) {
+        $summary[] = $this->t('Parent of a new term: @parent', ['@parent' => $parent->label()]);
+      }
+    }
     $summary[] = $this->t('Empty value message: @no_empty_message', ['@no_empty_message' => $this->getSetting('no_empty_message')]);
 
     return $summary;
@@ -357,6 +382,13 @@ class AutocompleteDeluxeWidget extends WidgetBase implements ContainerFactoryPlu
         'bundle' => $autocreate_bundle,
         'uid' => ($entity instanceof EntityOwnerInterface) ? $entity->getOwnerId() : $this->account->id(),
       ];
+
+      // Core creates the term without a parent, so the ID of the one to use is
+      // carried here and the element puts it on the term once core has built
+      // it. See AutocompleteDeluxeElement::setAutocreateParent().
+      if ($target_type === 'taxonomy_term' && $this->getSetting('auto_create_parent')) {
+        $element['#autocreate']['parent'] = $this->getSetting('auto_create_parent');
+      }
     }
 
     // Show every tag in the language of the entity being edited. Core hands

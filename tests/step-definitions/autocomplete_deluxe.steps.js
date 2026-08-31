@@ -1016,3 +1016,114 @@ Then(
     );
   },
 );
+
+/**
+ * Point the widget at a parent for the terms it creates, or clear it.
+ *
+ * The setting holds a term ID, which the suite keeps out of its fixtures, so
+ * it is set here by name through the settings form. Core resolves a name on
+ * its own where only one term carries it.
+ *
+ * Example #1: Given the widget on "acd_lineage" files new terms under "Uncategorized"
+ * Example #2: Given the widget on "acd_lineage" files new terms at the top
+ * Example #3: And the widget on "acd_lineage" files new terms under "Weather"
+ * Example #4: And the widget on "acd_lineage" files new terms at the top
+ * Example #5: Given the widget on "acd_test" files new terms under "Alpha"
+ */
+Given(
+  /^the widget on "([^"]*)" files new terms (?:under "([^"]*)"|at the top)$/,
+  async function (bundle, parent) {
+    await attempt(
+      async () => {
+        await gotoUrl(
+          this.page,
+          `${this.parameters.launchUrl}/admin/structure/types/manage/${bundle}/form-display`,
+        );
+        await waitForPageLoad(
+          this.page,
+          this.minWaitTime && this.minWaitTime.page,
+        );
+
+        await this.page
+          .locator('input[name="field_acd_tags_settings_edit"]')
+          .click();
+        const field = this.page.locator('[name*="auto_create_parent"]').first();
+        await field.waitFor({ state: 'visible', timeout: 10000 });
+        await field.fill(parent || '');
+
+        await this.page
+          .locator('input[name="field_acd_tags_plugin_settings_update"]')
+          .click();
+        await this.page
+          .locator('[name*="auto_create_parent"]')
+          .first()
+          .waitFor({ state: 'detached', timeout: 10000 });
+
+        await clickDrupalSubmit(this.page);
+        await waitForPageLoad(
+          this.page,
+          this.minWaitTime && this.minWaitTime.page,
+        );
+      },
+      `Could not point the widget on "${bundle}" at "${parent || 'the top'}"`,
+    );
+  },
+);
+
+/**
+ * Assert where a taxonomy term sits in its vocabulary.
+ *
+ * Read from the parent select on the term's own edit form, which names the
+ * parent outright and says <root> for a term at the top, rather than reading
+ * indentation off the overview table.
+ *
+ * Example #1: Then the term "Cycle lanes" should sit under "Uncategorized"
+ * Example #2: Then the term "Cycle lanes" should sit at the top
+ * Example #3: And the term "Alpha" should sit at the top
+ * Example #4: And the term "Flood defenses" should sit under "Weather"
+ * Example #5: Then the term "Beta" should sit at the top
+ */
+Then(
+  /^the term "([^"]*)" should sit (?:under "([^"]*)"|at the top)$/,
+  async function (term, parent) {
+    await attempt(
+      async () => {
+        await gotoUrl(
+          this.page,
+          `${this.parameters.launchUrl}/admin/structure/taxonomy/manage/acd_tags/overview`,
+        );
+        await this.page
+          .getByRole('link', { name: term, exact: true })
+          .first()
+          .click();
+        await waitForPageLoad(
+          this.page,
+          this.minWaitTime && this.minWaitTime.page,
+        );
+
+        const base = this.page.url().replace(/\/edit\/?$|\/$/, '');
+        await gotoUrl(this.page, `${base}/edit`);
+        await waitForPageLoad(
+          this.page,
+          this.minWaitTime && this.minWaitTime.page,
+        );
+
+        // Read the option with textContent. An <option> renders no visible
+        // text of its own, so innerText comes back empty here.
+        await this.page
+          .locator('#edit-parent')
+          .waitFor({ state: 'attached', timeout: 10000 });
+        const actual = await this.page.$eval('#edit-parent', (select) => {
+          const chosen = select.querySelector('option:checked');
+          return chosen ? chosen.textContent.trim() : '';
+        });
+        const wanted = parent || '<root>';
+
+        if (actual !== wanted) {
+          throw new Error(`the term sits under "${actual}", not "${wanted}"`);
+        }
+      },
+      `Expected the term "${term}" to sit ${parent ? `under "${parent}"` : 'at the top'}`,
+    );
+  },
+);
