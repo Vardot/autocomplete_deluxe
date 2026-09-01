@@ -61,9 +61,7 @@ a selection settings key, which is a hash of the selection settings that has
 to be in the key value store before the route is called.
 
 ```php
-use Drupal\Component\Utility\Crypt;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Site\Settings;
 
 /**
  * Implements hook_form_alter().
@@ -85,34 +83,17 @@ function my_module_autocomplete_deluxe_filter(string $field_name, array &$form) 
   }
 
   $target_type = $form[$filter_id]['#target_type'];
-  $selection_handler = 'default:' . $target_type;
-  $selection_settings = [
-    'target_bundles' => $form[$filter_id]['#selection_settings']['target_bundles'],
-    'sort' => ['field' => '_none'],
-    'auto_create' => FALSE,
-    'match_operator' => 'CONTAINS',
-  ];
-
-  $data = serialize($selection_settings) . $target_type . $selection_handler;
-  $selection_settings_key = Crypt::hmacBase64($data, Settings::getHashSalt());
-
-  $key_value_storage = \Drupal::service('keyvalue')->get('entity_autocomplete');
-  if (!$key_value_storage->has($selection_settings_key)) {
-    $key_value_storage->set($selection_settings_key, $selection_settings);
-  }
-
-  $url = \Drupal::urlGenerator()->getPathFromRoute('autocomplete_deluxe.autocomplete', [
-    'target_type' => $target_type,
-    'selection_handler' => $selection_handler,
-    'selection_settings_key' => $selection_settings_key,
-  ]);
 
   $form[$filter_id] = [
     '#type' => 'autocomplete_deluxe',
-    '#autocomplete_deluxe_path' => $url,
     '#target_type' => $target_type,
-    '#selection_handler' => $selection_handler,
-    '#selection_settings' => $selection_settings,
+    '#selection_handler' => 'default:' . $target_type,
+    '#selection_settings' => [
+      'target_bundles' => $form[$filter_id]['#selection_settings']['target_bundles'],
+      'sort' => ['field' => '_none'],
+      'auto_create' => FALSE,
+      'match_operator' => 'CONTAINS',
+    ],
     '#limit' => 10,
     '#size' => 60,
     '#new_terms' => FALSE,
@@ -123,6 +104,11 @@ function my_module_autocomplete_deluxe_filter(string $field_name, array &$form) 
 }
 ```
 
+The element puts the selection settings in the key value store and builds the
+route itself, in its process callback, so none of that has to be repeated here.
+Setting `#autocomplete_deluxe_path` yourself still works and still wins, for
+code written against the older element.
+
 **Q: Can I use the element on a form of my own?**
 
 **A:** Yes, and it is the same wiring: build the selection settings, put them
@@ -130,37 +116,19 @@ in the key value store under their hash, and point the element at the
 autocomplete route.
 
 ```php
-use Drupal\Component\Utility\Crypt;
-use Drupal\Core\Site\Settings;
-
 $target_type = 'taxonomy_term';
-$selection_handler = 'default:taxonomy_term';
-$selection_settings = [
-  'target_bundles' => ['tags' => 'tags'],
-  'sort' => ['field' => '_none'],
-  'auto_create' => FALSE,
-  'match_operator' => 'CONTAINS',
-];
-
-$data = serialize($selection_settings) . $target_type . $selection_handler;
-$selection_settings_key = Crypt::hmacBase64($data, Settings::getHashSalt());
-
-$key_value_storage = \Drupal::service('keyvalue')->get('entity_autocomplete');
-if (!$key_value_storage->has($selection_settings_key)) {
-  $key_value_storage->set($selection_settings_key, $selection_settings);
-}
 
 $form['tags'] = [
   '#type' => 'autocomplete_deluxe',
   '#title' => t('Tags'),
-  '#autocomplete_deluxe_path' => \Drupal::urlGenerator()->getPathFromRoute('autocomplete_deluxe.autocomplete', [
-    'target_type' => $target_type,
-    'selection_handler' => $selection_handler,
-    'selection_settings_key' => $selection_settings_key,
-  ]),
   '#target_type' => $target_type,
-  '#selection_handler' => $selection_handler,
-  '#selection_settings' => $selection_settings,
+  '#selection_handler' => 'default:' . $target_type,
+  '#selection_settings' => [
+    'target_bundles' => ['tags' => 'tags'],
+    'sort' => ['field' => '_none'],
+    'auto_create' => FALSE,
+    'match_operator' => 'CONTAINS',
+  ],
   '#limit' => 10,
   '#size' => 60,
   '#new_terms' => FALSE,

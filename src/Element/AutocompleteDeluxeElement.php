@@ -2,8 +2,11 @@
 
 namespace Drupal\autocomplete_deluxe\Element;
 
+use Drupal\Component\Utility\Crypt;
 use Drupal\Component\Utility\Html;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Site\Settings;
+use Drupal\Core\Url;
 use Drupal\Core\Render\Element\CompositeFormElementTrait;
 use Drupal\Core\Render\Element\FormElementBase;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
@@ -149,9 +152,59 @@ class AutocompleteDeluxeElement extends FormElementBase {
   }
 
   /**
+   * Puts the selection settings in the store and builds the path to the route.
+   *
+   * Anything placing this element used to repeat this, which meant knowing how
+   * the key is hashed and which route to name. Doing it here also means an
+   * alter that changed the selection settings is taken into account, because a
+   * process callback runs after hook_field_widget_single_element_form_alter().
+   *
+   * @param string $target_type
+   *   The entity type being referred to.
+   * @param string $selection_handler
+   *   The selection plugin that suggests the entities.
+   * @param array $selection_settings
+   *   The settings of that plugin.
+   *
+   * @return string
+   *   The path the browser calls for suggestions.
+   */
+  public static function autocompletePath($target_type, $selection_handler, array $selection_settings) {
+    // The entity being edited is deliberately left out of the hash and of what
+    // is stored, so one field keeps one key in the store whatever entity is
+    // being edited. The controller is told the entity through the query
+    // parameters instead, see issue #3268207.
+    unset($selection_settings['entity']);
+
+    $data = serialize($selection_settings) . $target_type . $selection_handler;
+    $selection_settings_key = Crypt::hmacBase64($data, Settings::getHashSalt());
+
+    $key_value_storage = \Drupal::keyValue('entity_autocomplete');
+    if (!$key_value_storage->has($selection_settings_key)) {
+      $key_value_storage->set($selection_settings_key, $selection_settings);
+    }
+
+    return Url::fromRoute('autocomplete_deluxe.autocomplete', [
+      'target_type' => $target_type,
+      'selection_handler' => $selection_handler,
+      'selection_settings_key' => $selection_settings_key,
+    ], ['absolute' => TRUE])->getInternalPath();
+  }
+
+  /**
    * Autocomplete Deluxe element process callback.
    */
   public static function processElement($element) {
+    // Build the path here unless whoever placed the element built one already,
+    // so code written against the older element keeps working.
+    if (empty($element['#autocomplete_deluxe_path']) && !empty($element['#target_type'])) {
+      $element['#autocomplete_deluxe_path'] = self::autocompletePath(
+        $element['#target_type'],
+        $element['#selection_handler'] ?? 'default',
+        $element['#selection_settings'] ?? []
+      );
+    }
+
     // Do not attach js library if the element is disabled.
     $element_disabled = $element['#disabled'] ?? FALSE;
     if (!$element_disabled) {

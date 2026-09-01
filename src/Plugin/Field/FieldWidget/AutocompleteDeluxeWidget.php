@@ -2,7 +2,6 @@
 
 namespace Drupal\autocomplete_deluxe\Plugin\Field\FieldWidget;
 
-use Drupal\Component\Utility\Crypt;
 use Drupal\Core\Entity\EntityReferenceSelection\SelectionPluginManagerInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
@@ -13,11 +12,10 @@ use Drupal\Core\Field\WidgetBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\KeyValueStore\KeyValueFactoryInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
-use Drupal\Core\Site\Settings;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\TypedData\TranslatableInterface;
-use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\user\EntityOwnerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\Config\Entity\ThirdPartySettingsInterface;
@@ -63,6 +61,9 @@ class AutocompleteDeluxeWidget extends WidgetBase implements ContainerFactoryPlu
 
   /**
    * Key value service.
+   *
+   * Kept, though the element now owns the store, so that code building this
+   * widget with the same argument list keeps working.
    *
    * @var \Drupal\Core\KeyValueStore\KeyValueFactoryInterface
    */
@@ -404,29 +405,15 @@ class AutocompleteDeluxeWidget extends WidgetBase implements ContainerFactoryPlu
       $entities[$item->id()] = $item;
     }
 
-    // The hash and the stored settings deliberately leave the entity out, so
-    // one field keeps one key in the store whatever entity is being edited.
-    $data = serialize($selection_settings) . $element['#target_type'] . $element['#selection_handler'];
-    $selection_settings_key = Crypt::hmacBase64($data, Settings::getHashSalt());
-
-    $key_value_storage = $this->keyValue->get('entity_autocomplete');
-    if (!$key_value_storage->has($selection_settings_key)) {
-      $key_value_storage->set($selection_settings_key, $selection_settings);
-    }
-
-    $route_parameters = [
-      'target_type' => $target_type,
-      'selection_handler' => $element['#selection_handler'],
-      'selection_settings_key' => $selection_settings_key,
-    ];
-
     if (!$entity->isNew()) {
       $element['#autocomplete_query_parameters']['entity_type'] = $entity->getEntityTypeId();
       $element['#autocomplete_query_parameters']['entity_id'] = $entity->id();
     }
 
+    // The store and the route are left to the process callback of the element,
+    // so an alter of this widget is taken into account before the key is
+    // hashed. See AutocompleteDeluxeElement::autocompletePath().
     $element += [
-      '#autocomplete_deluxe_path' => Url::fromRoute('autocomplete_deluxe.autocomplete', $route_parameters, ['absolute' => TRUE])->getInternalPath(),
       '#default_value' => self::implodeEntities($entities),
     ];
 
