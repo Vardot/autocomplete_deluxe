@@ -682,6 +682,9 @@
         const values = valueInput.val();
         valueInput.val(values + newValue);
         jqObject.val('');
+        // The value field carries the real value, so a change on it is what
+        // the ajax system listens for.
+        valueInput.trigger('change');
       }
     };
 

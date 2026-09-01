@@ -298,6 +298,12 @@ class AutocompleteDeluxeElement extends FormElementBase {
         '#suffix' => '</div>',
         '#description' => $element['#description'] ?? '',
       ];
+
+      // The value field is what carries the submitted value, so the ajax
+      // behavior of the element belongs on it.
+      if (isset($element['#ajax'])) {
+        $element['value_field']['#ajax'] = $element['#ajax'];
+      }
       $element['textfield']['#attributes']['style'] = ['display: none'];
 
       if (isset($element['#autocomplete_query_parameters'])) {
