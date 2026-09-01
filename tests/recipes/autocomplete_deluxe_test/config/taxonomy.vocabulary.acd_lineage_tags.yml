@@ -1,0 +1,8 @@
+langcode: en
+status: true
+dependencies: {  }
+name: 'ACD Lineage Tags'
+vid: acd_lineage_tags
+description: 'Test-only vocabulary for the term lineage scenarios, kept apart so they do not add terms to the vocabulary the other features count.'
+weight: 0
+new_revision: false

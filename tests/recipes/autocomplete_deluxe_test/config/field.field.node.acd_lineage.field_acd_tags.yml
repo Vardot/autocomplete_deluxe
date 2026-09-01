@@ -4,7 +4,7 @@ dependencies:
   config:
     - field.storage.node.field_acd_tags
     - node.type.acd_lineage
-    - taxonomy.vocabulary.acd_tags
+    - taxonomy.vocabulary.acd_lineage_tags
 id: node.acd_lineage.field_acd_tags
 field_name: field_acd_tags
 entity_type: node
@@ -19,6 +19,6 @@ settings:
   handler: 'default:taxonomy_term'
   handler_settings:
     target_bundles:
-      acd_tags: acd_tags
+      acd_lineage_tags: acd_lineage_tags
     auto_create: true
 field_type: entity_reference

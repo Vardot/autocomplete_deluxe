@@ -898,6 +898,25 @@ Given(
   /^(?:I |we )?create the taxonomy term "([^"]*)" in the "([^"]*)" vocabulary$/,
   async function (term, vocabulary) {
     await attempt(async () => {
+      // Leave the term alone where it is already there. Creating it a second
+      // time gives the vocabulary two terms of one name, which then makes any
+      // count wrong and any lookup by name ambiguous, and the suite could not
+      // be run twice against one site.
+      await gotoUrl(
+        this.page,
+        `${this.parameters.launchUrl}/admin/structure/taxonomy/manage/${vocabulary}/overview`,
+      );
+      await waitForPageLoad(
+        this.page,
+        this.minWaitTime && this.minWaitTime.page,
+      );
+      const already = await this.page
+        .getByRole('link', { name: term, exact: true })
+        .count();
+      if (already > 0) {
+        return;
+      }
+
       await gotoUrl(
         this.page,
         `${this.parameters.launchUrl}/admin/structure/taxonomy/manage/${vocabulary}/add`,
@@ -1044,12 +1063,41 @@ Given(
           this.minWaitTime && this.minWaitTime.page,
         );
 
+        // Resolve the parent to "Name (id)" first. A bare name is ambiguous
+        // the moment two terms share it, and the setting then refuses to
+        // save, so the ID is looked up rather than assumed unique.
+        let value = '';
+        if (parent) {
+          await gotoUrl(
+            this.page,
+            `${this.parameters.launchUrl}/admin/structure/taxonomy/manage/acd_lineage_tags/overview`,
+          );
+          const href = await this.page
+            .getByRole('link', { name: parent, exact: true })
+            .first()
+            .getAttribute('href');
+          const found = (href || '').match(/\/taxonomy\/term\/(\d+)/);
+          if (!found) {
+            throw new Error(`could not find "${parent}" to take its ID`);
+          }
+          value = `${parent} (${found[1]})`;
+
+          await gotoUrl(
+            this.page,
+            `${this.parameters.launchUrl}/admin/structure/types/manage/${bundle}/form-display`,
+          );
+          await waitForPageLoad(
+            this.page,
+            this.minWaitTime && this.minWaitTime.page,
+          );
+        }
+
         await this.page
           .locator('input[name="field_acd_tags_settings_edit"]')
           .click();
         const field = this.page.locator('[name*="auto_create_parent"]').first();
         await field.waitFor({ state: 'visible', timeout: 10000 });
-        await field.fill(parent || '');
+        await field.fill(value);
 
         await this.page
           .locator('input[name="field_acd_tags_plugin_settings_update"]')
@@ -1090,7 +1138,7 @@ Then(
       async () => {
         await gotoUrl(
           this.page,
-          `${this.parameters.launchUrl}/admin/structure/taxonomy/manage/acd_tags/overview`,
+          `${this.parameters.launchUrl}/admin/structure/taxonomy/manage/acd_lineage_tags/overview`,
         );
         await this.page
           .getByRole('link', { name: term, exact: true })

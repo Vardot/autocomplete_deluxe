@@ -5,17 +5,20 @@ Feature: A term the Autocomplete Deluxe widget creates can be filed under a pare
   So that a deep vocabulary does not fill up at its top level
   (Issue #3104486)
 
-  # The acd_lineage content type allows new terms and creates them. The parent
-  # is set by name through the widget settings rather than by ID, since the
-  # suite keeps term IDs out of its fixtures and the setting resolves a name.
+  # The acd_lineage content type allows new terms and creates them, in a
+  # vocabulary of its own so these scenarios add nothing to the vocabulary the
+  # other features count. The parent is named rather than given by ID, since
+  # the suite keeps term IDs out of its fixtures.
 
   Background:
     Given I am a logged in user with the "Webmaster" user
 
-  Scenario: Seed the parent the later scenarios file terms under
-    Given I create the taxonomy term "AcdParentTerm" in the "acd_tags" vocabulary
-    When I am on "/admin/structure/taxonomy/manage/acd_tags/overview"
+  Scenario: Seed the terms the later scenarios need
+    Given I create the taxonomy term "AcdParentTerm" in the "acd_lineage_tags" vocabulary
+    And I create the taxonomy term "AcdExistingTerm" in the "acd_lineage_tags" vocabulary
+    When I am on "/admin/structure/taxonomy/manage/acd_lineage_tags/overview"
     Then I should see "AcdParentTerm"
+    And I should see "AcdExistingTerm"
 
   Scenario: A new term is filed under the chosen parent
     Given the widget on "acd_lineage" files new terms under "AcdParentTerm"
@@ -31,10 +34,10 @@ Feature: A term the Autocomplete Deluxe widget creates can be filed under a pare
   Scenario: A term that already existed is never moved
     Given the widget on "acd_lineage" files new terms under "AcdParentTerm"
     When I am on "/node/add/acd_lineage"
-    And I add the autocomplete deluxe tag "Alpha"
+    And I add the autocomplete deluxe tag "AcdExistingTerm"
     And I fill in "Title" with "Lineage leaves existing terms alone"
     And I save the form
-    Then the term "Alpha" should sit at the top
+    Then the term "AcdExistingTerm" should sit at the top
 
   Scenario: With no parent chosen a new term stays at the top
     Given the widget on "acd_lineage" files new terms at the top
