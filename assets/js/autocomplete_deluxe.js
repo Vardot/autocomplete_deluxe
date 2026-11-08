@@ -12,16 +12,16 @@
 
       const $elements = $(
         once(
-          "attachAutocompleteDeluxe",
-          "input.autocomplete-deluxe-form",
-          context
-        )
+          'attachAutocompleteDeluxe',
+          'input.autocomplete-deluxe-form',
+          context,
+        ),
       );
 
       $elements.each(function () {
         new Drupal.autocomplete_deluxe.MultipleWidget(
           this,
-          autocompleteSettings[$(this).attr("id")]
+          autocompleteSettings[$(this).attr('id')],
         );
       });
     },
@@ -37,64 +37,74 @@
    * @return {Object}
    *   The auto grow input.
    */
-  $.fn.autoGrowInput = function(o) {
+  $.fn.autoGrowInput = function (o) {
     o = $.extend(
       {
         maxWidth: 1000,
         minWidth: 0,
-        comfortZone: 70
+        comfortZone: 70,
       },
-      o
+      o,
     );
 
-    this.filter("input:text").each(function() {
-      let minWidth = o.minWidth || $(this).width(),
-        val = "",
-        input = $(this),
-        testSubject = $("<tester/>").css({
-          position: "absolute",
-          top: -9999,
-          left: -9999,
-          width: "auto",
-          fontSize: input.css("fontSize"),
-          fontFamily: input.css("fontFamily"),
-          fontWeight: input.css("fontWeight"),
-          letterSpacing: input.css("letterSpacing"),
-          whiteSpace: "nowrap"
-        }),
-        check = function() {
-          if (val === (val = input.val())) {
-            return;
-          }
+    this.filter('input:text').each(function () {
+      const minWidth = o.minWidth || $(this).width();
+      let val = '';
+      const input = $(this);
+      const inputStyle = window.getComputedStyle(input[0]);
 
-          // Enter new content into testSubject.
-          const escaped = val
-            .replace(/&/g, "&amp;")
-            .replace(/\s/g, "&nbsp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;");
-          testSubject.html(escaped);
+      const testSubjectEl = document.createElement('tester');
 
-          // Calculate new width + whether to change.
-          const testerWidth = testSubject.width(),
-            newWidth =
-              testerWidth + o.comfortZone >= minWidth
-                ? testerWidth + o.comfortZone
-                : minWidth,
-            currentWidth = input.width(),
-            isValidWidthChange =
-              (newWidth < currentWidth && newWidth >= minWidth) ||
-              (newWidth > minWidth && newWidth < o.maxWidth);
+      testSubjectEl.style.position = 'absolute';
+      testSubjectEl.style.top = '-9999px';
+      testSubjectEl.style.left = '-9999px';
+      testSubjectEl.style.width = 'auto';
+      testSubjectEl.style.fontSize = inputStyle.fontSize;
+      testSubjectEl.style.fontFamily = inputStyle.fontFamily;
+      testSubjectEl.style.fontWeight = inputStyle.fontWeight;
+      testSubjectEl.style.letterSpacing = inputStyle.letterSpacing;
+      testSubjectEl.style.whiteSpace = 'nowrap';
 
-          // Animate width
-          if (isValidWidthChange) {
-            input.width(newWidth);
-          }
-        };
+      const testSubject = $(testSubjectEl);
+
+      const check = function () {
+        const newVal = input.val();
+        if (val === newVal) {
+          return;
+        }
+        val = newVal;
+
+        // Enter new content into testSubject.
+        const escaped = val
+          .replace(/&/g, '&amp;')
+          .replace(/\s/g, '&nbsp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;');
+        testSubject.html(escaped);
+
+        // Calculate new width + whether to change.
+        const testerWidth = testSubject.width();
+        const newWidth =
+          testerWidth + o.comfortZone >= minWidth
+            ? testerWidth + o.comfortZone
+            : minWidth;
+        const currentWidth = input.width();
+        const isValidWidthChange =
+          (newWidth < currentWidth && newWidth >= minWidth) ||
+          (newWidth > minWidth && newWidth < o.maxWidth);
+
+        // Animate width
+        if (isValidWidthChange) {
+          input.width(newWidth);
+        }
+      };
 
       testSubject.insertAfter(input);
 
-      $(this).bind("keyup keydown blur update", check);
+      this.addEventListener('keyup', check);
+      this.addEventListener('keydown', check);
+      this.addEventListener('blur', check);
+      this.addEventListener('update', check);
     });
 
     return this;
@@ -105,31 +115,31 @@
    * @type {{label: string, value: string}}
    */
   Drupal.autocomplete_deluxe.empty = {
-    label: "- " + Drupal.t("None") + " -",
-    value: ""
+    label: `- ${Drupal.t('None')} -`,
+    value: '',
   };
 
   /**
    * EscapeRegex function from jquery autocomplete, is not included in Drupal.
    */
-  Drupal.autocomplete_deluxe.escapeRegex = function(value) {
-    return value.replace(/[-[\]{}()*+?.,\\^$|#\s]/gi, "\\$&");
+  Drupal.autocomplete_deluxe.escapeRegex = function (value) {
+    return value.replace(/[-[\]{}()*+?.,\\^$|#\s]/gi, '\\$&');
   };
 
   /**
    * Filter function from jquery autocomplete, is not included in Drupal.
    */
-  Drupal.autocomplete_deluxe.filter = function(array, term) {
+  Drupal.autocomplete_deluxe.filter = function (array, term) {
     const matcher = new RegExp(
       Drupal.autocomplete_deluxe.escapeRegex(term),
-      "i"
+      'i',
     );
-    return $.grep(array, function(value) {
+    return array.filter(function (value) {
       return matcher.test(value.label || value.value || value);
     });
   };
 
-  Drupal.autocomplete_deluxe.Widget = function() {};
+  Drupal.autocomplete_deluxe.Widget = function () {};
 
   /**
    * Url for the callback.
@@ -143,54 +153,54 @@
    * @return {Boolean}
    *   true if the term should be accepted.
    */
-  Drupal.autocomplete_deluxe.Widget.prototype.acceptTerm = function(term) {
+  Drupal.autocomplete_deluxe.Widget.prototype.acceptTerm = function (term) {
     return true;
   };
 
-  Drupal.autocomplete_deluxe.Widget.prototype.init = function(settings) {
-    if (navigator.appVersion.indexOf("MSIE 6.") !== -1) {
+  Drupal.autocomplete_deluxe.Widget.prototype.init = function (settings) {
+    if (navigator.appVersion.indexOf('MSIE 6.') !== -1) {
       return;
     }
 
     this.id = settings.input_id;
-    this.jqObject = $("#" + this.id);
+    this.jqObject = $(`#${this.id}`);
 
     this.uri = settings.uri;
     this.cardinality = settings.cardinality;
     this.required = settings.required;
     this.match_limit = settings.match_limit;
     this.synonyms =
-      typeof settings.use_synonyms === "undefined"
+      typeof settings.use_synonyms === 'undefined'
         ? false
         : settings.use_synonyms;
     this.not_found_message =
-      typeof settings.use_synonyms === "undefined"
+      typeof settings.use_synonyms === 'undefined'
         ? Drupal.t("The entity '@term' will be added.")
         : settings.not_found_message;
     this.not_found_message_allow =
-      typeof settings.not_found_message_allow === "undefined"
+      typeof settings.not_found_message_allow === 'undefined'
         ? false
         : settings.not_found_message_allow;
     this.new_terms =
-      typeof settings.new_terms === "undefined" ? false : settings.new_terms;
+      typeof settings.new_terms === 'undefined' ? false : settings.new_terms;
     this.no_empty_message =
-      typeof settings.no_empty_message === "undefined"
+      typeof settings.no_empty_message === 'undefined'
         ? Drupal.t(
-            "No terms could be found. Please type in order to add a new term."
+            'No terms could be found. Please type in order to add a new term.',
           )
         : settings.no_empty_message;
     this.cardinality_message =
       this.cardinality > 0
         ? Drupal.formatPlural(
             this.cardinality,
-            "This field cannot hold more than one value.",
-            "This field cannot hold more than @count values."
+            'This field cannot hold more than one value.',
+            'This field cannot hold more than @count values.',
           )
-        : "";
+        : '';
 
     this.wrapper = '""';
 
-    if (typeof settings.delimiter === "undefined") {
+    if (typeof settings.delimiter === 'undefined') {
       this.delimiter = true;
     } else {
       this.delimiter = settings.delimiter.charCodeAt(0);
@@ -200,14 +210,14 @@
 
     const self = this;
     let parent = this.jqObject.parent();
-    const parents_parent = this.jqObject.parent().parent();
+    const parentsParent = this.jqObject.parent().parent();
 
-    parents_parent.append(this.jqObject);
+    parentsParent.append(this.jqObject);
     parent.remove();
-    parent = parents_parent;
+    parent = parentsParent;
 
-    const generateValues = function(data, term) {
-      const result = new Array();
+    const generateValues = function (data, term) {
+      const result = [];
 
       // Check for field cardinality and see if we have reached the limit.
       if (
@@ -216,18 +226,17 @@
       ) {
         result.push({
           label: self.cardinality_message,
-          noTerms: true
+          noTerms: true,
         });
-      }
-      else {
-        for (const terms in data) {
+      } else {
+        Object.keys(data).forEach(function (terms) {
           if (self.acceptTerm(terms)) {
             result.push({
               label: data[terms],
-              value: terms
+              value: terms,
             });
           }
-        }
+        });
       }
 
       // If there are no results and new terms OR not found message can be
@@ -236,18 +245,18 @@
         $.isEmptyObject(result) &&
         (self.new_terms || self.not_found_message_allow)
       ) {
-        if (term !== " ") {
+        if (term !== ' ') {
           result.push({
             label: Drupal.formatString(self.not_found_message, {
-              "@term": term
+              '@term': term,
             }),
             value: term,
-            newTerm: true
+            newTerm: true,
           });
         } else {
           result.push({
             label: self.no_empty_message,
-            noTerms: true
+            noTerms: true,
           });
         }
       }
@@ -257,7 +266,7 @@
     const cache = {};
     let lastXhr = null;
 
-    this.source = function(request, response) {
+    this.source = function (request, response) {
       let { term } = request;
       if (term in cache) {
         response(generateValues(cache[term], term));
@@ -268,19 +277,19 @@
       // least a whitespace. This whitespace will later on be trimmed in the
       // autocomplete callback.
       if (!term) {
-        term = " ";
+        term = ' ';
       }
       request.synonyms = self.synonyms;
-      const url = Drupal.url(settings.uri + "?q=" + term);
-      lastXhr = $.getJSON(url, request, function(data, status, xhr) {
+      const url = Drupal.url(`${settings.uri}?q=${term}`);
+      lastXhr = $.getJSON(url, request, function (data, status, xhr) {
         cache[term] = data;
         if (xhr === lastXhr) {
           // Filter already selected items from the response data.
           if (typeof self.valueForm !== 'undefined') {
-            var currentValues = self.valueForm.val().split('"');
+            const currentValues = self.valueForm.val().split('"');
             const dataArray = Object.entries(data);
             const dataFiltered = dataArray.filter(([key, value]) => {
-              return ! currentValues.includes(value);
+              return !currentValues.includes(value);
             });
             data = Object.fromEntries(dataFiltered);
           }
@@ -292,96 +301,97 @@
 
     this.jqObject.autocomplete({
       source: this.source,
-      minLength: settings.min_length
+      minLength: settings.min_length,
     });
 
     const { jqObject } = this;
 
     const autocompleteDataKey =
-      typeof this.jqObject.data("autocomplete") === "object"
-        ? "item.autocomplete"
-        : "ui-autocomplete";
+      typeof this.jqObject.data('autocomplete') === 'object'
+        ? 'item.autocomplete'
+        : 'ui-autocomplete';
 
     const throbber = $(
-      '<div class="autocomplete-deluxe-throbber autocomplete-deluxe-closed">&nbsp;</div>'
+      '<div class="autocomplete-deluxe-throbber autocomplete-deluxe-closed">&nbsp;</div>',
     ).insertAfter(jqObject);
 
-    this.jqObject.bind("autocompletesearch", function(event, ui) {
-      throbber.removeClass("autocomplete-deluxe-closed");
-      throbber.addClass("autocomplete-deluxe-open");
+    this.jqObject.bind('autocompletesearch', function (event, ui) {
+      throbber.removeClass('autocomplete-deluxe-closed');
+      throbber.addClass('autocomplete-deluxe-open');
     });
 
-    this.jqObject.bind("autocompleteresponse", function(event, ui) {
-      throbber.addClass("autocomplete-deluxe-closed");
-      throbber.removeClass("autocomplete-deluxe-open");
+    this.jqObject.bind('autocompleteresponse', function (event, ui) {
+      throbber.addClass('autocomplete-deluxe-closed');
+      throbber.removeClass('autocomplete-deluxe-open');
       // If no results found, show a message and prevent selecting it as a tag.
       if (
         !drupalSettings.autocomplete_deluxe[this.id].new_terms &&
-        typeof ui.item !== "undefined" &&
+        typeof ui.item !== 'undefined' &&
         ui.item.newTerm
       ) {
-        const uiWidgetContent = $(".ui-widget-content");
-        uiWidgetContent.css("pointer-events", "");
+        const uiWidgetContent = $('.ui-widget-content');
+        uiWidgetContent.css('pointer-events', '');
         if (!ui.content.length) {
           ui.content[0] = {
-            label: Drupal.t("No results found"),
-            value: ""
+            label: Drupal.t('No results found'),
+            value: '',
           };
-          uiWidgetContent.css("pointer-events", "none");
+          uiWidgetContent.css('pointer-events', 'none');
         }
       }
     });
 
     // Monkey patch the _renderItem function jquery so we can highlight the
     // text, that we already entered.
-    $.ui.autocomplete.prototype._renderItem = function(ul, item) {
-      let t = item.label;
-      if (this.term !== "") {
+    $.ui.autocomplete.prototype._renderItem = function (ul, item) {
+      const t = item.label;
+      if (this.term !== '') {
         const escapedValue = Drupal.autocomplete_deluxe.escapeRegex(this.term);
         const re = new RegExp(
-          '()*""' + escapedValue + '""|' + escapedValue + "()*",
-          "gi"
+          `()*""${escapedValue}""|${escapedValue}()*`,
+          'gi',
         );
-        let t = item.label.replace(
+        const t = item.label.replace(
           re,
-          "<span class='autocomplete-deluxe-highlight-char'>$&</span>"
+          "<span class='autocomplete-deluxe-highlight-char'>$&</span>",
         );
       }
 
-      return $("<li></li>")
+      return $('<li></li>')
         .data(autocompleteDataKey, item)
-        .append("<a>" + t + "</a>")
+        .append(`<a>${t}</a>`)
         .appendTo(ul);
     };
   };
 
-  Drupal.autocomplete_deluxe.Widget.prototype.generateValues = function(data) {
-    const result = new Array();
-    for (const index in data) {
+  Drupal.autocomplete_deluxe.Widget.prototype.generateValues = function (data) {
+    const result = [];
+    Object.keys(data).forEach(function (index) {
       result.push(data[index]);
-    }
+    });
     return result;
   };
 
   /**
    * Creates a multiple selecting widget.
    */
-  Drupal.autocomplete_deluxe.MultipleWidget = function(input, settings) {
+  Drupal.autocomplete_deluxe.MultipleWidget = function (input, settings) {
     this.init(settings);
     this.setup();
   };
 
-  Drupal.autocomplete_deluxe.MultipleWidget.prototype = new Drupal.autocomplete_deluxe.Widget();
-  Drupal.autocomplete_deluxe.MultipleWidget.prototype.items = new Object();
+  Drupal.autocomplete_deluxe.MultipleWidget.prototype =
+    new Drupal.autocomplete_deluxe.Widget();
+  Drupal.autocomplete_deluxe.MultipleWidget.prototype.items = {};
 
-  Drupal.autocomplete_deluxe.MultipleWidget.prototype.acceptTerm = function(
-    term
+  Drupal.autocomplete_deluxe.MultipleWidget.prototype.acceptTerm = function (
+    term,
   ) {
     // Accept only terms, that are not in our items list.
     return !(term in this.items);
   };
 
-  Drupal.autocomplete_deluxe.MultipleWidget.Item = function(widget, item) {
+  Drupal.autocomplete_deluxe.MultipleWidget.Item = function (widget, item) {
     if (item.newTerm === true) {
       item.label = item.value;
     } else if (item.noTerms === true) {
@@ -390,150 +400,151 @@
 
     this.value = item.value;
     this.element = $(
-      '<span class="autocomplete-deluxe-item">' + item.label + "</span>"
+      `<span class="autocomplete-deluxe-item">${item.label}</span>`,
     );
     this.widget = widget;
     this.item = item;
     const self = this;
 
     const close = $(
-      '<a class="autocomplete-deluxe-item-delete" href="javascript:void(0)"></a>'
+      '<a class="autocomplete-deluxe-item-delete" href="javascript:void(0)"></a>',
     ).appendTo(this.element);
     // Use single quotes because of the double quote encoded stuff.
-    // .. then to make this work for single quotes in names, like O'Brian, enocde '.
-    const encodedVal = this.value.replace("'", "&#039;");
-    const input = $(
-      '<input type="hidden" value=\'' + encodedVal + "'/>"
-    ).appendTo(this.element);
+    // .. then to make this work for single quotes in names, like O'Brian, encode '.
+    const encodedVal = this.value.replace("'", '&#039;');
+    const input = $(`<input type="hidden" value='${encodedVal}'/>`).appendTo(
+      this.element,
+    );
 
-    close.mousedown(function() {
+    close.mousedown(function () {
       self.remove(item);
-      const value_input = self.widget.jqObject
-        .parents(".autocomplete-deluxe-container")
+      const valueInput = self.widget.jqObject
+        .parents('.autocomplete-deluxe-container')
         .next()
-        .find("input");
-      value_input.trigger("change");
+        .find('input');
+      valueInput.trigger('change');
     });
   };
 
-  Drupal.autocomplete_deluxe.MultipleWidget.Item.prototype.remove = function() {
-    this.element.remove();
-    const values = this.widget.valueForm.val();
-    const escapedValue = Drupal.autocomplete_deluxe.escapeRegex(
-      this.item.value
-    );
-    const regex = new RegExp('()*""' + escapedValue + '""()*', "gi");
-    this.widget.valueForm.val(values.replace(regex, ""));
-    delete this.widget.items[this.value];
-  };
+  Drupal.autocomplete_deluxe.MultipleWidget.Item.prototype.remove =
+    function () {
+      this.element.remove();
+      const values = this.widget.valueForm.val();
+      const escapedValue = Drupal.autocomplete_deluxe.escapeRegex(
+        this.item.value,
+      );
+      const regex = new RegExp(`()*""${escapedValue}""()*`, 'gi');
+      this.widget.valueForm.val(values.replace(regex, ''));
+      delete this.widget.items[this.value];
+    };
 
-  Drupal.autocomplete_deluxe.MultipleWidget.prototype.setup = function() {
+  Drupal.autocomplete_deluxe.MultipleWidget.prototype.setup = function () {
     const { jqObject } = this;
-    const parent = jqObject.parents(".autocomplete-deluxe-container");
-    const value_container = parent.next();
-    const value_input = value_container.find("input");
+    const parent = jqObject.parents('.autocomplete-deluxe-container');
+    const valueContainer = parent.next();
+    const valueInput = valueContainer.find('input');
     const { items } = this;
     const self = this;
-    this.valueForm = value_input;
+    this.valueForm = valueInput;
 
     // Order values based on the UI. Usually called after a manual sort.
-    this.orderValues = function() {
+    this.orderValues = function () {
       const items = [];
       parent
-        .find(".autocomplete-deluxe-item input")
-        .each(function(index, value) {
-          items[index] = $(value).val();
+        .find('.autocomplete-deluxe-item input')
+        .each(function (index, value) {
+          items[index] = value.value;
         });
 
-      value_input.val('""' + items.join('"" ""') + '""');
-      value_input.trigger("change");
+      valueInput[0].value = `""${items.join('"" ""')}""`;
+      valueInput.trigger('change');
     };
 
     Sortable.create(parent.get(0), {
-      draggable: ".autocomplete-deluxe-item",
+      draggable: '.autocomplete-deluxe-item',
       onEnd: function onEnd() {
         self.orderValues();
-      }
+      },
     });
 
     // Override the resize function, so that the suggestion list doesn't resizes
     // all the time.
     const autocompleteDataKey =
-      typeof this.jqObject.data("autocomplete") === "object"
-        ? "autocomplete"
-        : "ui-autocomplete";
+      typeof this.jqObject.data('autocomplete') === 'object'
+        ? 'autocomplete'
+        : 'ui-autocomplete';
 
-    jqObject.data(autocompleteDataKey)._resizeMenu = function() {};
+    jqObject.data(autocompleteDataKey)._resizeMenu = function () {};
 
     jqObject.show();
 
-    value_input.hide();
+    valueInput.hide();
 
     // Add the default values to the box.
-    let defaultValues = value_input.val();
+    let defaultValues = valueInput.val();
     defaultValues = defaultValues.trim();
     defaultValues = defaultValues.substr(2, defaultValues.length - 4);
     defaultValues = defaultValues.split(/"" +""/);
 
-    for (const index in defaultValues) {
+    Object.keys(defaultValues).forEach(function (index) {
       const value = defaultValues[index];
-      if (value !== "") {
+      if (value !== '') {
         // If a terms is encoded in double quotes, then the label should have
         // no double quotes.
         let label =
           value.match(/["][\w|\s|\D|]*["]/gi) !== null
             ? value.substr(1, value.length - 2)
             : value;
-        const entityId = value.match(/.+\s\(([^\)]+)\)/);
+        const entityId = value.match(/.+\s\(([^)]+)\)/);
         if (entityId && entityId.length > 1) {
-          label = label.replace(" (" + entityId[1] + ")", "");
+          label = label.replace(` (${entityId[1]})`, '');
         }
-        let itemInit = {
+        const itemInit = {
           label: Drupal.checkPlain(label),
-          value: value
+          value,
         };
-        let item = new Drupal.autocomplete_deluxe.MultipleWidget.Item(
+        const item = new Drupal.autocomplete_deluxe.MultipleWidget.Item(
           self,
-          itemInit
+          itemInit,
         );
         if (typeof item.element !== 'undefined') {
           item.element.insertBefore(jqObject);
           items[item.value] = item;
         }
       }
-    }
+    });
 
-    jqObject.addClass("autocomplete-deluxe-multiple");
-    parent.addClass("autocomplete-deluxe-multiple");
+    jqObject.addClass('autocomplete-deluxe-multiple');
+    parent.addClass('autocomplete-deluxe-multiple');
 
     // Adds a value to the list.
-    this.addValue = function(ui_item) {
+    this.addValue = function (uiItem) {
       const item = new Drupal.autocomplete_deluxe.MultipleWidget.Item(
         self,
-        ui_item
+        uiItem,
       );
       if (typeof item.element !== 'undefined') {
         item.element.insertBefore(jqObject);
-        items[ui_item.value] = item;
-        const new_value = " " + self.wrapper + ui_item.value + self.wrapper;
-        const values = value_input.val();
-        value_input.val(values + new_value);
-        jqObject.val("");
+        items[uiItem.value] = item;
+        const newValue = ` ${self.wrapper}${uiItem.value}${self.wrapper}`;
+        const values = valueInput.val();
+        valueInput.val(values + newValue);
+        jqObject.val('');
       }
     };
 
-    parent.mouseup(function() {
-      jqObject.autocomplete("search", "");
+    parent.mouseup(function () {
+      jqObject.autocomplete('search', '');
       jqObject.focus();
     });
 
-    jqObject.bind("autocompleteselect", function(event, ui) {
-      const allow_new_terms =
+    jqObject.bind('autocompleteselect', function (event, ui) {
+      const allowNewTerms =
         drupalSettings.autocomplete_deluxe[this.id].new_terms;
       // If new terms are not allowed to be added as per the field widget
       // settings, do not continue to process and add that value.
-      if (!allow_new_terms && ui.item.newTerm) {
-        $(this).val("");
+      if (!allowNewTerms && ui.item.newTerm) {
+        this.value = '';
         return;
       }
       self.addValue(ui.item);
@@ -542,44 +553,44 @@
       return false;
     });
 
-    jqObject.bind("autocompletechange", function(event, ui) {
-      jqObject.val("");
+    jqObject.bind('autocompletechange', function (event, ui) {
+      jqObject.val('');
     });
 
-    jqObject.blur(function() {
+    jqObject.blur(function () {
       const lastElement = jqObject
         .parent()
-        .children(".autocomplete-deluxe-item")
+        .children('.autocomplete-deluxe-item')
         .last();
-      lastElement.removeClass("autocomplete-deluxe-item-focus");
+      lastElement.removeClass('autocomplete-deluxe-item-focus');
     });
 
     let clear = false;
 
-    jqObject.keypress(function(event) {
+    jqObject.keypress(function (event) {
       let value = jqObject.val();
       // If a comma was entered and there is none or more then one comma, or the
       // enter key was entered, then enter the new term.
       if (
         (event.which === self.delimiter && value.split('"').length - 1 !== 1) ||
-        (event.which === 13 && jqObject.val() !== "")
+        (event.which === 13 && jqObject.val() !== '')
       ) {
-        const allow_new_terms =
+        const allowNewTerms =
           drupalSettings.autocomplete_deluxe[this.id].new_terms;
         // If new terms are not allowed to be added as per the field widget
         // settings, do not continue to process and add that value.
-        if (!allow_new_terms) {
-          $(this).val("");
+        if (!allowNewTerms) {
+          this.value = '';
           return;
         }
 
         value = value.substr(0, value.length);
-        if (typeof self.items[value] === "undefined" && value !== "") {
-          const ui_item = {
+        if (typeof self.items[value] === 'undefined' && value !== '') {
+          const uiItem = {
             label: value,
-            value: value
+            value,
           };
-          self.addValue(ui_item);
+          self.addValue(uiItem);
         }
         clear = true;
         if (event.which === 13) {
@@ -588,40 +599,40 @@
       }
 
       // If the Backspace key was hit and the input is empty.
-      if (event.which === 8 && value === "") {
+      if (event.which === 8 && value === '') {
         const lastElement = jqObject
           .parent()
-          .children(".autocomplete-deluxe-item")
+          .children('.autocomplete-deluxe-item')
           .last();
         // then mark the last item for deletion or deleted it if already marked.
-        if (lastElement.hasClass("autocomplete-deluxe-item-focus")) {
-          let value = lastElement.children("input").val();
+        if (lastElement.hasClass('autocomplete-deluxe-item-focus')) {
+          const value = lastElement.children('input').val();
           self.items[value].remove(self.items[value]);
-          jqObject.autocomplete("search", "");
+          jqObject.autocomplete('search', '');
         } else {
-          lastElement.addClass("autocomplete-deluxe-item-focus");
+          lastElement.addClass('autocomplete-deluxe-item-focus');
         }
       } else {
         // Remove the focus class if any other key was hit.
         const lastElement = jqObject
           .parent()
-          .children(".autocomplete-deluxe-item")
+          .children('.autocomplete-deluxe-item')
           .last();
-        lastElement.removeClass("autocomplete-deluxe-item-focus");
+        lastElement.removeClass('autocomplete-deluxe-item-focus');
       }
     });
 
     jqObject.autoGrowInput({
       comfortZone: 50,
       minWidth: 10,
-      maxWidth: 460
+      maxWidth: 460,
     });
 
-    jqObject.keyup(function() {
+    jqObject.keyup(function () {
       if (clear) {
         // Trigger the search, so it display the values for an empty string.
-        jqObject.autocomplete("search", "");
-        jqObject.val("");
+        jqObject.autocomplete('search', '');
+        jqObject.val('');
         clear = false;
         // Return false to prevent entering the last character.
         return false;

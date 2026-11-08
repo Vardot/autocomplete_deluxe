@@ -1,10 +1,10 @@
 div.autocomplete-deluxe-multiple {
-  color: var(--gin-color-text);
-  background: var(--gin-bg-input);
-  border: 1px solid var(--gin-border-color-form-element);
-  border-radius: var(--gin-border-m);
   box-sizing: border-box;
   transition: var(--gin-transition);
+  color: var(--gin-color-text);
+  border: 1px solid var(--gin-border-color-form-element);
+  border-radius: var(--gin-border-m);
+  background: var(--gin-bg-input);
 }
 
 .autocomplete-deluxe-container input.autocomplete-deluxe-form {
@@ -13,11 +13,11 @@ div.autocomplete-deluxe-multiple {
 }
 
 .autocomplete-deluxe-item {
-  color: var(--gin-color-primary-hover);
   padding: 6px 24px 6px 12px;
-  background-color: var(--gin-color-primary-light-hover);
-  border-radius: var(--gin-border-m);
+  color: var(--gin-color-primary-hover);
   border: 0 none;
+  border-radius: var(--gin-border-m);
+  background-color: var(--gin-color-primary-light-hover);
   box-shadow: none;
 }
 
@@ -30,7 +30,7 @@ div.autocomplete-deluxe-multiple {
 .autocomplete-deluxe-item .autocomplete-deluxe-item-delete {
   top: 6px;
   right: 6px;
-  mask-image: url('../images/close.svg');
+  mask-image: url("../images/close.svg");
   mask-size: 10px 10px;
   mask-repeat: no-repeat;
   mask-position: center;

@@ -60,7 +60,7 @@ class AutocompleteDeluxeElement extends FormElement {
       if ($active_theme->getName() === 'gin'|| array_key_exists('gin', $base_themes)) {
         // Workaround for problems with jquery css in claro theme.
         $element['#attached']['library'][] = 'autocomplete_deluxe/assets.claro';
-        // Overrides to support Gin's CSS3 variables for Darkmode, Accent etc.
+        // Overrides to support Gin's CSS3 variables for Dark mode, Accent etc.
         $element['#attached']['library'][] = 'autocomplete_deluxe/assets.gin';
       }
       elseif ($active_theme->getName() === 'claro'|| array_key_exists('claro', $base_themes)) {
@@ -201,7 +201,7 @@ class AutocompleteDeluxeElement extends FormElement {
       $element['#value'] = preg_replace('/" +"/', '","', $element['#value']);
 
       if (substr($element['#value'], 0, 3) == '","') {
-        $element['#value'] = substr($element['#value'], 2); 
+        $element['#value'] = substr($element['#value'], 2);
       }
 
       // Remove the double quotes at the beginning and the end from the first

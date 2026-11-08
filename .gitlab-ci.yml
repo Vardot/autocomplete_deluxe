@@ -1,0 +1,40 @@
+################################################################################
+# GitLab CI: the standard drupal/gitlab_templates pipeline.
+# https://project.pages.drupalcode.org/gitlab_templates/
+#
+# The lint jobs (composer-lint, cspell, eslint, phpcs, phpstan, stylelint) keep
+# the template default, advisory. The composer build and phpunit gate the
+# pipeline.
+################################################################################
+include:
+  - project: $_GITLAB_TEMPLATES_REPO
+    ref: $_GITLAB_TEMPLATES_REF
+    file:
+      - "/includes/include.drupalci.main.yml"
+      - "/includes/include.drupalci.variables.yml"
+      - "/includes/include.drupalci.workflows.yml"
+
+variables:
+  # The branch declares core <10.3, so it is tested on the last Drupal 10.2 release.
+  DRUPAL_CORE: "10.2.12"
+  IGNORE_PROJECT_DRUPAL_CORE_VERSION: "1"
+  # No yarn.lock is committed; Yarn 4 would refuse to create one in CI.
+  YARN_ENABLE_IMMUTABLE_INSTALLS: "false"
+
+composer:
+  variables:
+    # The template's composer job sets DRUPAL_CORE itself, which overrides the
+    # global value above, so the pin has to be on the job.
+    DRUPAL_CORE: "10.2.12"
+
+.composer-base:
+  variables:
+    # Drupal core's own Yarn 4.9.1 would read the project .yarnrc.yml (Yarn >= 4.14 keys) too.
+    YARN_RC_FILENAME: .yarnrc.core.yml
+    YARN_NODE_LINKER: node-modules
+
+stylelint:
+  variables:
+    # Drupal core's own Yarn 4.9.1 would read the project .yarnrc.yml (Yarn >= 4.14 keys) too.
+    YARN_RC_FILENAME: .yarnrc.core.yml
+    YARN_NODE_LINKER: node-modules

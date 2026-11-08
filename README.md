@@ -74,7 +74,7 @@ existing tags as well as create new ones.
          'sort' => array('field' => '_none'),
          'auto_create' => (BOOL) 0,
          // Even though we've specified '0' for 'auto_create', it seems that
-         // a value for 'auto_crteate_bundle' is required for this to work.
+         // a value for 'auto_create_bundle' is required for this to work.
          'auto_create_bundle' => 'tags',
          'match_operator' => 'CONTAINS',
        );
