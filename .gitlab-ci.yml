@@ -16,7 +16,7 @@
 # https://git.drupalcode.org/project/gitlab_templates/-/tags
 include:
   - project: $_GITLAB_TEMPLATES_REPO
-    ref: '1.15.7'
+    ref: '1.17.3'
     file:
       - '/includes/include.drupalci.main.yml'
       - '/includes/include.drupalci.variables.yml'
@@ -40,7 +40,7 @@ variables:
   # $_GITLAB_TEMPLATES_REF: the jobs that pull helper scripts and assets over
   # curl (cspell fetches prepare-cspell.php and the default .cspell.json) read
   # this variable instead. It must always equal the pinned `ref:` value.
-  _CURL_TEMPLATES_REF: '1.15.7'
+  _CURL_TEMPLATES_REF: '1.17.3'
   # No lint or test job is advisory. The templates ship most validate jobs as
   # allow_failure by default, which lets a red lint merge; this turns every one
   # of them into a gate, including the per-core-version phpstan variants that a
@@ -62,7 +62,34 @@ phpcs:
   allow_failure: false
 phpstan:
   allow_failure: false
+
+# The next-major lane runs on Drupal core main (12.x, not released yet). Its
+# composer and phpunit jobs are advisory in drupal/gitlab_templates; this keeps
+# its phpstan job advisory too, overriding _ALL_VALIDATE_ALLOW_FAILURE for this
+# one job.
+phpstan (next major):
+  variables:
+    _PHPSTAN_ALLOW_FAILURE: "1"
+  allow_failure: true
+# Removed at the maintainer's request: on core main (tests no longer packaged, core #3067979)
+# run-tests.sh also wants PHPUnit 12 #[Group] attributes, which these tests do not have yet.
+'phpunit (next major)':
+  rules:
+    - when: never
+.composer-base:
+  variables:
+    # Drupal core's own Yarn 4.9.1 would read the project .yarnrc.yml (Yarn >= 4.14 keys) too.
+    YARN_RC_FILENAME: .yarnrc.core.yml
+    YARN_NODE_LINKER: node-modules
+composer:
+  variables:
+    # Core 11.4.4 with Twig 3.30 answers HTTP 500 on rendered pages (fixed in 11.4.8).
+    DRUPAL_CORE: "11.4.11"
 stylelint:
+  variables:
+    # Drupal core's own Yarn 4.9.1 would read the project .yarnrc.yml (Yarn >= 4.14 keys) too.
+    YARN_RC_FILENAME: .yarnrc.core.yml
+    YARN_NODE_LINKER: node-modules
   allow_failure: false
 
 ################################################################################
@@ -140,7 +167,7 @@ webship e2e:
     - $CI_PROJECT_DIR/vendor/bin/drush --root=$CI_PROJECT_DIR/$_WEB_ROOT cache:rebuild
     - rm -f $CI_PROJECT_DIR/$_WEB_ROOT/apply-test-recipe.php
     # --- Node + Playwright test runner --------------------------------------
-    - curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+    - curl -fsSL https://deb.nodesource.com/setup_24.x | bash -
     - apt-get install -y nodejs
     - node --version && npm --version
     - 'test -f .yarnrc.yml || echo "nodeLinker: node-modules" > .yarnrc.yml'

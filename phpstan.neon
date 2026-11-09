@@ -1,0 +1,19 @@
+# The drupal/gitlab_templates default (assets/phpstan.neon), plus one ignore for
+# the previous-major lane.
+parameters:
+  level: 0
+  fileExtensions:
+    - php
+    - module
+    - inc
+    - install
+    - theme
+    - profile
+  reportUnmatchedIgnoredErrors: false
+  ignoreErrors:
+    # new static() is a best practice in Drupal, so we cannot fix that.
+    - "#^Unsafe usage of new static#"
+    # Drupal 10 has no Hook/LegacyHook attributes (added in 11.1) and its
+    # PHPUnit 9 has no test attributes. PHP only resolves an attribute class
+    # when it is read through reflection, so the module still runs on Drupal 10.
+    - "#^Attribute class .+ does not exist\\.$#"

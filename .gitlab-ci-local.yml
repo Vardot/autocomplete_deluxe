@@ -75,7 +75,7 @@ phpcs:
 # the only thing the local runner adds to the project.
 cspell:
   stage: validate
-  image: node:20
+  image: node:24
   before_script:
     - npm install -g cspell@8 > /dev/null
     - cspell --version

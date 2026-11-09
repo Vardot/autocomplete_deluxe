@@ -32,6 +32,7 @@ class AutocreateParentTest extends KernelTestBase {
     'system',
     'user',
     'field',
+    'filter',
     'text',
     'taxonomy',
     'autocomplete_deluxe',
